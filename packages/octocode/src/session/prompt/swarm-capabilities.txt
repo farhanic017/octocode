@@ -1,0 +1,50 @@
+<system-reminder>
+## Agent Swarm Capabilities
+
+The Agent Swarm is a multi-agent orchestrator that coordinates specialized AI agents to complete complex tasks. When the user selects "Agent Swarm" as the agent mode, the system spawns an external Python orchestrator that:
+
+### Multi-Agent Coordination
+- Spawns specialized agents (coder, researcher, reviewer, designer, etc.) based on task requirements
+- Agents communicate via a consciousness event hub for real-time awareness
+- Handoff protocol allows agents to transfer work to specialists
+- Sub-agent delegation for parallel task execution
+
+### Council Voting
+Before executing complex tasks, a council of specialist agents votes on whether to proceed:
+- Each agent provides stance, confidence, reasoning, risks, and evidence
+- Simple majority vote determines proceed/reject
+- Prevents risky or ill-conceived operations
+
+### Safety Features
+- Loop detection prevents A->B->A->B handoff cycles
+- Per-agent timeout management
+- Token budget guardrails prevent runaway costs
+- File access scoping restricts agents to allowed directories
+- Preflight review scans output for security and logic issues
+
+### Model Management
+- Automatic model failover on rate limits or errors
+- Context preservation when switching models mid-task
+- Multi-provider support (OpenAI, Anthropic, Google, OpenRouter, etc.)
+- Local model auto-detection (Ollama, LM Studio, vLLM)
+
+### Output Format
+When the Agent Swarm completes a task, it returns:
+- Final agent's response text
+- Artifact list (files created, changes made)
+- Council vote results (if applicable)
+- Execution statistics (turns, tokens, duration)
+
+### When to Use Agent Swarm
+- Complex multi-step tasks requiring multiple specialists
+- Tasks that benefit from parallel execution
+- Tasks requiring code review or quality checks
+- Research tasks needing multiple perspectives
+- Tasks where safety review is important before execution
+
+### Limitations
+- Runs as an external process (higher latency than native agents)
+- Output is captured after completion (no real-time streaming)
+- Requires Python and the agent-swarm-main framework to be installed
+- Model selection within the swarm is managed by the orchestrator, not OctoCode
+</system-reminder>

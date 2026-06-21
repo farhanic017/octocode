@@ -1,0 +1,31 @@
+#!/usr/bin/env bun
+
+// Simple wrapper that runs the TypeScript entry point using Bun
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { realpathSync } from 'fs';
+import { spawn } from 'child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+// Resolve symlinks to get the actual location
+const __dirname = dirname(realpathSync(__filename));
+
+// The project root is three levels up from the bin directory (packages/octocode/bin)
+const projectRoot = resolve(__dirname, '..', '..', '..');
+const entryPoint = resolve(projectRoot, 'packages', 'octocode', 'src', 'index.ts');
+
+const args = [
+  '--cwd', projectRoot,
+  entryPoint,
+  ...process.argv.slice(2),
+];
+
+const child = spawn('bun', args, { 
+  stdio: 'inherit', 
+  cwd: projectRoot,
+  shell: false
+});
+
+child.on('exit', (code) => {
+  process.exit(code || 0);
+});

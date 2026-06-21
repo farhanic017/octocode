@@ -1,0 +1,42 @@
+# .understandignore — patterns for files/dirs to exclude from analysis
+# Syntax: same as .gitignore (globs, # comments, ! negation, trailing / for dirs)
+# Lines below are suggestions — uncomment to activate.
+# Use ! prefix to force-include something excluded by defaults.
+#
+# Built-in defaults (always excluded unless negated):
+#   node_modules/, .git/, dist/, build/, obj/, *.lock, *.min.js, etc.
+#
+# --- From .gitignore (uncomment to exclude) ---
+
+# .DS_Store
+# .worktrees
+# .sst
+# .env
+# .env.local
+# .codex
+# *~
+# playground
+# tmp
+# ts-dist
+# **/.serena
+# .serena/
+# **/.omo
+# .omo/
+# /result
+# refs
+# Session.vim
+# /octocode.json
+# a.out
+# .scripts
+# .direnv/
+# octocode-dev
+# UPCOMING_CHANGELOG.md
+# logs/
+# *.bun-build
+# tsconfig.tsbuildinfo
+
+# --- Test file patterns (uncomment to exclude) ---
+
+# *.test.*
+# *.spec.*
+# *.snap
