@@ -59,7 +59,7 @@ export function Dialog(
       justifyContent={props.position ? "flex-start" : "center"}
       position="absolute"
       zIndex={3000}
-      paddingTop={props.position ? position().top : dimensions().height / 4}
+      paddingTop={props.position ? position().top : dimensions().height / 3}
       paddingLeft={props.position ? position().left : 0}
       left={0}
       top={0}

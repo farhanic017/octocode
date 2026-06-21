@@ -163,9 +163,9 @@ export function Home() {
   const dialog = useDialog()
   const dimensions = useTerminalDimensions()
   const dashboardWidth = createMemo(() => Math.max(72, Math.min(88, dimensions().width - 26)))
+
   const leftWidth = createMemo(() => Math.floor(dashboardWidth() * 0.44))
   const rightWidth = createMemo(() => dashboardWidth() - leftWidth() - 2)
-  const promptMaxWidth = createMemo(() => Math.max(72, Math.min(92, dimensions().width - 18)))
   const showNav = createMemo(() => dimensions().width >= 84)
   const user = createMemo(() => process.env.USERNAME || process.env.USER || "Farhan")
   const cwd = createMemo(() => truncateMiddle(relativeCwd(), Math.max(18, leftWidth() - 4)))
@@ -336,7 +336,7 @@ export function Home() {
         </box>
         <box flexGrow={1} minHeight={2} />
         <box width="100%" alignItems="center" paddingBottom={1} flexShrink={0}>
-          <box width="100%" maxWidth={promptMaxWidth()} zIndex={1000}>
+          <box width="100%" zIndex={1000}>
             <pluginRuntime.Slot name="home_prompt" mode="replace" ref={bind}>
               <Prompt
                 ref={bind}

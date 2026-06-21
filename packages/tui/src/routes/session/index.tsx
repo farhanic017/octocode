@@ -251,6 +251,7 @@ export function Session() {
   const [sidebar, setSidebar] = kv.signal<"auto" | "hide">("sidebar", "auto")
   const [sidebarOpen, setSidebarOpen] = createSignal(false)
   const [conceal, setConceal] = createSignal(true)
+  const [editingMessageId, setEditingMessageId] = createSignal<string | null>(null)
   const thinking = useThinkingMode()
   const thinkingMode = thinking.mode
   const showThinking = createMemo(() => true)
@@ -1392,17 +1393,26 @@ export function Session() {
                           index={index()}
                           onMouseUp={() => {
                             if (renderer.getSelection()?.getSelectedText()) return
+                            if (editingMessageId()) return
                             dialog.replace(() => (
                               <DialogMessage
                                 messageID={message.id}
                                 sessionID={route.sessionID}
                                 setPrompt={(promptInfo) => prompt?.set(promptInfo)}
+                                pending={pending()}
+                                onEdit={() => setEditingMessageId(message.id)}
                               />
                             ))
                           }}
                           message={message as UserMessage}
                           parts={sync.data.part[message.id] ?? []}
                           pending={pending()}
+                          isEditing={editingMessageId() === message.id}
+                          onCancelEdit={() => setEditingMessageId(null)}
+                          onSaveEdit={(text) => {
+                            setEditingMessageId(null)
+                            prompt?.set({ input: text, parts: [] })
+                          }}
                         />
                       </Match>
                       <Match when={message.role === "assistant"}>
@@ -1500,6 +1510,10 @@ function UserMessage(props: {
   onMouseUp: () => void
   index: number
   pending?: string
+  isEditing?: boolean
+  onStartEdit?: () => void
+  onCancelEdit?: () => void
+  onSaveEdit?: (text: string) => void
 }) {
   const ctx = use()
   const local = useLocal()
@@ -1548,7 +1562,32 @@ function UserMessage(props: {
             backgroundColor={hover() ? theme.backgroundElement : theme.backgroundPanel}
             flexShrink={0}
           >
-            <text fg={theme.text}>{text()}</text>
+            <Show
+              when={props.isEditing}
+              fallback={<text fg={theme.text}>{text()}</text>}
+            >
+              <input
+                ref={(r) => {
+                  setTimeout(() => {
+                    if (r && !r.isDestroyed) {
+                      r.setText(text())
+                      r.cursorOffset = text().length
+                      r.focus()
+                    }
+                  }, 1)
+                }}
+                onInput={(e) => {}}
+                onKeyDown={(e: { preventDefault(): void }) => {}}
+                onSubmit={(e: any) => {
+                  props.onSaveEdit?.(e?.target?.plainText ?? text())
+                }}
+                cursorColor={theme.primary}
+                focusedTextColor={theme.text}
+                focusedBackgroundColor={theme.backgroundPanel}
+                placeholder="Edit message..."
+                placeholderColor={theme.textMuted}
+              />
+            </Show>
             <Show when={files().length}>
               <box flexDirection="row" paddingBottom={metadataVisible() ? 1 : 0} paddingTop={1} gap={1} flexWrap="wrap">
                 <For each={files()}>

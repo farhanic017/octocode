@@ -17,6 +17,7 @@ export function DialogModel(props: { providerID?: string }) {
   dialog.setSize("large")
   const [query, setQuery] = createSignal("")
   const [tab, setTab] = createSignal<"all" | "favorite" | "free" | "hidden">("all")
+  const [hoveredProvider, setHoveredProvider] = createSignal(false)
 
   const connected = useConnected()
   const { theme } = useTheme()
@@ -226,7 +227,9 @@ export function DialogModel(props: { providerID?: string }) {
       current={local.model.current()}
       headerRight={
         <text
-          fg="#a45c75"
+          fg={hoveredProvider() ? "#a45c75" : "#8f8586"}
+          onMouseOver={() => setHoveredProvider(true)}
+          onMouseOut={() => setHoveredProvider(false)}
           onMouseUp={() => dialog.replace(() => <DialogProvider />)}
         >
           + provider

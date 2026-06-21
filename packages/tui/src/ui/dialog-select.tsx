@@ -102,6 +102,8 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
   })
   const [focusedAction, setFocusedAction] = createSignal<number>()
   const actionFocused = createMemo(() => focusedAction() !== undefined)
+  const [hoveredBack, setHoveredBack] = createSignal(false)
+  const [hoveredFilter, setHoveredFilter] = createSignal<number | null>(null)
 
   createEffect(
     on(
@@ -524,9 +526,16 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
     <box gap={props.renderFilter === false ? 0 : 1} paddingBottom={props.renderFilter === false ? 0 : 1} flexGrow={1}>
       <box paddingLeft={1} paddingRight={1}>
         <box flexDirection="row" alignItems="center">
-          <text fg={theme.textMuted} onMouseUp={() => dialog.clear()}>
-            ←
-          </text>
+          <box
+            paddingRight={1}
+            onMouseOver={() => setHoveredBack(true)}
+            onMouseOut={() => setHoveredBack(false)}
+            onMouseUp={() => dialog.clear()}
+          >
+            <text fg={hoveredBack() ? RGBA.fromHex("#a45c75") : theme.textMuted}>
+              ←
+            </text>
+          </box>
           <box flexGrow={1} alignItems="center">
             {props.titleView ?? (
               <text fg={theme.text} attributes={TextAttributes.BOLD} wrapMode="none">
@@ -534,6 +543,9 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
               </text>
             )}
           </box>
+          <Show when={props.headerRight}>
+            {props.headerRight}
+          </Show>
         </box>
         <Show when={props.renderFilter !== false}>
           <box paddingTop={1}>
@@ -546,11 +558,12 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
                 })
               }}
               focusedBackgroundColor={theme.backgroundPanel}
-              cursorColor={theme.primary}
+              cursorColor={theme.textMuted}
               focusedTextColor={theme.textMuted}
               ref={(r) => {
                 input = r
                 input.traits = { status: "FILTER" }
+                input.cursorStyle = { style: "block", blinking: false }
                 setTimeout(() => {
                   if (!input) return
                   if (input.isDestroyed) return
@@ -565,23 +578,30 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
         <Show when={props.filterButtons && props.filterButtons.length > 0}>
           <box flexDirection="row" gap={1} paddingTop={1} justifyContent="center">
             <For each={props.filterButtons}>
-              {(btn) => (
-                <box
-                  width={13}
-                  paddingLeft={1}
-                  paddingRight={1}
-                  justifyContent="center"
-                  alignItems="center"
-                  backgroundColor={btn.active ? theme.primary : RGBA.fromInts(0, 0, 0, 0)}
-                  borderStyle="rounded"
-                  borderColor={btn.active ? theme.primary : theme.textMuted}
-                  onMouseUp={btn.onSelect}
-                >
-                  <text fg={btn.active ? selectedForeground(theme) : theme.textMuted}>
-                    {btn.label}
-                  </text>
-                </box>
-              )}
+              {(btn, i) => {
+                const pink = RGBA.fromHex("#a45c75")
+                const muted = RGBA.fromHex("#8f8586")
+                const isHovered = () => hoveredFilter() === i()
+                const fg = () => btn.active || isHovered() ? pink : muted
+                return (
+                  <box
+                    width={13}
+                    paddingLeft={1}
+                    paddingRight={1}
+                    justifyContent="center"
+                    alignItems="center"
+                    borderStyle="rounded"
+                    borderColor={fg()}
+                    onMouseOver={() => setHoveredFilter(i())}
+                    onMouseOut={() => setHoveredFilter(null)}
+                    onMouseUp={btn.onSelect}
+                  >
+                    <text fg={fg()}>
+                      {btn.label}
+                    </text>
+                  </box>
+                )
+              }}
             </For>
           </box>
         </Show>

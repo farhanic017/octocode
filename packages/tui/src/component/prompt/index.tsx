@@ -1633,7 +1633,7 @@ export function Prompt(props: PromptProps) {
           skipFilter={true}
         />
       )
-    }, undefined, { x: 14, y: dimensions().height - 1 })
+    }, undefined, { x: 0, y: dimensions().height - 1 })
   }
   const homeDockButton = (options: {
     id: HomeDockControl
@@ -1690,8 +1690,7 @@ export function Prompt(props: PromptProps) {
           id: "effort",
           width: 8,
           onPress: () => {
-            // Position dialog aligned with chatbox, touching it
-            const pos = { x: dimensions().width - 36, y: dimensions().height - 4 }
+            const pos = { x: dimensions().width - 22, y: dimensions().height - 4 }
             dialog.replace(() => <DialogVariant />, undefined, pos)
           },
           children: (
