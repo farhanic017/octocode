@@ -131,6 +131,39 @@ export const {
       vcs: undefined,
     })
 
+    const [queuedMessages, setQueuedMessages] = createStore<{ [sessionID: string]: Array<{ id: string; text: string; time: number }> }>({})
+
+    const addQueuedMessage = (sessionID: string, msg: { id: string; text: string; time: number }) => {
+      setQueuedMessages(sessionID, (prev) => [...(prev ?? []), msg])
+    }
+
+    const removeQueuedMessage = (sessionID: string, messageID: string) => {
+      setQueuedMessages(sessionID, (prev) => (prev ?? []).filter((m) => m.id !== messageID))
+    }
+
+    const sendQueuedMessage = async (sessionID: string, messageID: string) => {
+      const msgs = queuedMessages[sessionID] ?? []
+      const msg = msgs.find((m) => m.id === messageID)
+      if (!msg) return
+      removeQueuedMessage(sessionID, messageID)
+      await sdk.client.session.prompt({
+        sessionID,
+        parts: [{ type: "text", text: msg.text }],
+      } as any).catch(() => {})
+    }
+
+    const sendAllQueuedMessages = async (sessionID: string) => {
+      const msgs = queuedMessages[sessionID] ?? []
+      if (msgs.length === 0) return
+      setQueuedMessages(sessionID, [])
+      for (const msg of msgs) {
+        await sdk.client.session.prompt({
+          sessionID,
+          parts: [{ type: "text", text: msg.text }],
+        } as any).catch(() => {})
+      }
+    }
+
     const event = useEvent()
     const project = useProject()
     const sdk = useSDK()
@@ -574,6 +607,7 @@ export const {
 
     const result = {
       data: store,
+      queuedMessages,
       set: setStore,
       get status() {
         return store.status
@@ -682,6 +716,10 @@ export const {
           return task
         },
       },
+      addQueuedMessage,
+      removeQueuedMessage,
+      sendQueuedMessage,
+      sendAllQueuedMessages,
       bootstrap,
     }
     return result

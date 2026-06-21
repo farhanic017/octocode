@@ -379,19 +379,6 @@ export function Prompt(props: PromptProps) {
         },
       },
       {
-        title: "Submit prompt",
-        name: "prompt.submit",
-        category: "Prompt",
-        hidden: true,
-        run: async () => {
-          if (!input || input.isDestroyed || !input.focused) return
-          const handled = await submit()
-          if (!handled) return
-
-          dialog.clear()
-        },
-      },
-      {
         title: "Remove editor context",
         name: "prompt.editor_context.clear",
         category: "Prompt",
@@ -1162,15 +1149,15 @@ export function Prompt(props: PromptProps) {
             ...nonTextParts,
           ],
         })
-        .catch((error) => {
-          if (error && String(error) !== "AbortError") {
-            toast.show({
-              message: errorMessage(error) || "Failed to send message — connection error",
-              variant: "error",
-              duration: 5000,
-            })
-          }
-        })
+          .catch((error) => {
+            if (error && String(error) !== "AbortError") {
+              toast.show({
+                message: errorMessage(error) || "Failed to send message — connection error",
+                variant: "error",
+                duration: 5000,
+              })
+            }
+          })
       if (editorParts.length > 0) editor.markSelectionSent()
     }
     history.append({

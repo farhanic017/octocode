@@ -320,6 +320,28 @@ export const promoteSteers = Effect.fn("SessionInput.promoteSteers")(function* (
   return yield* publish(db, events, sessionID, rows)
 })
 
+const CANCELLED_SEQ = -1
+
+export const cancelQueued = Effect.fn("SessionInput.cancelQueued")(function* (
+  db: DatabaseService,
+  sessionID: SessionSchema.ID,
+  messageID: SessionMessage.ID,
+) {
+  yield* db
+    .update(SessionInputTable)
+    .set({ promoted_seq: CANCELLED_SEQ })
+    .where(
+      and(
+        eq(SessionInputTable.session_id, sessionID),
+        eq(SessionInputTable.id, messageID),
+        isNull(SessionInputTable.promoted_seq),
+        eq(SessionInputTable.delivery, "queue"),
+      ),
+    )
+    .run()
+    .pipe(Effect.orDie)
+})
+
 export const promoteNextQueued = Effect.fn("SessionInput.promoteNextQueued")(function* (
   db: DatabaseService,
   events: EventV2.Interface,
@@ -340,6 +362,29 @@ export const promoteNextQueued = Effect.fn("SessionInput.promoteNextQueued")(fun
     .get()
     .pipe(Effect.orDie)
   return row === undefined ? false : yield* publish(db, events, sessionID, [row]).pipe(Effect.as(true))
+})
+
+export const promoteById = Effect.fn("SessionInput.promoteById")(function* (
+  db: DatabaseService,
+  events: EventV2.Interface,
+  sessionID: SessionSchema.ID,
+  messageID: SessionMessage.ID,
+) {
+  const row = yield* db
+    .select()
+    .from(SessionInputTable)
+    .where(
+      and(
+        eq(SessionInputTable.session_id, sessionID),
+        eq(SessionInputTable.id, messageID),
+        isNull(SessionInputTable.promoted_seq),
+      ),
+    )
+    .get()
+    .pipe(Effect.orDie)
+  if (!row) return false
+  yield* publish(db, events, sessionID, [row])
+  return true
 })
 
 const toMessage = (input: Admitted) =>

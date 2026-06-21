@@ -1,0 +1,891 @@
+{
+  "user_input": "gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+  "summary": "",
+  "artifacts": {
+    "ai_selection": {
+      "assignments": [],
+      "route_summary": {
+        "local": 0,
+        "mcp": 0,
+        "cloud": 0
+      }
+    },
+    "environment_support": {
+      "local_models": [
+        {
+          "name": "ollama",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible/ollama"
+        },
+        {
+          "name": "lmstudio",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        },
+        {
+          "name": "vllm",
+          "available": true,
+          "kind": "local_model",
+          "detail": "command=C:\\Python314\\python.EXE port=closed api=openai-compatible"
+        },
+        {
+          "name": "llamacpp",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        },
+        {
+          "name": "jan",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        },
+        {
+          "name": "koboldcpp",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=kobold/openai-compatible"
+        },
+        {
+          "name": "text-generation-webui",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        },
+        {
+          "name": "localai",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        }
+      ],
+      "cli_agents": [
+        {
+          "name": "codex",
+          "available": false,
+          "kind": "cli_agent",
+          "detail": "codex"
+        },
+        {
+          "name": "opencode",
+          "available": false,
+          "kind": "cli_agent",
+          "detail": "opencode"
+        },
+        {
+          "name": "mistral_vibe",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "C:\\Users\\Farhan\\AppData\\Local\\Microsoft\\WinGet\\Packages\\MistralAI.MistralVibe.ACP_Microsoft.Winget.Source_8wekyb3d8bbwe\\vibe-acp.EXE"
+        },
+        {
+          "name": "claude_code",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "D:\\open code\\npm-global\\claude.CMD"
+        },
+        {
+          "name": "gemini_cli",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "D:\\open code\\npm-global\\gemini.CMD"
+        },
+        {
+          "name": "qwen_code",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "D:\\open code\\npm-global\\qwen.CMD"
+        },
+        {
+          "name": "aider",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "C:\\Users\\Farhan\\.local\\bin\\aider.EXE"
+        },
+        {
+          "name": "cursor",
+          "available": false,
+          "kind": "cli_agent",
+          "detail": "cursor"
+        },
+        {
+          "name": "windsurf",
+          "available": false,
+          "kind": "cli_agent",
+          "detail": "windsurf"
+        }
+      ],
+      "ide_agents": [
+        {
+          "name": "vscode",
+          "available": true,
+          "kind": "ide_agent",
+          "detail": "D:\\SOFTWARE\\Microsoft VS Code\\bin\\code.CMD"
+        },
+        {
+          "name": "vscodium",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "codium"
+        },
+        {
+          "name": "cursor",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "cursor"
+        },
+        {
+          "name": "windsurf",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "windsurf"
+        },
+        {
+          "name": "zed",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "zed"
+        },
+        {
+          "name": "jetbrains",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "idea,pycharm,webstorm"
+        }
+      ],
+      "mcp_servers": [
+        {
+          "name": "filesystem",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "local file access"
+        },
+        {
+          "name": "github",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "PR comments, issues, repo automation"
+        },
+        {
+          "name": "browser",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "browser control and snapshots"
+        },
+        {
+          "name": "figma",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "Figma design control"
+        },
+        {
+          "name": "supabase",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "database/backend operations"
+        },
+        {
+          "name": "blender",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "3D automation"
+        },
+        {
+          "name": "memory",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "persistent project memory"
+        },
+        {
+          "name": "obsidian",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "markdown vaults, backlinks, and graph view notes"
+        },
+        {
+          "name": "graphify",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "knowledge graph visualization and project maps"
+        }
+      ]
+    },
+    "skill_plan": {
+      "required": [],
+      "existing": [],
+      "temporary_install": false,
+      "cleanup_policy": "delete temporary skills after all agents finish"
+    },
+    "council_decision": {
+      "question": "gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+      "verdict": "proceed",
+      "yes_votes": 6,
+      "no_votes": 0,
+      "confidence": 80,
+      "vote_line": "6/6 YES",
+      "opinions": [
+        {
+          "agent_name": "researcher",
+          "pillar": "see",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "researcher recommends proceed after checking see/core concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "research, user signal, or visual evidence requested"
+          ]
+        },
+        {
+          "agent_name": "reviewer",
+          "pillar": "code",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "reviewer recommends proceed after checking code/coding concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "implementation and test impact reviewed"
+          ]
+        },
+        {
+          "agent_name": "triage",
+          "pillar": "act",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "triage recommends proceed after checking act/core concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "business, operational, and execution impact assessed"
+          ]
+        },
+        {
+          "agent_name": "hermes",
+          "pillar": "act",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "hermes recommends proceed after checking act/core concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "business, operational, and execution impact assessed"
+          ]
+        },
+        {
+          "agent_name": "web_scraper",
+          "pillar": "see",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "web_scraper recommends proceed after checking see/coding concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "research, user signal, or visual evidence requested"
+          ]
+        },
+        {
+          "agent_name": "coder",
+          "pillar": "code",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "coder recommends proceed after checking code/coding concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "implementation and test impact reviewed"
+          ]
+        }
+      ],
+      "conflicts": [],
+      "summary": "Council vote: 6/6 YES. Verdict: proceed. Confidence: 80%."
+    },
+    "ab_test": {
+      "prompt": "gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+      "candidates": [
+        {
+          "id": "A",
+          "name": "Lean Single-Path Plan",
+          "strategy": "Use the smallest specialist set, keep token usage low, build the core path first, then run focused master review.",
+          "strengths": [
+            "lower token cost",
+            "faster delivery",
+            "less coordination overhead"
+          ],
+          "tradeoffs": [
+            "less parallel exploration",
+            "may miss creative alternatives"
+          ],
+          "score": 72
+        },
+        {
+          "id": "B",
+          "name": "Hybrid Multi-Agent Plan",
+          "strategy": "Use cloud models for master/council reasoning, local or cheap models for sub-agent checks, MCP/browser tools for external state, and integrate after specialist work.",
+          "strengths": [
+            "stronger coverage",
+            "hybrid routing",
+            "better validation breadth"
+          ],
+          "tradeoffs": [
+            "slightly higher token use",
+            "more moving parts"
+          ],
+          "score": 70
+        }
+      ],
+      "winner_id": "A",
+      "loser_id": "B",
+      "council_votes": {
+        "triage": "A",
+        "hermes": "A",
+        "researcher": "A",
+        "web_scraper": "A",
+        "coder": "A",
+        "backend_api": "A",
+        "frontend_ui": "A",
+        "app_builder": "A"
+      },
+      "summary": "Council selected version A: Lean Single-Path Plan. Vote A/B: 8/0. Alternative shown: B: Hybrid Multi-Agent Plan."
+    },
+    "sub_agent_plan": [
+      {
+        "parent_agent": "triage",
+        "sub_agent": "researcher",
+        "task": "Support the parent agent on: gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+        "model_preference": "reasoning",
+        "pillar": "see"
+      },
+      {
+        "parent_agent": "triage",
+        "sub_agent": "product_manager",
+        "task": "Support the parent agent on: gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+        "model_preference": "reasoning",
+        "pillar": "act"
+      }
+    ],
+    "preflight_reviews": [
+      {
+        "agent_name": "triage",
+        "passed": true,
+        "comments": [],
+        "fix_prompt": "",
+        "summary": "triage preflight review passed: no obvious security, performance, or logic issues.",
+        "metadata": {
+          "max_comments": 20
+        }
+      }
+    ],
+    "pr_inline_comments": [],
+    "integration_report": {
+      "connected_parts": [
+        "council_decision",
+        "sub_agent_plan",
+        "ab_test",
+        "ai_selection",
+        "preflight_reviews",
+        "agent_outputs",
+        "shared_artifacts"
+      ],
+      "missing_parts": [],
+      "summary": "Connected project parts: council_decision, sub_agent_plan, ab_test, ai_selection, preflight_reviews, agent_outputs, shared_artifacts"
+    },
+    "master_review": {
+      "status": "needs_attention",
+      "confidence": 83,
+      "checks": {
+        "council_completed": true,
+        "council_proceeded": true,
+        "parts_connected": true,
+        "no_model_failures": false,
+        "preflight_reviews_passed": true,
+        "loop_free": true
+      },
+      "risks": [
+        "1 model failure turn(s) need attention"
+      ],
+      "summary": "Master review needs_attention. 5/6 checks passed. Confidence: 83%."
+    }
+  },
+  "metadata": {
+    "agent_communication_mesh": {
+      "agents": [
+        "ai_reviewer",
+        "analytics",
+        "animator",
+        "app_builder",
+        "app_tester",
+        "backend_api",
+        "backend_maker",
+        "building_designer",
+        "coder",
+        "debugging",
+        "design",
+        "documentation",
+        "finance",
+        "frontend_ui",
+        "game_developer",
+        "hallucination_guard",
+        "hermes",
+        "job_finder",
+        "legal",
+        "localization",
+        "marketing",
+        "n8n_workflow_creator",
+        "photo_editor",
+        "product_manager",
+        "prompt_generator",
+        "researcher",
+        "reviewer",
+        "sales",
+        "security",
+        "social_media_manager",
+        "testing",
+        "text_editor",
+        "trading",
+        "triage",
+        "ux_research",
+        "video_editor",
+        "voice_generator",
+        "voice_transcriber",
+        "web_scraper",
+        "writer"
+      ],
+      "mode": "direct+broadcast+shared_state+consciousness",
+      "all_agents_can_message_each_other": true
+    },
+    "token_budget": {
+      "single_agent_estimate": 1200,
+      "max_swarm_tokens": 2640,
+      "max_iterations": 1,
+      "max_parallel_agents": 6,
+      "reason": "Bound swarm overhead so multi-agent work does not spend far more than a single-agent run unless explicitly configured higher."
+    },
+    "ai_selection": {
+      "assignments": [],
+      "route_summary": {
+        "local": 0,
+        "mcp": 0,
+        "cloud": 0
+      }
+    },
+    "environment_support": {
+      "local_models": [
+        {
+          "name": "ollama",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible/ollama"
+        },
+        {
+          "name": "lmstudio",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        },
+        {
+          "name": "vllm",
+          "available": true,
+          "kind": "local_model",
+          "detail": "command=C:\\Python314\\python.EXE port=closed api=openai-compatible"
+        },
+        {
+          "name": "llamacpp",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        },
+        {
+          "name": "jan",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        },
+        {
+          "name": "koboldcpp",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=kobold/openai-compatible"
+        },
+        {
+          "name": "text-generation-webui",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        },
+        {
+          "name": "localai",
+          "available": false,
+          "kind": "local_model",
+          "detail": "command=missing port=closed api=openai-compatible"
+        }
+      ],
+      "cli_agents": [
+        {
+          "name": "codex",
+          "available": false,
+          "kind": "cli_agent",
+          "detail": "codex"
+        },
+        {
+          "name": "opencode",
+          "available": false,
+          "kind": "cli_agent",
+          "detail": "opencode"
+        },
+        {
+          "name": "mistral_vibe",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "C:\\Users\\Farhan\\AppData\\Local\\Microsoft\\WinGet\\Packages\\MistralAI.MistralVibe.ACP_Microsoft.Winget.Source_8wekyb3d8bbwe\\vibe-acp.EXE"
+        },
+        {
+          "name": "claude_code",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "D:\\open code\\npm-global\\claude.CMD"
+        },
+        {
+          "name": "gemini_cli",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "D:\\open code\\npm-global\\gemini.CMD"
+        },
+        {
+          "name": "qwen_code",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "D:\\open code\\npm-global\\qwen.CMD"
+        },
+        {
+          "name": "aider",
+          "available": true,
+          "kind": "cli_agent",
+          "detail": "C:\\Users\\Farhan\\.local\\bin\\aider.EXE"
+        },
+        {
+          "name": "cursor",
+          "available": false,
+          "kind": "cli_agent",
+          "detail": "cursor"
+        },
+        {
+          "name": "windsurf",
+          "available": false,
+          "kind": "cli_agent",
+          "detail": "windsurf"
+        }
+      ],
+      "ide_agents": [
+        {
+          "name": "vscode",
+          "available": true,
+          "kind": "ide_agent",
+          "detail": "D:\\SOFTWARE\\Microsoft VS Code\\bin\\code.CMD"
+        },
+        {
+          "name": "vscodium",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "codium"
+        },
+        {
+          "name": "cursor",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "cursor"
+        },
+        {
+          "name": "windsurf",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "windsurf"
+        },
+        {
+          "name": "zed",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "zed"
+        },
+        {
+          "name": "jetbrains",
+          "available": false,
+          "kind": "ide_agent",
+          "detail": "idea,pycharm,webstorm"
+        }
+      ],
+      "mcp_servers": [
+        {
+          "name": "filesystem",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "local file access"
+        },
+        {
+          "name": "github",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "PR comments, issues, repo automation"
+        },
+        {
+          "name": "browser",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "browser control and snapshots"
+        },
+        {
+          "name": "figma",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "Figma design control"
+        },
+        {
+          "name": "supabase",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "database/backend operations"
+        },
+        {
+          "name": "blender",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "3D automation"
+        },
+        {
+          "name": "memory",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "persistent project memory"
+        },
+        {
+          "name": "obsidian",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "markdown vaults, backlinks, and graph view notes"
+        },
+        {
+          "name": "graphify",
+          "available": false,
+          "kind": "mcp_server",
+          "detail": "knowledge graph visualization and project maps"
+        }
+      ]
+    },
+    "skill_plan": {
+      "required": [],
+      "existing": [],
+      "temporary_install": false,
+      "cleanup_policy": "delete temporary skills after all agents finish"
+    },
+    "council_decision": {
+      "question": "gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+      "verdict": "proceed",
+      "yes_votes": 6,
+      "no_votes": 0,
+      "confidence": 80,
+      "vote_line": "6/6 YES",
+      "opinions": [
+        {
+          "agent_name": "researcher",
+          "pillar": "see",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "researcher recommends proceed after checking see/core concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "research, user signal, or visual evidence requested"
+          ]
+        },
+        {
+          "agent_name": "reviewer",
+          "pillar": "code",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "reviewer recommends proceed after checking code/coding concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "implementation and test impact reviewed"
+          ]
+        },
+        {
+          "agent_name": "triage",
+          "pillar": "act",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "triage recommends proceed after checking act/core concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "business, operational, and execution impact assessed"
+          ]
+        },
+        {
+          "agent_name": "hermes",
+          "pillar": "act",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "hermes recommends proceed after checking act/core concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "business, operational, and execution impact assessed"
+          ]
+        },
+        {
+          "agent_name": "web_scraper",
+          "pillar": "see",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "web_scraper recommends proceed after checking see/coding concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "research, user signal, or visual evidence requested"
+          ]
+        },
+        {
+          "agent_name": "coder",
+          "pillar": "code",
+          "stance": "proceed",
+          "confidence": 72,
+          "reasoning": "coder recommends proceed after checking code/coding concerns with 1 evidence point(s) and 0 risk flag(s).",
+          "risks": [],
+          "evidence": [
+            "implementation and test impact reviewed"
+          ]
+        }
+      ],
+      "conflicts": [],
+      "summary": "Council vote: 6/6 YES. Verdict: proceed. Confidence: 80%."
+    },
+    "ab_test": {
+      "prompt": "gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+      "candidates": [
+        {
+          "id": "A",
+          "name": "Lean Single-Path Plan",
+          "strategy": "Use the smallest specialist set, keep token usage low, build the core path first, then run focused master review.",
+          "strengths": [
+            "lower token cost",
+            "faster delivery",
+            "less coordination overhead"
+          ],
+          "tradeoffs": [
+            "less parallel exploration",
+            "may miss creative alternatives"
+          ],
+          "score": 72
+        },
+        {
+          "id": "B",
+          "name": "Hybrid Multi-Agent Plan",
+          "strategy": "Use cloud models for master/council reasoning, local or cheap models for sub-agent checks, MCP/browser tools for external state, and integrate after specialist work.",
+          "strengths": [
+            "stronger coverage",
+            "hybrid routing",
+            "better validation breadth"
+          ],
+          "tradeoffs": [
+            "slightly higher token use",
+            "more moving parts"
+          ],
+          "score": 70
+        }
+      ],
+      "winner_id": "A",
+      "loser_id": "B",
+      "council_votes": {
+        "triage": "A",
+        "hermes": "A",
+        "researcher": "A",
+        "web_scraper": "A",
+        "coder": "A",
+        "backend_api": "A",
+        "frontend_ui": "A",
+        "app_builder": "A"
+      },
+      "summary": "Council selected version A: Lean Single-Path Plan. Vote A/B: 8/0. Alternative shown: B: Hybrid Multi-Agent Plan."
+    },
+    "sub_agent_plan": [
+      {
+        "parent_agent": "triage",
+        "sub_agent": "researcher",
+        "task": "Support the parent agent on: gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+        "model_preference": "reasoning",
+        "pillar": "see"
+      },
+      {
+        "parent_agent": "triage",
+        "sub_agent": "product_manager",
+        "task": "Support the parent agent on: gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+        "model_preference": "reasoning",
+        "pillar": "act"
+      }
+    ],
+    "preflight_reviews": [
+      {
+        "agent_name": "triage",
+        "passed": true,
+        "comments": [],
+        "fix_prompt": "",
+        "summary": "triage preflight review passed: no obvious security, performance, or logic issues.",
+        "metadata": {
+          "max_comments": 20
+        }
+      }
+    ],
+    "total_iterations": 1,
+    "total_tokens": 0,
+    "total_duration_ms": 3,
+    "switch_memory": {
+      "records": []
+    },
+    "master_review": {
+      "status": "needs_attention",
+      "confidence": 83,
+      "checks": {
+        "council_completed": true,
+        "council_proceeded": true,
+        "parts_connected": true,
+        "no_model_failures": false,
+        "preflight_reviews_passed": true,
+        "loop_free": true
+      },
+      "risks": [
+        "1 model failure turn(s) need attention"
+      ],
+      "summary": "Master review needs_attention. 5/6 checks passed. Confidence: 83%."
+    },
+    "learning_stats": {
+      "total_lessons": 6,
+      "by_agent": {
+        "*": 6
+      },
+      "success_rate": 0.6666666666666666,
+      "total_applies": 5
+    },
+    "temporary_skill_cleanup": {
+      "removed": [],
+      "remaining": 0
+    },
+    "watchdog_stats": {
+      "running": true,
+      "interval": 120,
+      "checks": 0,
+      "rotations": 0,
+      "recoveries": 0,
+      "last_check": 0,
+      "bridge_stats": {
+        "total": 1,
+        "working": 0,
+        "depleted": 0,
+        "task": "coding",
+        "active": "azure-openai:gpt-4.1"
+      }
+    }
+  },
+  "iteration": 1,
+  "agent_turns": [
+    {
+      "agent_name": "triage",
+      "input": "gfgjhgjggjhgfjhgfggghgh    vcxfggfdfgqwerfertgtyuy",
+      "output": "[ALL MODELS FAILED] All models exhausted for triage. Errors: ",
+      "model": "unknown",
+      "tokens_used": 0,
+      "duration_ms": 3
+    }
+  ]
+}

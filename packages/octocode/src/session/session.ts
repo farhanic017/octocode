@@ -13,6 +13,7 @@ import { EventV2Bridge } from "@/event-v2-bridge"
 import { EventV2 } from "@octocode-ai/core/event"
 import { SessionV2 } from "@octocode-ai/core/session"
 import { SessionExecution } from "@octocode-ai/core/session/execution"
+import { SessionInput } from "@octocode-ai/core/session/input"
 
 import { NotFoundError } from "@/storage/storage"
 import { eq } from "drizzle-orm"
@@ -493,6 +494,8 @@ export interface Interface {
   readonly remove: (sessionID: SessionID) => Effect.Effect<void, NotFound>
   readonly updateMessage: <T extends SessionV1.Info>(msg: T) => Effect.Effect<T>
   readonly removeMessage: (input: { sessionID: SessionID; messageID: MessageID }) => Effect.Effect<MessageID>
+  readonly cancelQueued: (input: { sessionID: SessionID; messageID: MessageID }) => Effect.Effect<void>
+  readonly promoteQueued: (input: { sessionID: SessionID; messageID: MessageID }) => Effect.Effect<boolean>
   readonly removePart: (input: { sessionID: SessionID; messageID: MessageID; partID: PartID }) => Effect.Effect<PartID>
   readonly getPart: (input: {
     sessionID: SessionID
@@ -915,6 +918,20 @@ export const layer: Layer.Layer<
       return input.messageID
     })
 
+    const cancelQueued = Effect.fn("Session.cancelQueued")(function* (input: {
+      sessionID: SessionID
+      messageID: MessageID
+    }) {
+      yield* SessionInput.cancelQueued(db, input.sessionID, input.messageID)
+    })
+
+    const promoteQueued = Effect.fn("Session.promoteQueued")(function* (input: {
+      sessionID: SessionID
+      messageID: MessageID
+    }) {
+      return yield* SessionInput.promoteById(db, events, input.sessionID, input.messageID)
+    })
+
     const removePart = Effect.fn("Session.removePart")(function* (input: {
       sessionID: SessionID
       messageID: MessageID
@@ -979,6 +996,8 @@ export const layer: Layer.Layer<
       remove,
       updateMessage,
       removeMessage,
+      cancelQueued,
+      promoteQueued,
       removePart,
       updatePart,
       getPart,
