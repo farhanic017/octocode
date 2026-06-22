@@ -16,32 +16,7 @@
 <p align="center">
   <a href="https://octocode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
   <a href="https://www.npmjs.com/package/octocode-ai"><img alt="npm" src="https://img.shields.io/npm/v/octocode-ai?style=flat-square" /></a>
-  <a href="https://github.com/farhanic017/octocode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/farhanic017/octocode/publish.yml?style=flat-square&branch=dev" /></a>
-</p>
-
-<p align="center">
-  <a href="README.md">English</a> |
-  <a href="README.zh.md">简体中文</a> |
-  <a href="README.zht.md">繁體中文</a> |
-  <a href="README.ko.md">한국어</a> |
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.fr.md">Français</a> |
-  <a href="README.it.md">Italiano</a> |
-  <a href="README.da.md">Dansk</a> |
-  <a href="README.ja.md">日本語</a> |
-  <a href="README.pl.md">Polski</a> |
-  <a href="README.ru.md">Русский</a> |
-  <a href="README.bs.md">Bosanski</a> |
-  <a href="README.ar.md">العربية</a> |
-  <a href="README.no.md">Norsk</a> |
-  <a href="README.br.md">Português (Brasil)</a> |
-  <a href="README.th.md">ไทย</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.uk.md">Українська</a> |
-  <a href="README.bn.md">বাংলা</a> |
-  <a href="README.gr.md">Ελληνικά</a> |
-  <a href="README.vi.md">Tiếng Việt</a>
+  <a href="https://github.com/farhanic017/octocode/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue.svg?style=flat-square" /></a>
 </p>
 
 [![OctoCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://octocode.ai)
@@ -51,9 +26,6 @@
 ### Installation
 
 ```bash
-# YOLO
-curl -fsSL https://octocode.ai/install | bash
-
 # Package managers
 npm i -g octocode-ai@latest        # or bun/pnpm/yarn
 scoop install octocode             # Windows
@@ -139,7 +111,10 @@ If you're interested in contributing to OctoCode, please read our [contributing 
 
 If you are working on a project that's related to OctoCode and is using "octo" as part of its name, for example "octocode-dashboard" or "octocode-mobile", please add a note to your README to clarify that it is not built by the OctoCode team and is not affiliated with us in any way.
 
+### License
+
+OctoCode is licensed under the [GNU General Public License v3.0](./LICENSE).
+
 ---
 
 **Join our community** [Discord](https://discord.gg/octocode) | [X.com](https://x.com/octocode)
-
