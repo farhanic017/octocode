@@ -11,7 +11,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./tool": "./src/tool.ts",
-    "./tui": "./src/tui.ts"
+    "./tui": "./src/tui.ts",
+    "./auth/gitlab": "./src/auth/gitlab.ts",
+    "./auth/poe": "./src/auth/poe.ts"
   },
   "files": [
     "dist"
@@ -19,6 +21,8 @@
   "dependencies": {
     "@octocode-ai/sdk": "workspace:*",
     "effect": "catalog:",
+    "open": "^10.0.0",
+    "poe-oauth": "*",
     "zod": "catalog:"
   },
   "peerDependencies": {

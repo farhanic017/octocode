@@ -79,6 +79,7 @@
     "@clack/prompts": "1.0.0-alpha.1",
     "@effect/opentelemetry": "catalog:",
     "@effect/platform-node": "catalog:",
+
     "@modelcontextprotocol/sdk": "1.29.0",
     "@octokit/graphql": "9.0.2",
     "@octokit/rest": "catalog:",
@@ -127,6 +128,7 @@
     "minimatch": "10.0.3",
     "npm-package-arg": "13.0.2",
     "open": "10.1.2",
+
     "opentui-spinner": "catalog:",
     "partial-json": "0.1.7",
     "remeda": "catalog:",

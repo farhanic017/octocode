@@ -273,7 +273,9 @@ export function createTuiPluginApi(opts: Opts = {}): HostPluginApi {
           size = "medium"
         },
         setSize: (next) => {
-          size = next
+          if (next === "medium" || next === "large" || next === "xlarge") {
+            size = next
+          }
         },
         get size() {
           return size

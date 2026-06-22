@@ -10,7 +10,9 @@ describe("BuiltinMCPs", () => {
   test("graphify is a local MCP with correct command", () => {
     const graphify = BuiltinMCPs.graphify
     expect(graphify.type).toBe("local")
-    expect(graphify.command).toEqual(["python3", "-m", "graphify.serve"])
+    if (graphify.type === "local") {
+      expect(graphify.command).toEqual(["python3", "-m", "graphify.serve"])
+    }
     expect(graphify.enabled).toBe(true)
     expect(graphify.timeout).toBe(30000)
   })
@@ -18,7 +20,9 @@ describe("BuiltinMCPs", () => {
   test("obsidian is a local MCP with correct command", () => {
     const obsidian = BuiltinMCPs.obsidian
     expect(obsidian.type).toBe("local")
-    expect(obsidian.command).toEqual(["npx", "-y", "@anthropic/mcp-obsidian"])
+    if (obsidian.type === "local") {
+      expect(obsidian.command).toEqual(["npx", "-y", "@anthropic/mcp-obsidian"])
+    }
     expect(obsidian.enabled).toBe(true)
     expect(obsidian.timeout).toBe(15000)
   })
