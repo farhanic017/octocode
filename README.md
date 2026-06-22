@@ -26,52 +26,11 @@
 ### Installation
 
 ```bash
-# Package managers
-npm i -g octocode-ai@latest        # or bun/pnpm/yarn
-scoop install octocode             # Windows
-choco install octocode             # Windows
-brew install farhanic017/tap/octocode # macOS and Linux (recommended, always up to date)
-brew install octocode              # macOS and Linux (official brew formula, updated less)
-sudo pacman -S octocode            # Arch Linux (Stable)
-paru -S octocode-bin               # Arch Linux (Latest from AUR)
-mise use -g octocode               # Any OS
-nix run nixpkgs#octocode           # or github:farhanic017/octocode for latest dev branch
-```
+# npm (recommended)
+npm i -g octocode-ai@latest
 
-> [!TIP]
-> Remove versions older than 0.1.x before installing.
-
-### Desktop App (BETA)
-
-OctoCode is also available as a desktop application. Download directly from the [releases page](https://github.com/farhanic017/octocode/releases) or [octocode.ai/download](https://octocode.ai/download).
-
-| Platform              | Download                           |
-| --------------------- | ---------------------------------- |
-| macOS (Apple Silicon) | `octocode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `octocode-desktop-mac-x64.dmg`     |
-| Windows               | `octocode-desktop-windows-x64.exe` |
-| Linux                 | `.deb`, `.rpm`, or `.AppImage`     |
-
-```bash
-# macOS (Homebrew)
-brew install --cask octocode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/octocode-desktop
-```
-
-#### Installation Directory
-
-The install script respects the following priority order for the installation path:
-
-1. `$OCTO_INSTALL_DIR` - Custom installation directory
-2. `$XDG_BIN_DIR` - XDG Base Directory Specification compliant path
-3. `$HOME/bin` - Standard user binary directory (if it exists or can be created)
-4. `$HOME/.octo/bin` - Default fallback
-
-```bash
-# Examples
-OCTO_INSTALL_DIR=/usr/local/bin curl -fsSL https://octocode.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://octocode.ai/install | bash
+# curl (one-liner)
+curl -fsSL https://octocode.ai/install | bash
 ```
 
 ### What's New
