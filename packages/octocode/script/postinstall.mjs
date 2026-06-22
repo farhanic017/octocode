@@ -25,8 +25,8 @@ const archMap = {
 const platform = platformMap[os.platform()] ?? os.platform()
 const arch = archMap[os.arch()] ?? os.arch()
 const base = `octocode-${platform}-${arch}`
-const sourceBinary = platform === "windows" ? "octocode.exe" : "octo"
-const targetBinary = path.join(__dirname, "bin", "octocode.exe")
+const sourceBinary = platform === "windows" ? "octo.exe" : "octo"
+const targetBinary = path.join(__dirname, "bin", platform === "windows" ? "octocode.exe" : "octocode")
 
 function supportsAvx2() {
   if (arch !== "x64") return false
@@ -123,16 +123,24 @@ function resolveBinary(name) {
   return binaryPath
 }
 
+function getTempDir() {
+  const tmpdir = os.tmpdir()
+  if (!tmpdir.includes(" ")) return tmpdir
+  const fallback = path.join(path.parse(tmpdir).root, "octocode-temp")
+  try { fs.mkdirSync(fallback, { recursive: true }) } catch {}
+  return fallback
+}
+
 function installPackage(name) {
   const version = packageJson.optionalDependencies?.[name]
   if (!version) return
 
-  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "octocode-install-"))
+  const temp = fs.mkdtempSync(path.join(getTempDir(), "octocode-install-"))
   try {
     const result = childProcess.spawnSync(
       "npm",
       ["install", "--ignore-scripts", "--no-save", "--loglevel=error", "--prefix", temp, `${name}@${version}`],
-      { stdio: "inherit", windowsHide: true },
+      { stdio: "inherit", windowsHide: true, shell: true },
     )
     if (result.status !== 0) return
     const packageDir = path.join(temp, "node_modules", name)
@@ -160,6 +168,7 @@ function verifyBinary() {
     encoding: "utf8",
     stdio: "ignore",
     windowsHide: true,
+    shell: true,
   })
   return result.status === 0
 }
