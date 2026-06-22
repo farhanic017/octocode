@@ -107,16 +107,17 @@ function init() {
     setTimeout(() => {
       if (!focus) return
       if (focus.isDestroyed) return
-      function find(item: Renderable) {
+      const queue: Renderable[] = [renderer.root]
+      while (queue.length > 0) {
+        const item = queue.pop()!
         for (const child of item.getChildren()) {
-          if (child === focus) return true
-          if (find(child)) return true
+          if (child === focus) {
+            focus.focus()
+            return
+          }
+          queue.push(child)
         }
-        return false
       }
-      const found = find(renderer.root)
-      if (!found) return
-      focus.focus()
     }, 1)
   }
 

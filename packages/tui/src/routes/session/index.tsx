@@ -1102,6 +1102,235 @@ export function Session() {
       },
     },
     {
+      title: "Document conversation to markdown",
+      value: "session.document",
+      category: "Session",
+      slash: {
+        name: "document",
+        aliases: ["doc"],
+      },
+      run: async () => {
+        try {
+          const sessionData = session()
+          if (!sessionData) return
+          const sessionMessages = messages()
+          const allParts = sync.data.part
+
+          // Auto-rename FIRST — so the new title is used in the document and filename
+          let effectiveTitle = sessionData.title
+          try {
+            const { isDefaultTitle } = await import("../../util/session")
+            if (isDefaultTitle(sessionData.title) && sessionMessages.length > 0) {
+              const userTexts: string[] = []
+              for (const msg of sessionMessages) {
+                if (msg.role === "user") {
+                  for (const part of (allParts[msg.id] ?? [])) {
+                    const p = part as { type?: string; text?: string; synthetic?: boolean }
+                    if (p.type === "text" && !p.synthetic && p.text) userTexts.push(p.text)
+                  }
+                }
+              }
+              if (userTexts.length > 0) {
+                const { generateSessionTitle } = await import("../../util/brain")
+                effectiveTitle = generateSessionTitle(userTexts)
+                void sdk.client.session.update({ sessionID: route.sessionID, title: effectiveTitle })
+              }
+            }
+          } catch {}
+
+          // Build structured summary from conversation
+          const userRequests: string[] = []
+          const actionsTaken: { tool: string; detail: string; file?: string }[] = []
+          const errorsEncountered: { when: string; what: string; how: string }[] = []
+          const filesModified: string[] = []
+          const outcome = { summary: "" }
+
+          for (const msg of sessionMessages) {
+            const parts = allParts[msg.id] ?? []
+
+            if (msg.role === "user") {
+              // Extract user request text — keep as-is for prompt clarity
+              for (const part of parts) {
+                if (part.type === "text" && !part.synthetic) {
+                  const text = part.text.trim()
+                  if (text) userRequests.push(text)
+                }
+              }
+            }
+
+            if (msg.role === "assistant") {
+              // Extract actions from tool calls
+              for (const part of parts) {
+                if (part.type === "tool") {
+                  const toolName = part.tool
+                  const input = part.state.input as Record<string, string> | undefined
+                  const status = part.state.status
+
+                  if (toolName === "edit" && input?.filePath) {
+                    const fp = String(input.filePath).replace(/.*[/\\]/, "")
+                    if (!filesModified.includes(fp)) filesModified.push(fp)
+                    const oldStr = input.oldString ? String(input.oldString).slice(0, 80) : ""
+                    actionsTaken.push({ tool: "edit", detail: `Replaced content in \`${fp}\`${oldStr ? ` (old: "${oldStr}${oldStr.length >= 80 ? "..." : ""}")` : ""}`, file: fp })
+                  } else if (toolName === "write" && input?.filePath) {
+                    const fp = String(input.filePath).replace(/.*[/\\]/, "")
+                    if (!filesModified.includes(fp)) filesModified.push(fp)
+                    actionsTaken.push({ tool: "write", detail: `Created or rewrote \`${fp}\``, file: fp })
+                  } else if (toolName === "bash" && input?.command) {
+                    const cmd = String(input.command)
+                    actionsTaken.push({ tool: "bash", detail: `Executed command: \`${cmd.slice(0, 100)}${cmd.length > 100 ? "..." : ""}\`` })
+                  } else if (toolName === "grep" || toolName === "glob") {
+                    actionsTaken.push({ tool: toolName, detail: `Searched codebase using \`${toolName}\`` })
+                  } else if (status === "error" && part.state.error) {
+                    errorsEncountered.push({
+                      when: `During \`${toolName}\` execution`,
+                      what: String(part.state.error).slice(0, 300),
+                      how: "Agent retried with adjusted parameters or alternative approach",
+                    })
+                  } else if (toolName && toolName !== "read") {
+                    actionsTaken.push({ tool: toolName, detail: `Used \`${toolName}\` tool` })
+                  }
+                }
+
+                // Extract assistant text summary
+                if (part.type === "text" && !part.synthetic) {
+                  const text = part.text.trim()
+                  if (text && text.length > 20) {
+                    outcome.summary = text.slice(0, 800)
+                  }
+                }
+              }
+            }
+          }
+
+          // Build the markdown document using the effective (possibly renamed) title
+          const created = new Date(sessionData.time.created)
+          const updated = new Date(sessionData.time.updated)
+          const duration = ((sessionData.time.updated - sessionData.time.created) / 1000 / 60).toFixed(1)
+
+          let doc = `# ${effectiveTitle}\n\n`
+          doc += `> **Session:** \`${sessionData.id}\` · **Date:** ${created.toLocaleDateString()} · **Duration:** ${duration} min\n\n`
+
+          // Task description — structured prompt format
+          doc += `## Task Description\n\n`
+          doc += `The following task was assigned to the AI agent:\n\n`
+          if (userRequests.length > 0) {
+            doc += `\`\`\`\n`
+            for (const req of userRequests) {
+              doc += `${req}\n`
+            }
+            doc += `\`\`\`\n\n`
+          } else {
+            doc += `Execute development tasks as requested by the user.\n\n`
+          }
+
+          // Completed actions — structured
+          doc += `## Completed Actions\n\n`
+          if (actionsTaken.length > 0) {
+            for (let i = 0; i < actionsTaken.length; i++) {
+              doc += `${i + 1}. ${actionsTaken[i].detail}\n`
+            }
+            doc += `\n`
+          } else {
+            doc += `No discrete actions were recorded.\n\n`
+          }
+
+          // Files modified
+          if (filesModified.length > 0) {
+            doc += `## Files Modified\n\n`
+            doc += `**Total files modified:** ${filesModified.length}\n\n`
+            for (const f of filesModified) {
+              doc += `- \`${f}\`\n`
+            }
+            doc += `\n`
+          }
+
+          // Errors and resolutions
+          if (errorsEncountered.length > 0) {
+            doc += `## Issues & Resolutions\n\n`
+            for (const err of errorsEncountered) {
+              doc += `### ${err.when}\n`
+              doc += `- **Error encountered:** ${err.what}\n`
+              doc += `- **Resolution:** ${err.how}\n\n`
+            }
+          }
+
+          // How it works — agent's explanation
+          if (outcome.summary) {
+            doc += `## How Everything Works\n\n`
+            doc += `${outcome.summary}\n\n`
+          }
+
+          doc += `---\n`
+          doc += `*Documented by OctoCode · ${new Date().toLocaleString()}*\n`
+
+          // Save — idempotent: append if exists, create if not
+          let obsidianConfig: { connected?: boolean; vaultPath?: string; subfolders?: string[] } | null = null
+          try {
+            const osMod = await import("os")
+            const fsMod = await import("fs")
+            const configDir = process.platform === "win32"
+              ? path.join(osMod.homedir(), "AppData", "Local", "octo")
+              : path.join(osMod.homedir(), ".local", "share", "octo")
+            const configPath = path.join(configDir, "obsidian-config.json")
+            if (fsMod.existsSync(configPath)) {
+              obsidianConfig = JSON.parse(fsMod.readFileSync(configPath, "utf-8"))
+            }
+          } catch {}
+
+          const filename = `${effectiveTitle.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 50)}_${sessionData.id.slice(0, 8)}.md`
+
+          const { sessionNoteExists, findSessionNoteFolder, appendToSessionNote } = await import("../../util/brain")
+
+          if (obsidianConfig?.connected && obsidianConfig?.vaultPath) {
+            const subfolders = obsidianConfig.subfolders || []
+            const existingFolder = sessionNoteExists(sessionData.id, obsidianConfig.vaultPath)
+              ? findSessionNoteFolder(sessionData.id, obsidianConfig.vaultPath, subfolders) || obsidianConfig.vaultPath
+              : null
+
+            if (existingFolder) {
+              const newActions = actionsTaken.map((a, i) => `${i + 1}. ${a.detail}`).join("\n")
+              appendToSessionNote(sessionData.id, existingFolder, newActions, filesModified)
+              toast.show({ message: `Updated existing note: ${filename}`, variant: "success" })
+            } else {
+              const sessionsDir = path.join(obsidianConfig.vaultPath, "OctoCode", "Sessions")
+              await mkdir(sessionsDir, { recursive: true })
+              await writeFile(path.join(sessionsDir, filename), doc)
+
+              for (const sub of subfolders) {
+                const subSessionsDir = path.join(obsidianConfig.vaultPath, sub, "OctoCode", "Sessions")
+                await mkdir(subSessionsDir, { recursive: true })
+                await writeFile(path.join(subSessionsDir, filename), doc)
+              }
+              toast.show({ message: `Created note: ${filename}`, variant: "success" })
+            }
+          } else {
+            const osMod = await import("os")
+            const localDir = process.platform === "win32"
+              ? path.join(osMod.homedir(), "AppData", "Local", "octo", "session-md")
+              : path.join(osMod.homedir(), ".local", "share", "octo", "session-md")
+            await mkdir(localDir, { recursive: true })
+            const filepath = path.join(localDir, filename)
+
+            const fsMod = await import("fs")
+            if (fsMod.existsSync(filepath)) {
+              const existing = fsMod.readFileSync(filepath, "utf-8")
+              const newActions = actionsTaken.map((a, i) => `${i + 1}. ${a.detail}`).join("\n")
+              let updated = existing.replace(/\n---\n\*Documented by OctoCode[^\n]*\*\n?$/, "")
+              updated = updated.trimEnd() + "\n\n" + newActions + "\n\n---\n*Documented by OctoCode · " + new Date().toLocaleString() + "*\n"
+              fsMod.writeFileSync(filepath, updated, "utf-8")
+              toast.show({ message: `Updated existing note: ${filename}`, variant: "success" })
+            } else {
+              await writeFile(filepath, doc)
+              toast.show({ message: `Created note: ${filepath}`, variant: "success" })
+            }
+          }
+        } catch {
+          toast.show({ message: "Failed to document conversation", variant: "error" })
+        }
+        dialog.clear()
+      },
+    },
+    {
       title: "Background subagents",
       value: "session.background",
       category: "Session",
@@ -1261,9 +1490,9 @@ export function Session() {
                       gap={1}
                       alignItems="center"
                     >
-                      <text fg={interruptCount() > 0 ? theme.primary : theme.textMuted}>
+                      <text fg={interruptCount() > 0 ? theme.error : theme.textMuted}>
                         esc{" "}
-                        <span style={{ fg: interruptCount() > 0 ? theme.primary : theme.textMuted }}>
+                        <span style={{ fg: interruptCount() > 0 ? theme.error : theme.textMuted }}>
                           {interruptCount() > 0 ? "again to interrupt" : "interrupt"}
                         </span>
                       </text>

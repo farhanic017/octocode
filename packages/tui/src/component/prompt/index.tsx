@@ -1456,6 +1456,7 @@ export function Prompt(props: PromptProps) {
         item.part.type === "file",
       ),
   )
+  const [hoveredCloseAttachment, setHoveredCloseAttachment] = createSignal<number | null>(null)
   type HomeDockControl = NonNullable<ReturnType<typeof homeControlHover>>
   const hoverFg = (id: HomeDockControl, base: RGBA, hover = HOME_DOCK_TEXT) =>
     homeControlHover() === id ? hover : base
@@ -1492,6 +1493,33 @@ export function Prompt(props: PromptProps) {
     }
     openLocalFile({ platform: terminalEnvironment.platform, path: filepath })
   }
+  const removeHomeAttachment = (partIndex: number) => {
+    if (input && !input.isDestroyed) {
+      let extmarkId: number | undefined
+      for (const [eid, pid] of store.extmarkToPartIndex.entries()) {
+        if (pid === partIndex) {
+          extmarkId = eid
+          break
+        }
+      }
+      if (extmarkId !== undefined) {
+        try {
+          input.extmarks.delete(extmarkId)
+        } catch {}
+      }
+    }
+    setStore(
+      produce((draft) => {
+        draft.prompt.parts.splice(partIndex, 1)
+        const newMap = new Map<number, number>()
+        for (const [eid, pid] of draft.extmarkToPartIndex.entries()) {
+          if (pid === partIndex) continue
+          newMap.set(eid, pid > partIndex ? pid - 1 : pid)
+        }
+        draft.extmarkToPartIndex = newMap
+      }),
+    )
+  }
   const homeAttachmentTray = () => (
     <Show when={homeAttachments().length}>
       <box flexDirection="row" gap={1} paddingBottom={1} flexWrap="wrap">
@@ -1499,25 +1527,46 @@ export function Prompt(props: PromptProps) {
           {(item) => {
             const accent = createMemo(() => attachmentAccent(item.part.mime))
             const isImage = createMemo(() => item.part.mime.startsWith("image/"))
+            const isCloseHovered = createMemo(() => hoveredCloseAttachment() === item.index)
             return (
               <box
-                width={isImage() ? 12 : 18}
-                height={isImage() ? 5 : 4}
+                width={isImage() ? 14 : 20}
+                flexDirection="column"
                 border={["top", "right", "bottom", "left"]}
                 borderColor={HOME_ATTACHMENT_BORDER}
                 backgroundColor={HOME_ATTACHMENT_BG}
-                paddingLeft={isImage() ? 0 : 1}
-                paddingRight={isImage() ? 0 : 1}
+                paddingLeft={1}
+                paddingRight={1}
                 onMouseUp={() => openHomeAttachment(item.part)}
               >
+                <box flexDirection="row" justifyContent="space-between" width="100%">
+                  <text fg={HOME_ATTACHMENT_TEXT} wrapMode="none">
+                    <span style={{ fg: accent(), bold: true }}>{attachmentIcon(item.part.mime)}</span>{" "}
+                    <span style={{ fg: accent(), bold: true }}>{attachmentKind(item.part.mime)}</span>
+                  </text>
+                  <box
+                    width={3}
+                    alignItems="center"
+                    justifyContent="flex-end"
+                    onMouseOver={() => setHoveredCloseAttachment(item.index)}
+                    onMouseOut={() => setHoveredCloseAttachment(null)}
+                    onMouseUp={(e: MouseEvent) => {
+                      e.stopPropagation()
+                      removeHomeAttachment(item.index)
+                    }}
+                  >
+                    <text
+                      fg={isCloseHovered() ? RGBA.fromHex("#ff5555") : HOME_DOCK_TEXT_MUTED}
+                      wrapMode="none"
+                    >
+                      <span style={{ bold: isCloseHovered() }}>✕</span>
+                    </text>
+                  </box>
+                </box>
                 <Show
                   when={isImage()}
                   fallback={
                     <>
-                      <text fg={HOME_ATTACHMENT_TEXT} wrapMode="none">
-                        <span style={{ fg: accent(), bold: true }}>{attachmentIcon(item.part.mime)}</span>{" "}
-                        <span style={{ fg: accent(), bold: true }}>{attachmentKind(item.part.mime)}</span>
-                      </text>
                       <text fg={HOME_DOCK_TEXT_MUTED} wrapMode="none">
                         {attachmentName(item.part)}
                       </text>
@@ -1528,7 +1577,7 @@ export function Prompt(props: PromptProps) {
                   }
                 >
                   <attachment_thumbnail
-                    width={10}
+                    width={12}
                     height={3}
                     dataUrl={item.part.url}
                     filePath={attachmentPath(item.part)}
@@ -1991,9 +2040,9 @@ export function Prompt(props: PromptProps) {
                     })()}
                   </box>
                 </box>
-                <text fg={store.interrupt > 0 ? theme.primary : theme.text}>
+                <text fg={store.interrupt > 0 ? theme.error : theme.text}>
                   esc{" "}
-                  <span style={{ fg: store.interrupt > 0 ? theme.primary : theme.textMuted }}>
+                  <span style={{ fg: store.interrupt > 0 ? theme.error : theme.textMuted }}>
                     {store.interrupt > 0 ? "again to interrupt" : "interrupt"}
                   </span>
                 </text>

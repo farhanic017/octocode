@@ -195,6 +195,23 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
     })
   }
 
+  const resizeEditor = () => {
+    const container = scrollRef
+    const editor = editorRef
+    if (!container || !editor) return
+
+    const maxHeight = newSession() ? 180 : 240
+
+    editor.style.height = "0px"
+    const h = Math.min(Math.max(editor.scrollHeight, 64), maxHeight)
+    editor.style.height = `${h}px`
+    container.style.maxHeight = `${maxHeight}px`
+  }
+
+  const scheduleResize = () => {
+    requestAnimationFrame(resizeEditor)
+  }
+
   const activeFileTab = createSessionTabs({
     tabs,
     pathFromTab: files.pathFromTab,
@@ -446,6 +463,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
       editorRef.focus()
       setCursorPosition(editorRef, length)
       setStore("applyingHistory", false)
+      resizeEditor()
       queueScroll()
     })
   }
@@ -709,12 +727,14 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
       setEditorText(text)
       prompt.set([{ type: "text", content: text, start: 0, end: text.length }, ...images], text.length)
       focusEditorEnd()
+      scheduleResize()
       return
     }
 
     clearEditor()
     prompt.set([...DEFAULT_PROMPT, ...images], 0)
     command.trigger(cmd.id, "slash")
+    scheduleResize()
   }
 
   const {
@@ -829,6 +849,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
       (parts) => {
         if (composing()) return
         reconcile(parts.filter((part) => part.type !== "image"))
+        resizeEditor()
       },
     ),
   )
@@ -935,6 +956,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
         mirror.input = true
         prompt.set(DEFAULT_PROMPT, 0)
       }
+      scheduleResize()
       queueScroll()
       return
     }
@@ -962,6 +984,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
 
     mirror.input = true
     prompt.set([...rawParts, ...images], cursorPosition)
+    scheduleResize()
     queueScroll()
   }
 
@@ -1085,6 +1108,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
         requestAnimationFrame(() => {
           editorRef.focus()
           setCursorPosition(editorRef, promptLength(edit.prompt))
+          resizeEditor()
           queueScroll()
         })
         props.onEditLoaded?.()
@@ -1528,7 +1552,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                 removeLabel={language.t("prompt.attachment.remove")}
               />
               <div
-                class="relative min-h-[52px]"
+                class="relative"
                 onMouseDown={(e) => {
                   const target = e.target
                   if (!(target instanceof HTMLElement)) return
@@ -1536,7 +1560,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                   editorRef?.focus()
                 }}
               >
-                <div class="relative max-h-[180px] overflow-y-auto no-scrollbar" ref={(el) => (scrollRef = el)}>
+                <div class="relative overflow-y-auto no-scrollbar" ref={(el) => (scrollRef = el)}>
                   <div
                     data-component="prompt-input"
                     ref={(el) => {
@@ -1561,7 +1585,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                     onKeyDown={handleKeyDown}
                     classList={{
                       "select-text": true,
-                      "min-h-[52px] w-full px-4 pt-4 pb-2 focus:outline-none whitespace-pre-wrap leading-5 text-[13px] font-[440] text-v2-text-text-base": true,
+                      "w-full px-4 pt-4 pb-2 focus:outline-none whitespace-pre-wrap leading-5 text-[13px] font-[440] text-v2-text-text-base": true,
                       "[&_[data-type=file]]:text-syntax-property": true,
                       "[&_[data-type=agent]]:text-syntax-type": true,
                       "font-mono!": store.mode === "shell",
@@ -1712,7 +1736,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
               }}
             >
               <div
-                class="relative max-h-[240px] overflow-y-auto no-scrollbar"
+                class="relative overflow-y-auto no-scrollbar"
                 ref={(el) => (scrollRef = el)}
                 style={{ "scroll-padding-bottom": space }}
               >

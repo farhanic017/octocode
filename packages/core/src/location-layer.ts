@@ -42,6 +42,8 @@ import { RequestExecutor } from "@octocode-ai/llm/route"
 import * as SessionRunnerLLM from "./session/runner/llm"
 import { SessionRunnerModel } from "./session/runner/model"
 import { SystemContextBuiltIns } from "./system-context/builtins"
+import { ObsidianSystemContext } from "./system-context/obsidian-context"
+import { ObsidianVault } from "./obsidian/vault"
 import { FetchHttpClient } from "effect/unstable/http"
 
 export class LocationServiceMap extends LayerMap.Service<LocationServiceMap>()("@octocode/example/LocationServiceMap", {
@@ -65,6 +67,8 @@ export class LocationServiceMap extends LayerMap.Service<LocationServiceMap>()("
       systemContext,
       LocationMutation.locationLayer.pipe(Layer.orDie),
     ).pipe(Layer.provideMerge(location))
+    const obsidian = ObsidianVault.layer.pipe(Layer.provideMerge(base))
+    const obsidianContext = ObsidianSystemContext.layer.pipe(Layer.provideMerge(Layer.mergeAll(base, obsidian)))
     const resources = ToolOutputStore.layer.pipe(Layer.provide(base))
     const permissionsAndTools = ToolRegistry.layer.pipe(
       Layer.provideMerge(PermissionV2.locationLayer),
@@ -104,6 +108,8 @@ export class LocationServiceMap extends LayerMap.Service<LocationServiceMap>()("
       model,
       runner,
       builtInTools,
+      obsidian,
+      obsidianContext,
     ).pipe(Layer.fresh)
   },
   idleTimeToLive: "60 minutes",

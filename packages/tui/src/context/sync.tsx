@@ -293,6 +293,7 @@ export const {
                 draft.splice(result.index, 1)
               }),
             )
+            fullSyncedSessions.delete(event.properties.info.id)
           }
           break
         }
@@ -369,6 +370,7 @@ export const {
                 }),
               )
             })
+            deltaBuffer.delete(oldest.id)
           }
           break
         }
@@ -384,6 +386,7 @@ export const {
                 draft.splice(result.index, 1)
               }),
             )
+            deltaBuffer.delete(event.properties.messageID)
           }
           break
         }
