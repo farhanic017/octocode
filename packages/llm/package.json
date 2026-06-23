@@ -3,7 +3,7 @@
   "version": "1.16.2",
   "name": "@octocode-ai/llm",
   "type": "module",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "private": true,
   "scripts": {
     "setup:recording-env": "bun run script/setup-recording-env.ts",

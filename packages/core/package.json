@@ -3,7 +3,7 @@
   "version": "1.16.2",
   "name": "@octocode-ai/core",
   "type": "module",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "private": true,
   "scripts": {
     "db": "bun drizzle-kit",
