@@ -1,14 +1,14 @@
 <p align="center">
   <a href="https://octocode.ai">
     <pre>
-             _______  _______ _________ _______  _______  _______  ______   _______
-             (  ___  )(  ____ \__   __/(  ___  )(  ____ \(  ___  )(  __  \ (  ____ \
-             | (   ) || (    \/   ) (   | (   ) || (    \/| (   ) || (  \  )| (    \/
-             | |   | || |         | |   | |   | || |      | |   | || |   ) || (__    
-             | |   | || |         | |   | |   | || |      | |   | || |   | ||  __)   
-             | |   | || |         | |   | |   | || |      | |   | || |   ) || (      
-             | (___) || (____/\   | |   | (___) || (____/\| (___) || (__/  )| (____/\ 
-             (_______)(_______/   )_(   (_______)(_______/(_______)(______/ (_______/
+                _______  _______ _________ _______  _______  _______  ______   _______
+               (  ___  )(  ____ \__   __/(  ___  )(  ____ \(  ___  )(  __  \ (  ____ \
+               | (   ) || (    \/   ) (   | (   ) || (    \/| (   ) || (  \  )| (    \/
+               | |   | || |         | |   | |   | || |      | |   | || |   ) || (__    
+               | |   | || |         | |   | |   | || |      | |   | || |   | ||  __)   
+               | |   | || |         | |   | |   | || |      | |   | || |   ) || (      
+               | (___) || (____/\   | |   | (___) || (____/\| (___) || (__/  )| (____/\ 
+               (_______)(_______/   )_(   (_______)(_______/(_______)(______/ (_______/
     </pre>
   </a>
 </p>
@@ -35,7 +35,6 @@ curl -fsSL https://octocode.ai/install | bash
 
 ### What's New
 
-- **Renamed to OctoCode** - Rebranded from OpenCode to OctoCode with new identity
 - **New CLI command: `octo`** - Faster, cleaner command name
 - **Fixed 200k+ token sessions** - Sessions no longer crash at large context windows
 - **Improved compaction** - Better memory management for long conversations
@@ -45,7 +44,7 @@ curl -fsSL https://octocode.ai/install | bash
 
 ### Agents
 
-OctoCode includes two built-in agents you can switch between with the `Tab` key.
+OctoCode includes two built-in agents you can switch between.
 
 - **build** - Default, full-access agent for development work
 - **plan** - Read-only agent for analysis and code exploration
