@@ -1,3 +1,10 @@
+/*
+ * OctoCode - Original UI/UX Design
+ * Copyright (C) 2025 Farhan Dhrubo
+ * Licensed under the GNU General Public License v3.0
+ * https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Audio, type AudioErrorContext, type AudioPlayOptions, type AudioSound, type AudioVoice } from "@opentui/core"
 import { readFile } from "node:fs/promises"
 

@@ -1,3 +1,10 @@
+/*
+ * OctoCode - Original UI/UX Design
+ * Copyright (C) 2025 Farhan Dhrubo
+ * Licensed under the GNU General Public License v3.0
+ * https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 export default {
   // NOTE: FOR markdown, javascript and typescript, we use the opentui built-in parsers
   // Warn: when taking queries from the nvim-treesitter repo, make sure to include the query dependencies as well
