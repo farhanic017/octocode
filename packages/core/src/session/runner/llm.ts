@@ -388,8 +388,14 @@ export const layer = Layer.effect(
         }
         if (needsContinuation)
           return yield* new StepLimitExceededError({ sessionID: input.sessionID, limit: MAX_STEPS })
-        openActivity = false
-        promotion = undefined
+        const hasQueued = yield* SessionInput.hasPending(db, input.sessionID, "queue")
+        if (hasQueued) {
+          openActivity = true
+          promotion = "queue"
+        } else {
+          openActivity = false
+          promotion = undefined
+        }
       }
     })
 

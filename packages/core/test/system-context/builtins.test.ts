@@ -15,7 +15,10 @@ const directory = AbsolutePath.make(FSUtil.resolve("/repo/packages/core"))
 const projectDirectory = AbsolutePath.make(FSUtil.resolve("/repo"))
 const instructionFile = FSUtil.resolve("/repo/AGENTS.md")
 const timestamp = Date.parse("2026-06-03T12:00:00.000Z")
-const localDate = (time: number) => new Date(time).toDateString()
+const localDateTime = (time: number) => {
+  const date = new Date(time)
+  return `${date.toDateString()} ${date.toLocaleTimeString()}`
+}
 const locationLayer = Layer.succeed(
   Location.Service,
   Location.Service.of(
@@ -69,7 +72,7 @@ describe("SystemContextBuiltIns", () => {
           `  Platform: ${process.platform}`,
           "</env>",
           "",
-          `Today's date: ${localDate(timestamp)}`,
+          `Current date and time: ${localDateTime(timestamp)}`,
         ].join("\n"),
       )
     }),
@@ -86,18 +89,18 @@ describe("SystemContextBuiltIns", () => {
 
       expect(refreshed).toMatchObject({
         _tag: "Updated",
-        text: `Today's date is now: ${localDate(timestamp + 24 * 60 * 60 * 1000)}`,
+        text: `Current date and time is now: ${localDateTime(timestamp + 24 * 60 * 60 * 1000)}`,
       })
     }),
   )
 
-  it.effect("does not update again within the same local calendar day", () =>
+  it.effect("does not update again within the same instant", () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(timestamp)
       const context = yield* SystemContextRegistry.Service
       const initialized = yield* SystemContext.initialize(yield* context.load())
 
-      yield* TestClock.setTime(timestamp + 60 * 60 * 1000)
+      yield* TestClock.setTime(timestamp + 1)
       expect(yield* SystemContext.reconcile(yield* context.load(), initialized.snapshot)).toEqual({ _tag: "Unchanged" })
     }),
   )
@@ -117,7 +120,7 @@ describe("SystemContextBuiltIns", () => {
           `  Platform: ${process.platform}`,
           "</env>",
           "",
-          `Today's date: ${localDate(timestamp)}`,
+          `Current date and time: ${localDateTime(timestamp)}`,
           "",
           `Instructions from: ${instructionFile}\nBe precise.`,
         ].join("\n"),

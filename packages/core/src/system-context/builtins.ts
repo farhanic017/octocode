@@ -30,9 +30,14 @@ const builtIns = Layer.effectDiscard(
       SystemContext.make({
         key: SystemContext.Key.make("core/date"),
         codec: Schema.toCodecJson(Schema.String),
-        load: DateTime.nowAsDate.pipe(Effect.map((date) => date.toDateString())),
-        baseline: (date) => `Today's date: ${date}`,
-        update: (_previous, date) => `Today's date is now: ${date}`,
+        load: DateTime.now.pipe(
+          Effect.map((dt) => {
+            const date = new Date(DateTime.toEpochMillis(dt))
+            return `${date.toDateString()} ${date.toLocaleTimeString()}`
+          }),
+        ),
+        baseline: (date) => `Current date and time: ${date}`,
+        update: (_previous, date) => `Current date and time is now: ${date}`,
       }),
     ])
 

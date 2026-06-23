@@ -298,7 +298,7 @@ describe("BashTool", () => {
         reset()
         denyAction = "external_directory"
         const target = path.join(outside.path, "secret.txt")
-        return withTool(active.path, (registry) => settleTool(registry, call({ command: `cat ${target}` }))).pipe(
+        return withTool(active.path, (registry) => settleTool(registry, call({ command: `cat "${target}"` }))).pipe(
           Effect.andThen((settled) =>
             Effect.sync(() => {
               expect(assertions.map((item) => item.action)).toEqual(["bash"])
