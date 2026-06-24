@@ -20,7 +20,7 @@
   <img alt="Downloads" src="https://img.shields.io/npm/dm/octocode-ai?style=flat-square&label=downloads" />
 </p>
 
-[![OctoCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://octocode.ai)
+[![OctoCode V2 Desktop](designs/design.png)](https://octocode.ai)
 
 ---
 
