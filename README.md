@@ -81,7 +81,7 @@ For configuration, plugins, and advanced usage, visit **[octocode.ai/docs](https
 ## Community
 
 - [Discord](https://discord.gg/octocode) — Get help and connect with the community
-- [X.com](https://x.com/octocode) — Follow for updates
+- [X.com]((https://x.com/farhanic0)) — Follow for updates
 
 ## Contributing
 
