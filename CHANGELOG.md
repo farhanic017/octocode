@@ -8,7 +8,7 @@ The V2 rewrite introduces a durable session runtime with context epoch managemen
 
 ### New
 - **Session runtime (V2)** — Durable conversational history with context epoch management
-- **Desktop app** — Native application for macOS, Windows, and Linux
+- **Desktop app** — noy avaiable yet 
 - **Plugin system** — MCP protocol support with custom tool definitions
 - **Built-in agents** — `build` (full access) and `plan` (read-only) modes
 - **Subagent orchestration** — `@general` subagent for complex multi-step tasks
