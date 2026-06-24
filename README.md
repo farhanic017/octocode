@@ -44,6 +44,16 @@ npm i -g octocode-ai@latest
 curl -fsSL https://octocode.ai/install | bash
 ```
 
+### Uninstall
+
+```bash
+# npm
+npm uninstall -g octocode-ai
+
+# manual (curl install)
+rm ~/.octo/bin/octo
+```
+
 ### Quick Start
 
 ```bash
