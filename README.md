@@ -72,7 +72,6 @@ octo
 | `build` | Full read/write | Default agent for development work |
 | `plan` | Read-only | Analysis, exploration, and planning |
 
-Switch agents with `/agent` or use `@general` for complex subtasks.
 
 ## Documentation
 
