@@ -14,6 +14,7 @@ export function createTuiPluginApi(opts: Opts = {}) {
   const values = new Map<string, unknown>()
   const color = RGBA.fromInts(200, 200, 200)
   const dialog = { clear() {}, replace() {}, setSize() {}, size: "medium" as const, depth: 0, open: false }
+  const disposeHandlers: (() => void)[] = []
   return {
     attention: { notify: async () => ({ ok: false, notification: false, sound: false }), ...opts.attention },
     client: opts.client,
@@ -27,6 +28,11 @@ export function createTuiPluginApi(opts: Opts = {}) {
         values.set(name, value)
       },
       ready: true,
+    },
+    lifecycle: {
+      onDispose(fn: () => void) {
+        disposeHandlers.push(fn)
+      },
     },
     state: { session: { get: () => undefined, ...opts.state?.session } },
     theme: { current: new Proxy({}, { get: () => color }) },

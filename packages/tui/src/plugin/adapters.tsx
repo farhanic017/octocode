@@ -56,6 +56,7 @@ function routeNavigate(route: ReturnType<typeof useRoute>, name: string, params?
 
 function routeCurrent(route: ReturnType<typeof useRoute>): TuiPluginApi["route"]["current"] {
   if (route.data.type === "home") return { name: "home" }
+  if (route.data.type === "welcome") return { name: "welcome" }
   if (route.data.type === "session") {
     return {
       name: "session",

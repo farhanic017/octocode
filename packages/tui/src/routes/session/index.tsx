@@ -373,8 +373,7 @@ export function Session() {
   const renderer = useRenderer()
 
   const showTopNav = createMemo(() => {
-    const w = dimensions().width
-    return w >= 100 && w < 190
+    return true
   })
 
   const topNavUsage = createMemo(() => {
@@ -918,7 +917,7 @@ export function Session() {
           const message = messages[i]
           if (!message || message.role !== "user") continue
 
-          const parts = sync.data.part[message.id]
+        const parts = sync.data.part[message.id] ?? []
           if (!parts || !Array.isArray(parts)) continue
 
           const hasValidTextPart = parts.some(
@@ -1921,7 +1920,7 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
           customBorderChars={SplitBorder.customBorderChars}
           borderColor={theme.error}
         >
-          <text fg={theme.textMuted}>{String(props.message.error?.data.message)}</text>
+          <text fg={theme.textMuted}>{String(props.message.error?.data?.message ?? "Unknown error")}</text>
         </box>
       </Show>
       <Switch>

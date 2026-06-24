@@ -47,6 +47,7 @@ import { DialogWorkspaceList } from "./component/dialog-workspace-list"
 import { DialogConsoleOrg } from "./component/dialog-console-org"
 import { ThemeProvider, useTheme } from "./context/theme"
 import { Home } from "./routes/home"
+import { Welcome } from "./routes/welcome"
 import { Session } from "./routes/session"
 import { PromptHistoryProvider } from "./component/prompt/history"
 import { FrecencyProvider } from "./component/prompt/frecency"
@@ -434,7 +435,7 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
   createEffect(() => {
     if (!terminalTitleEnabled() || Flag.OCTOCODE_DISABLE_TERMINAL_TITLE) return
 
-    if (route.data.type === "home") {
+    if (route.data.type === "home" || route.data.type === "welcome") {
       renderer.setTerminalTitle("octo code")
       return
     }
@@ -475,6 +476,10 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
           type: "session",
           sessionID: args.sessionID,
         })
+      }
+      // Redirect to welcome flow for first-time users
+      if (!kv.get("onboarded") && route.data.type !== "session") {
+        route.navigate({ type: "welcome" })
       }
     })
   })
@@ -524,6 +529,8 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
       (isEmpty, wasEmpty) => {
         // only trigger when we transition into an empty-provider state
         if (!isEmpty || wasEmpty) return
+        // skip if user hasn't completed onboarding yet (Welcome flow handles provider setup)
+        if (!kv.get("onboarded")) return
         dialog.replace(() => <DialogProviderList />)
       },
     ),
@@ -1069,6 +1076,9 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
       <Show when={ready()}>
         <box flexGrow={1} minHeight={0} flexDirection="column">
           <Switch>
+            <Match when={route.data.type === "welcome"}>
+              <Welcome />
+            </Match>
             <Match when={route.data.type === "home"}>
               <Home />
             </Match>

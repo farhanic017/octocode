@@ -1,4 +1,4 @@
-import { RGBA, TextAttributes } from "@opentui/core"
+import { TextAttributes } from "@opentui/core"
 import { Prompt, type PromptRef } from "../component/prompt"
 import { createEffect, createMemo, createSignal, For, onMount } from "solid-js"
 import { useSync } from "../context/sync"
@@ -18,23 +18,9 @@ import { DialogSessionList } from "../component/dialog-session-list"
 import { Locale } from "../util/locale"
 import { useKV } from "../context/kv"
 import { useSDK } from "../context/sdk"
+import { useTheme } from "../context/theme"
 
 let once = false
-
-const C = {
-  bg: RGBA.fromHex("#050505"),
-  panel: RGBA.fromHex("#101012"),
-  prompt: RGBA.fromHex("#242528"),
-  border: RGBA.fromHex("#40363a"),
-  text: RGBA.fromHex("#f1eeee"),
-  muted: RGBA.fromHex("#8f8586"),
-  dim: RGBA.fromHex("#676165"),
-  pink: RGBA.fromHex("#a45c75"),
-  purple: RGBA.fromHex("#7b32b8"),
-  outline: RGBA.fromHex("#050505"),
-  icon: RGBA.fromHex("#27282b"),
-  iconHover: RGBA.fromHex("#34363a"),
-}
 
 const DOTTED = {
   topLeft: ".",
@@ -58,8 +44,8 @@ const placeholder = {
 const mascot = [
   "                               ███████████████",
   "                             ███████████████████",
-  "                             ██ █████████████ ██",
-  "                             ██ █████████████ ██",
+  "                             ██ O███████████O ██",
+  "                             ██ O███████████O ██",
   "                             ███████████████████",
   "                    ███████  ███████████████████  ███████",
   "                       ███████████████████████████████",
@@ -91,7 +77,7 @@ function truncateMiddle(value: string, max: number) {
 function mascotSegments(line: string) {
   const result: Array<{ kind: "outline" | "fill" | "space"; text: string }> = []
   for (const char of line) {
-    const kind = char === "O" ? "outline" : char === "P" ? "fill" : "space"
+    const kind = char === "O" ? "outline" : char === "█" || char === "P" ? "fill" : "space"
     const text = kind === "space" ? " " : "█"
     const last = result.at(-1)
     if (last?.kind === kind) {
@@ -104,13 +90,15 @@ function mascotSegments(line: string) {
 }
 
 function MascotLine(props: { line: string }) {
+  const themeState = useTheme()
+  const isDark = createMemo(() => themeState.mode() === "dark")
   return (
     <text>
       {mascotSegments(props.line).map((segment) =>
         segment.kind === "space" ? (
           segment.text
         ) : (
-          <span style={{ fg: segment.kind === "outline" ? C.outline : C.purple }}>{segment.text}</span>
+          <span style={{ fg: segment.kind === "outline" ? (isDark() ? "#000000" : "#ffffff") : "#7b32b8" }}>{segment.text}</span>
         ),
       )}
     </text>
@@ -119,6 +107,7 @@ function MascotLine(props: { line: string }) {
 
 function NavItem(props: { icon: string; label: string; command: string }) {
   const keymap = useOctocodeKeymap()
+  const { theme } = useTheme()
   const [hover, setHover] = createSignal(false)
 
   return (
@@ -131,8 +120,8 @@ function NavItem(props: { icon: string; label: string; command: string }) {
       onMouseOut={() => setHover(false)}
       onMouseUp={() => keymap.dispatchCommand(props.command)}
     >
-      <text fg={hover() ? C.pink : C.text} attributes={TextAttributes.BOLD} wrapMode="none">{props.icon}</text>
-      <text fg={hover() ? C.pink : C.muted} wrapMode="none">
+      <text fg={hover() ? theme.primary : theme.text} attributes={TextAttributes.BOLD} wrapMode="none">{props.icon}</text>
+      <text fg={hover() ? theme.primary : theme.textMuted} wrapMode="none">
         {props.label}
       </text>
     </box>
@@ -141,6 +130,7 @@ function NavItem(props: { icon: string; label: string; command: string }) {
 
 function MemoryButton() {
   const dialog = useDialog()
+  const { theme } = useTheme()
   const [hover, setHover] = createSignal(false)
 
   return (
@@ -153,8 +143,8 @@ function MemoryButton() {
       onMouseOut={() => setHover(false)}
       onMouseUp={() => dialog.replace(() => <DialogObsidianGraph />)}
     >
-      <text fg={hover() ? C.pink : C.text} attributes={TextAttributes.BOLD} wrapMode="none">*</text>
-      <text fg={hover() ? C.pink : C.muted} wrapMode="none">
+      <text fg={hover() ? theme.primary : theme.text} attributes={TextAttributes.BOLD} wrapMode="none">*</text>
+      <text fg={hover() ? theme.primary : theme.textMuted} wrapMode="none">
         Brain
       </text>
     </box>
@@ -175,6 +165,7 @@ export function Home() {
   const kv = useKV()
   const sdk = useSDK()
   const dimensions = useTerminalDimensions()
+  const { theme } = useTheme()
   const dashboardWidth = createMemo(() => Math.max(72, Math.min(88, dimensions().width - 26)))
 
   const leftWidth = createMemo(() => Math.floor(dashboardWidth() * 0.65))
@@ -192,24 +183,38 @@ export function Home() {
   const [hoveredMore, setHoveredMore] = createSignal(false)
   const [hoveredCommand, setHoveredCommand] = createSignal<string | null>(null)
   const [hoveredCmd, setHoveredCmd] = createSignal<string | null>(null)
+
+  const C = {
+    bg: theme.background,
+    panel: theme.backgroundPanel,
+    prompt: theme.backgroundElement,
+    border: theme.border,
+    text: theme.text,
+    muted: theme.textMuted,
+    dim: theme.borderSubtle,
+    pink: theme.primary,
+    purple: theme.accent,
+    outline: theme.background,
+    icon: theme.backgroundElement,
+    iconHover: theme.borderActive,
+  }
   let sent = false
+  const [firstTime, setFirstTime] = createSignal(false)
 
   onMount(() => {
     editor.clearSelection()
-    if (!kv.get("username_prompted")) {
-      const defaultName = sync.data.config.username || process.env.USERNAME || process.env.USER || ""
-      import("../ui/dialog-prompt").then(({ DialogPrompt }) => {
-        DialogPrompt.show(dialog, "What should we call you?", {
-          placeholder: "Your name",
-          value: defaultName,
-        }).then((name: string | null) => {
-          kv.set("username_prompted", true)
-          if (name && name.trim()) {
-            sdk.client.config.update({ config: { username: name.trim() } }).catch(() => {})
-          }
-        })
-      })
+    // Check first_time flag once (one-shot)
+    if (!firstTime()) {
+      const val = !!kv.get("first_time")
+      setFirstTime(val)
+      if (val) {
+        kv.set("first_time", false)
+      }
     }
+  })
+
+  const greeting = createMemo(() => {
+    return firstTime() ? "Welcome " : "Welcome back "
   })
 
   const bind = (r: PromptRef | undefined) => {
@@ -247,10 +252,10 @@ export function Home() {
               <text fg={C.pink} attributes={TextAttributes.BOLD}>
                 OCTOCODE V2
               </text>
-              <text fg={C.muted}>{"Welcome back " + user() + "!"}</text>
+              <text fg={C.muted}>{greeting() + user() + "!"}</text>
             </box>
             <box marginTop={1}>
-              <For each={mascot}>{(line) => <text fg={C.purple}>{line}</text>}</For>
+              <For each={mascot}>{(line) => <MascotLine line={line} />}</For>
             </box>
           </box>
           <box
@@ -288,7 +293,7 @@ export function Home() {
               onMouseOut={() => setHoveredMore(false)}
               onMouseUp={() => dialog.replace(() => <DialogSessionList />)}
             >
-              <text fg={hoveredMore() ? C.text : C.pink} attributes={TextAttributes.BOLD}>
+              <text fg={hoveredMore() ? C.pink : C.muted} attributes={TextAttributes.BOLD}>
                 more sessions →
               </text>
             </box>

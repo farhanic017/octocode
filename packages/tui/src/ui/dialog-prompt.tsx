@@ -1,7 +1,7 @@
 import { TextareaRenderable, TextAttributes } from "@opentui/core"
 import { useTheme } from "../context/theme"
 import { useDialog, type DialogContext } from "./dialog"
-import { Show, createEffect, createSignal, onMount, type JSX } from "solid-js"
+import { Show, createEffect, onMount, type JSX } from "solid-js"
 import { Spinner } from "../component/spinner"
 import { useTuiConfig } from "../config"
 import { useBindings, useCommandShortcut } from "../keymap"
@@ -22,19 +22,16 @@ export function DialogPrompt(props: DialogPromptProps) {
   const { theme } = useTheme()
   const tuiConfig = useTuiConfig()
   const submitShortcut = useCommandShortcut("dialog.prompt.submit")
-  const [textareaTarget, setTextareaTarget] = createSignal<TextareaRenderable>()
   let textarea: TextareaRenderable
 
   function confirm() {
     if (props.busy) return
+    if (!textarea || textarea.isDestroyed) return
     props.onConfirm?.(textarea.plainText)
   }
 
   useBindings(() => ({
-    target: textareaTarget,
-    enabled: textareaTarget() !== undefined && !props.busy,
-    // Dialog form semantics must win over the global managed textarea input layer.
-    priority: 1,
+    enabled: !props.busy,
     commands: [
       {
         name: "dialog.prompt.submit",
@@ -44,11 +41,7 @@ export function DialogPrompt(props: DialogPromptProps) {
       },
     ],
     bindings: [
-      {
-        key: "return",
-        command: "dialog.prompt.submit",
-        preventDefault: true,
-      },
+      ...tuiConfig.keybinds.gather("dialog.prompt", ["dialog.prompt.submit"]),
     ],
   }))
 
@@ -58,7 +51,7 @@ export function DialogPrompt(props: DialogPromptProps) {
       if (!textarea || textarea.isDestroyed) return
       if (props.busy) return
       textarea.focus()
-    }, 1)
+    }, 5)
     textarea.gotoLineEnd()
   })
 
@@ -94,7 +87,6 @@ export function DialogPrompt(props: DialogPromptProps) {
           height={3}
           ref={(val: TextareaRenderable) => {
             textarea = val
-            setTextareaTarget(val)
           }}
           initialValue={props.value}
           placeholder={props.placeholder ?? "Enter text"}

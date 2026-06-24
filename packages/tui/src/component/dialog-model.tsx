@@ -243,5 +243,8 @@ export function sortModelOptions<T extends { footer?: string; releaseDate: strin
   options: T[],
   newestFirst: boolean,
 ) {
-  return sortBy(options, (option) => option.title.toLowerCase())
+  if (newestFirst) {
+    return sortBy(options, (option) => -new Date(option.releaseDate).getTime())
+  }
+  return sortBy(options, (option) => (option.footer ? 0 : 1), (option) => option.title.toLowerCase())
 }

@@ -435,7 +435,6 @@ export const {
         }
 
         case "message.part.delta": {
-          touchPart(event.properties.sessionID, event.properties.partID)
           const parts = store.part[event.properties.messageID]
           if (!parts) {
             const buf = deltaBuffer.get(event.properties.messageID) ?? new Map()
@@ -454,6 +453,7 @@ export const {
             deltaBuffer.set(event.properties.messageID, buf)
             break
           }
+          touchPart(event.properties.sessionID, event.properties.partID)
           setStore(
             "part",
             event.properties.messageID,
