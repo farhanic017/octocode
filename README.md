@@ -60,8 +60,7 @@ rm ~/.octo/bin/octo
 
 ### Quick Start
 
-```bash
-cd your-project
+# Run
 octo
 ```
 
