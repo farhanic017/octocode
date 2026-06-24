@@ -40,9 +40,11 @@
 # npm (recommended)
 npm i -g octocode-ai@latest
 
-# curl (one-liner)
+# curl (macOS / Linux)
 curl -fsSL https://octocode.ai/install | bash
 ```
+
+**Windows:** Install via npm, or download the `.exe` directly from [GitHub Releases](https://github.com/farhanic017/octocode/releases).
 
 ### Uninstall
 
@@ -53,6 +55,8 @@ npm uninstall -g octocode-ai
 # manual (curl install)
 rm ~/.octo/bin/octo
 ```
+
+**Windows:** Remove the global npm package, or delete the `octo.exe` from your install directory.
 
 ### Quick Start
 
