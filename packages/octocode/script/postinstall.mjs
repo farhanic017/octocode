@@ -131,9 +131,23 @@ function getTempDir() {
   return fallback
 }
 
+function packageExists(name) {
+  const version = packageJson.optionalDependencies?.[name]
+  if (!version) return false
+  const result = childProcess.spawnSync("npm", ["view", `${name}@${version}`, "version"], {
+    encoding: "utf8",
+    timeout: 15000,
+    windowsHide: true,
+    shell: true,
+  })
+  return result.status === 0
+}
+
 function installPackage(name) {
   const version = packageJson.optionalDependencies?.[name]
   if (!version) return
+
+  if (!packageExists(name)) return
 
   const temp = fs.mkdtempSync(path.join(getTempDir(), "octocode-install-"))
   try {
@@ -174,7 +188,8 @@ function verifyBinary() {
 }
 
 function main() {
-  for (const name of packageNames()) {
+  const names = packageNames()
+  for (const name of names) {
     try {
       copyBinary(resolveBinary(name), targetBinary)
       if (verifyBinary()) return
@@ -183,11 +198,16 @@ function main() {
     }
   }
 
-  throw new Error(
-    `It seems your package manager failed to install the right octocode CLI package. Try manually installing ${packageNames()
-      .map((name) => JSON.stringify(name))
-      .join(" or ")}.`,
-  )
+  const available = names.filter((n) => packageExists(n))
+  const msg = [
+    `Failed to install the octocode CLI binary for ${platform}-${arch}.`,
+    "",
+    "Try installing the binary package directly:",
+    ...available.map((n) => `  npm i -g ${n}`),
+    "",
+    "Or download manually from: https://github.com/farhanic017/octocode/releases",
+  ]
+  throw new Error(msg.join("\n"))
 }
 
 try {
