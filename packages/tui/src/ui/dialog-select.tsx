@@ -649,28 +649,10 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
                           id={JSON.stringify(option.value)}
                           flexDirection="column"
                           position="relative"
-                          onMouseMove={() => {
-                            if (props.locked) return
-                            setStore("input", "mouse")
-                            setFocusedAction(undefined)
-                          }}
                           onMouseUp={() => {
                             if (props.locked) return
                             option.onSelect?.(dialog)
                             props.onSelect?.(option)
-                          }}
-                          onMouseOver={() => {
-                            if (props.locked) return
-                            if (store.input !== "mouse") return
-                            const index = flat().findIndex((x) => isDeepEqual(x.value, option.value))
-                            if (index === -1) return
-                            moveTo(index)
-                          }}
-                          onMouseDown={() => {
-                            if (props.locked) return
-                            const index = flat().findIndex((x) => isDeepEqual(x.value, option.value))
-                            if (index === -1) return
-                            moveTo(index)
                           }}
                         >
                           <box

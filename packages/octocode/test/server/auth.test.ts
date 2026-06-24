@@ -22,12 +22,12 @@ describe("ServerAuth", () => {
     expect(ServerAuth.headers()).toBeUndefined()
   })
 
-  test("defaults to the octocode username", () => {
+  test("defaults to the octo username", () => {
     Flag.OCTOCODE_SERVER_PASSWORD = "secret"
     Flag.OCTOCODE_SERVER_USERNAME = undefined
 
     expect(ServerAuth.headers()).toEqual({
-      Authorization: `Basic ${Buffer.from("octocode:secret").toString("base64")}`,
+      Authorization: `Basic ${Buffer.from("octo:secret").toString("base64")}`,
     })
   })
 

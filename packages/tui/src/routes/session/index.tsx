@@ -286,9 +286,6 @@ export function Session() {
 
   const wide = createMemo(() => dimensions().width > 120)
   const sidebarVisible = createMemo(() => {
-    if (session()?.parentID) return false
-    if (sidebarOpen()) return true
-    if (sidebar() === "auto" && wide()) return true
     return false
   })
   const showTimestamps = createMemo(() => timestamps() === "show")
@@ -2032,8 +2029,8 @@ function ReasoningHeader(props: {
   const { theme } = useTheme()
   const fg = () =>
     props.open
-      ? RGBA.fromValues(theme.warning.r, theme.warning.g, theme.warning.b, theme.thinkingOpacity)
-      : theme.warning
+      ? RGBA.fromValues(theme.accent.r, theme.accent.g, theme.accent.b, theme.thinkingOpacity)
+      : theme.accent
 
   return (
     <Switch>

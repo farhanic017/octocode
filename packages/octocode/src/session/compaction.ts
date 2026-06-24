@@ -44,6 +44,11 @@ const PRUNE_PROTECTED_TOOLS = ["skill"]
 const DEFAULT_TAIL_TURNS = 2
 const MIN_PRESERVE_RECENT_TOKENS = 2_000
 const MAX_PRESERVE_RECENT_TOKENS = 16_000
+
+// Codex-level compaction constants
+const COMPACT_USER_MESSAGE_MAX_TOKENS = 20_000
+const COMPACTION_RETRY_MAX = 3
+const COMPACTION_BACKOFF_BASE_MS = 1_000
 type Turn = {
   start: number
   end: number
@@ -61,6 +66,12 @@ type CompletedCompaction = {
   summary: string | undefined
 }
 
+type CompactedUserMessage = {
+  message: string
+  agent?: string
+  model?: SessionV1.User["model"]
+}
+
 function summaryText(message: SessionV1.WithParts) {
   const text = message.parts
     .filter((part): part is SessionV1.TextPart => part.type === "text")
@@ -69,6 +80,104 @@ function summaryText(message: SessionV1.WithParts) {
     .join("\n\n")
     .trim()
   return text || undefined
+}
+
+// Codex-level: Collect user messages for preservation
+function collectUserMessages(messages: SessionV1.WithParts[]): CompactedUserMessage[] {
+  const result: CompactedUserMessage[] = []
+  for (const msg of messages) {
+    if (msg.info.role !== "user") continue
+    if (msg.parts.some((part) => part.type === "compaction")) continue
+
+    const textParts = msg.parts
+      .filter((part): part is SessionV1.TextPart => part.type === "text")
+      .map((part) => part.text.trim())
+      .filter(Boolean)
+
+    if (textParts.length > 0) {
+      result.push({
+        message: textParts.join("\n"),
+        agent: msg.info.agent,
+        model: msg.info.model,
+      })
+    }
+  }
+  return result
+}
+
+// Codex-level: Truncate text to token limit
+function truncateToTokens(text: string, maxTokens: number): string {
+  const estimatedTokens = Token.estimate(text)
+  if (estimatedTokens <= maxTokens) return text
+
+  // Rough approximation: 1 token ≈ 4 chars
+  const maxChars = maxTokens * 4
+  if (text.length <= maxChars) return text
+
+  return text.slice(0, maxChars) + "\n[truncated]"
+}
+
+// Codex-level: Build compacted history with user message preservation
+function buildCompactedHistory(
+  userMessages: CompactedUserMessage[],
+  summaryText: string,
+  maxTokens: number = COMPACT_USER_MESSAGE_MAX_TOKENS,
+): string[] {
+  const parts: string[] = []
+
+  // Select recent user messages within token budget
+  const selectedMessages: CompactedUserMessage[] = []
+  let remaining = maxTokens
+
+  for (let i = userMessages.length - 1; i >= 0; i--) {
+    if (remaining <= 0) break
+    const msg = userMessages[i]!
+    const tokens = Token.estimate(msg.message)
+    if (tokens <= remaining) {
+      selectedMessages.unshift(msg)
+      remaining -= tokens
+    } else {
+      // Truncate to fit
+      const truncated = truncateToTokens(msg.message, remaining)
+      selectedMessages.unshift({ ...msg, message: truncated })
+      break
+    }
+  }
+
+  // Add preserved user messages
+  for (const msg of selectedMessages) {
+    parts.push(`[User]: ${msg.message}`)
+  }
+
+  // Add summary
+  parts.push(summaryText || "(no summary available)")
+
+  return parts
+}
+
+// Codex-level: Build handoff prompt for compaction
+function buildHandoffPrompt(previousSummary?: string): string {
+  const basePrompt = `You are performing a CONTEXT CHECKPOINT COMPACTION. Create a handoff summary for another LLM that will resume the task.
+
+Include:
+- Current progress and key decisions made
+- Important context, constraints, or user preferences
+- What remains to be done (clear next steps)
+- Any critical data, examples, or references needed to continue
+
+Be concise, structured, and focused on helping the next LLM seamlessly continue the work.`
+
+  if (previousSummary) {
+    return `Another language model started to solve this problem and produced a summary of its thinking process. You also have access to the state of the tools that were used by that language model. Use this to build on the work that has already been done and avoid duplicating work. Here is the summary produced by the other language model, use the information in this summary to assist with your own analysis:
+
+<previous-summary>
+${previousSummary}
+</previous-summary>
+
+${basePrompt}`
+  }
+
+  return basePrompt
 }
 
 function completedCompactions(messages: SessionV1.WithParts[]) {
@@ -349,16 +458,24 @@ export const layer = Layer.effect(
         cfg,
         model,
       })
+
+      // Codex-level: Collect user messages for preservation
+      const userMessages = collectUserMessages(selected.head)
+
       // Allow plugins to inject context or replace compaction prompt.
       const compacting = yield* plugin.trigger(
         "experimental.session.compacting",
         { sessionID: input.sessionID },
         { context: [], prompt: undefined },
       )
-      const nextPrompt = compacting.prompt ?? buildPrompt({ previousSummary, context: compacting.context })
+
+      // Codex-level: Use handoff prompt for better compaction
+      const handoffPrompt = buildHandoffPrompt(previousSummary)
+      const nextPrompt = compacting.prompt ?? handoffPrompt
+
       const msgs = structuredClone(selected.head)
       yield* plugin.trigger("experimental.chat.messages.transform", {}, { messages: msgs })
-      const modelMessages = yield* MessageV2.toModelMessagesEffect(msgs, model, {
+      let modelMessages = yield* MessageV2.toModelMessagesEffect(msgs, model, {
         stripMedia: true,
         toolOutputMaxChars: TOOL_OUTPUT_MAX_CHARS,
       })
@@ -407,21 +524,43 @@ export const layer = Layer.effect(
         sessionID: input.sessionID,
         model,
       })
-      const result = yield* processor.process({
-        user: userMessage,
-        agent,
-        sessionID: input.sessionID,
-        tools: {},
-        system: [],
-        messages: [
-          ...modelMessages,
-          {
-            role: "user",
-            content: [{ type: "text", text: nextPrompt }],
-          },
-        ],
-        model,
-      })
+
+      // Codex-level: Retry logic with backoff
+      let result: "continue" | "compact" | "stop" = "compact"
+      let retries = 0
+
+      while (retries <= COMPACTION_RETRY_MAX) {
+        result = yield* processor.process({
+          user: userMessage,
+          agent,
+          sessionID: input.sessionID,
+          tools: {},
+          system: [],
+          messages: [
+            ...modelMessages,
+            {
+              role: "user",
+              content: [{ type: "text", text: nextPrompt }],
+            },
+          ],
+          model,
+        })
+
+        if (result !== "compact") break
+
+        // Context window exceeded - trim oldest items and retry
+        retries++
+        if (retries <= COMPACTION_RETRY_MAX) {
+          log.info("compaction context exceeded, retrying with trimmed history", { retries })
+          // Remove oldest messages to fit in context
+          if (modelMessages.length > 2) {
+            modelMessages = modelMessages.slice(2)
+          } else {
+            break
+          }
+          yield* Effect.sleep(`${COMPACTION_BACKOFF_BASE_MS * retries} millis`)
+        }
+      }
 
       if (result === "compact") {
         processor.message.error = new SessionV1.ContextOverflowError({

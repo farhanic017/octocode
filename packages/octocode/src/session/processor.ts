@@ -32,6 +32,7 @@ import * as DateTime from "effect/DateTime"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { toolFileSourceFromUri, Usage, type LLMEvent } from "@octocode-ai/llm"
 import { ToolOutput } from "@octocode-ai/core/tool-output"
+import { checkResources, getSystemStatus } from "@/util/sys-monitor"
 
 const DOOM_LOOP_THRESHOLD = 3
 const log = Log.create({ service: "session.processor" })
@@ -957,6 +958,25 @@ export const layer = Layer.effect(
 
       const process = Effect.fn("SessionProcessor.process")(function* (streamInput: LLM.StreamInput) {
         slog.info("process")
+        
+        // Check system resources before processing
+        const resources = yield* Effect.tryPromise(() => checkResources()).pipe(
+          Effect.catch(() => Effect.succeed({ canProceed: true, resources: { freeRamMB: 8192, maxParallelAgents: 1 }, warnings: [] as string[] })),
+        )
+        
+        if (!resources.canProceed) {
+          slog.warn("low memory, may affect performance", { 
+            freeRamMB: resources.resources.freeRamMB,
+            warnings: resources.warnings 
+          })
+        }
+        
+        // Log system status periodically
+        const systemStatus = yield* Effect.tryPromise(() => getSystemStatus()).pipe(
+          Effect.catch(() => Effect.succeed("unknown")),
+        )
+        slog.debug("system status", { status: systemStatus })
+        
         ctx.needsCompaction = false
         ctx.shouldBreak = (yield* config.get()).experimental?.continue_loop_on_deny !== true
 

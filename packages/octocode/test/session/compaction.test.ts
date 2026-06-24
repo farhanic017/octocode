@@ -1448,8 +1448,11 @@ describe("session.compaction.process", () => {
         expect(captured).toContain("<previous-summary>")
         expect(captured).toContain("summary one")
         expect(captured.match(/summary one/g)?.length).toBe(1)
-        expect(captured).toContain("## Constraints & Preferences")
-        expect(captured).toContain("## Progress")
+        // Codex-style: Check for handoff prompt content
+        expect(captured).toContain("Another language model started to solve this problem")
+        expect(captured).toContain("CONTEXT CHECKPOINT COMPACTION")
+        expect(captured).toContain("constraints")
+        expect(captured).toContain("progress")
       }).pipe(withCompaction({ llm: stub.layer }))
     },
     { git: true },

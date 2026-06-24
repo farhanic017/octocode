@@ -5,8 +5,19 @@
  * https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { readFile } from "node:fs/promises"
+import { readFile, stat } from "node:fs/promises"
 import path from "node:path"
+
+const MAX_ATTACHMENT_SIZE = 20 * 1024 * 1024
+
+const EXECUTABLE_SIGNATURES = [
+  new Uint8Array([0x7f, 0x45, 0x4c, 0x46]),
+  new Uint8Array([0x4d, 0x5a]),
+  new Uint8Array([0xcf, 0xfa, 0xed, 0xfe]),
+  new Uint8Array([0xfe, 0xed, 0xfa, 0xce]),
+  new Uint8Array([0xfe, 0xed, 0xfa, 0xcf]),
+  new Uint8Array([0xca, 0xfe, 0xba, 0xbe]),
+]
 
 export type LocalFiles = Readonly<{
   readText(path: string): Promise<string>
@@ -91,9 +102,24 @@ const documentMimes = new Set([
   "text/plain",
 ])
 
+function hasExecutableSignature(header: Uint8Array): boolean {
+  for (const sig of EXECUTABLE_SIGNATURES) {
+    if (header.length >= sig.length) {
+      let match = true
+      for (let i = 0; i < sig.length; i++) {
+        if (header[i] !== sig[i]) { match = false; break }
+      }
+      if (match) return true
+    }
+  }
+  return false
+}
+
 export async function readLocalAttachmentWith(files: LocalFiles, path: string): Promise<LocalAttachment | undefined> {
   const mime = await files.mime(path).catch(() => undefined)
   if (!mime) return
+  const info = await stat(path).catch(() => undefined)
+  if (!info || info.size > MAX_ATTACHMENT_SIZE) return
   if (mime === "image/svg+xml") {
     const content = await files.readText(path).catch(() => undefined)
     if (!content) return
@@ -103,5 +129,6 @@ export async function readLocalAttachmentWith(files: LocalFiles, path: string): 
     return
   const content = await files.readBytes(path).catch(() => undefined)
   if (!content) return
+  if (content.length >= 4 && hasExecutableSignature(content.subarray(0, 4))) return
   return { type: "binary", mime, content }
 }

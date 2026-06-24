@@ -5,19 +5,20 @@ import { fileURLToPath } from "url"
 import { DialogSelect, type DialogSelectOption } from "../../ui/dialog-select"
 import { Show, createEffect, createMemo, createSignal } from "solid-js"
 import { useBindings } from "../../keymap"
+import { TextAttributes } from "@opentui/core"
 
 const id = "internal:plugin-manager"
 
 function state(api: TuiPluginApi, item: TuiPluginStatus) {
   if (!item.enabled) {
-    return <span style={{ fg: api.theme.current.textMuted }}>disabled</span>
+    return <span style={{ fg: api.theme.current.warning, attributes: TextAttributes.BOLD }}>○ Enable</span>
   }
 
-  return (
-    <span style={{ fg: item.active ? api.theme.current.success : api.theme.current.error }}>
-      {item.active ? "active" : "inactive"}
-    </span>
-  )
+  if (item.active) {
+    return <span style={{ fg: api.theme.current.success, attributes: TextAttributes.BOLD }}>✓ Active</span>
+  }
+
+  return <span style={{ fg: api.theme.current.error }}>✗ Inactive</span>
 }
 
 function source(spec: string) {
@@ -243,6 +244,8 @@ const tui: TuiPlugin = async (api) => {
         title: "Plugins",
         category: "System",
         namespace: "palette",
+        slashName: "plugins",
+        slashAliases: ["plugin"],
         run() {
           show(api)
         },
@@ -252,6 +255,7 @@ const tui: TuiPlugin = async (api) => {
         title: "Install plugin",
         category: "System",
         namespace: "palette",
+        slashName: "plugin-install",
         run() {
           showInstall(api)
         },

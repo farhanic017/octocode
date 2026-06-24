@@ -32,6 +32,8 @@ let connectError = "Mock transport cannot connect"
 let clientCreateCount = 0
 // Tracks how many times transport.close() is called across all mock transports
 let transportCloseCount = 0
+// Tracks which builtin MCPs have been connected during state init
+const builtinMcpConnected = new Set<string>()
 
 function getOrCreateClientState(name?: string): MockClientState {
   const key = name ?? "default"
@@ -187,6 +189,8 @@ beforeEach(() => {
   connectError = "Mock transport cannot connect"
   clientCreateCount = 0
   transportCloseCount = 0
+  // Reset builtin MCP state so tests start clean
+  builtinMcpConnected.clear()
 })
 
 // Import after mocks
@@ -194,6 +198,14 @@ const { MCP } = await import("../../src/mcp/index")
 const { McpOAuthCallback } = await import("../../src/mcp/oauth-callback")
 
 const it = testEffect(MCP.defaultLayer)
+
+// Disable builtin MCPs (graphify, obsidian) so they don't affect test counters
+const noBuiltinsConfig = {
+  mcp: {
+    graphify: { type: "local" as const, command: ["echo", "noop"], enabled: false },
+    obsidian: { type: "local" as const, command: ["echo", "noop"], enabled: false },
+  },
+}
 
 function statusName(status: Record<string, MCPNS.Status> | MCPNS.Status, server: string) {
   if ("status" in status) return status.status
@@ -231,7 +243,7 @@ it.instance(
         expect(serverState.listToolsCalls).toBe(1)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -269,7 +281,7 @@ it.instance(
         expect(serverState.listToolsCalls).toBe(2)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -309,6 +321,7 @@ it.instance(
           type: "local",
           command: ["echo", "test"],
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -347,6 +360,7 @@ it.instance(
           type: "local",
           command: ["echo", "test"],
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -387,7 +401,7 @@ it.instance(
         expect(secondState.closed).toBe(false)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -441,6 +455,7 @@ it.instance(
           type: "local",
           command: ["echo", "bad"],
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -477,7 +492,7 @@ it.instance(
         expect(serverState.requestCalls).toBe(1)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 it.instance(
@@ -500,7 +515,7 @@ it.instance(
         expect(serverState.requestCalls).toBe(0)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -535,6 +550,7 @@ it.instance(
           command: ["echo", "test"],
           enabled: false,
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -572,6 +588,7 @@ it.instance(
           type: "local",
           command: ["echo", "test"],
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -605,6 +622,7 @@ it.instance(
           type: "local",
           command: ["echo", "test"],
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -633,7 +651,7 @@ it.instance(
         expect(serverState.listPromptsCalls).toBe(0)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 it.instance(
@@ -659,7 +677,7 @@ it.instance(
         expect(serverState.listResourcesCalls).toBe(0)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 it.instance(
@@ -685,7 +703,7 @@ it.instance(
         expect(serverState.listResourcesCalls).toBe(0)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 it.instance(
@@ -715,6 +733,7 @@ it.instance(
           type: "local",
           command: ["echo", "test"],
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -738,7 +757,7 @@ it.instance(
         expect(status["nonexistent"]).toBeUndefined()
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -757,7 +776,7 @@ it.instance(
         }
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -773,7 +792,7 @@ it.instance(
         expect(Object.keys(tools).length).toBe(0)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -813,6 +832,7 @@ it.instance(
           type: "local",
           command: ["echo", "test"],
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -884,6 +904,7 @@ it.instance(
           type: "local",
           command: ["echo", "test"],
         },
+        ...noBuiltinsConfig.mcp,
       },
     },
   },
@@ -915,7 +936,7 @@ it.instance(
         expect(transportCloseCount).toBeGreaterThanOrEqual(1)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -944,7 +965,7 @@ it.instance(
         expect(transportCloseCount).toBeGreaterThanOrEqual(1)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )
 
 // ========================================================================
@@ -974,5 +995,5 @@ it.instance(
         expect(transportCloseCount).toBeGreaterThanOrEqual(2)
       }),
     ),
-  { config: { mcp: {} } },
+  { config: noBuiltinsConfig },
 )

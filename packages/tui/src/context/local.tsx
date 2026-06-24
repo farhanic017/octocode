@@ -588,7 +588,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
     const mcp = {
       isEnabled(name: string) {
         const status = sync.data.mcp[name]
-        return status?.status === "connected"
+        return status?.status === "connected" || status?.status === "enabled"
       },
       async toggle(name: string) {
         const status = sync.data.mcp[name]

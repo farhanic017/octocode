@@ -88,8 +88,15 @@ const AGENT_SWARM_AGENT = "agent-swarm"
 const AGENT_SWARM_DEFAULT_DIR = path.join(os.homedir(), "Desktop", "agent-swarm-main")
 const AGENT_SWARM_OUTPUT_LIMIT = 60_000
 
-const GREETINGS = /^(hi|hey|hello|sup|yo|hola|namaste|salaam|greetings|howdy|what'?s up|how are you|how's it going|hey there|hi there)\b/i
+const GREETINGS = /^(hi|hey|hello|sup|yo|hola|namaste|salaam|greetings|howdy|what'?s up|how are you|how's it going|hey there|hi there|thanks|thank you|ok|okay|got it|understood|sure|cool|nice|great|perfect|awesome|bye|goodbye|see you|later)\b/i
 const FILLER_WORDS = /^(i|me|my|mine|we|our|you|your|it|its|this|that|the|a|an|and|or|but|so|if|then|than|can|could|would|should|will|shall|may|might|do|does|did|have|has|had|be|am|is|are|was|were|being|been|to|of|in|on|at|by|for|with|from|up|about|into|through|during|before|after|above|below|between|out|off|over|under|again|further|once|here|there|when|where|why|how|all|each|every|both|few|more|most|other|some|such|no|not|only|own|same|than|too|very|just|also|now|please|help|want|need|make|fix|add|remove|change|update|create|write|read|check|look|find|get|set|put|give|take|let|try|use|run|start|stop|open|close|show|hide|delete|install|build|test|debug|deploy|push|pull|merge|commit|clone|init)$/i
+
+// Fast-path: "make it 20", "set to 10", "change to 50" — treat as literal number assignment
+const NUMBER_ASSIGN = /^(make|set|change|update|put|use|try)\s+(it|this|that|the\s+\w+)?\s*(to|=)?\s*(\d+)$/i
+// Fast-path: "add 10", "subtract 5", "multiply by 3", "divide by 2" — do the math
+const MATH_OP = /^(add|plus|\+|subtract|minus|\-|multiply|times|\*|divide|divided\s+by|\/)\s+(\d+)$/i
+// Detect session references: "that session", "the previous one"
+const SESSION_REF = /(that|the|this|previous|last|earlier|recent)\s+(session|chat|conversation|one)/i
 
 function extractTopic(text: string, dateStr: string): string {
   const cleaned = text.replace(/\s+/g, " ").trim()
@@ -1298,6 +1305,123 @@ export const layer = Layer.effect(
       }
 
       if (input.noReply === true) return message
+
+      // Fast path for simple greetings - skip full LLM processing
+      const text = message.parts
+        .filter((p): p is SessionV1.TextPart => p.type === "text" && !p.synthetic && !p.ignored)
+        .map((p) => p.text)
+        .join(" ")
+        .trim()
+      
+      if (GREETINGS.test(text) && text.split(" ").length <= 3) {
+        // Quick response for simple greetings with varied tones
+        const lowerText = text.toLowerCase().replace(/[!?.]+$/, "")
+        
+        // Multi-language greetings with varied responses
+        const greetingResponses: Array<{ patterns: string[]; responses: string[] }> = [
+          // English
+          { patterns: ["hi", "hey", "hello", "howdy", "helu", "helo", "hai"], responses: ["Hey there!", "Hi!", "Hello!", "Hey!", "What's up!", "Hi there!", "Hey babe!", "Hi señorita!", "Aye aye captain!", "Yes my lord, how may I help?", "Yes my majesty, how may I help?", "At your command, master!", "Hi senpai!", "Hello tiny human!"] },
+          { patterns: ["thanks", "thank you", "thx", "ty"], responses: ["You're welcome!", "No problem!", "Anytime!", "Happy to help!", "Sure thing!"] },
+          { patterns: ["ok", "okay", "k", "got it", "understood"], responses: ["Got it!", "Roger that!", "Done!", "Makes sense!", "Noted!"] },
+          { patterns: ["bye", "goodbye", "see you", "later"], responses: ["See you!", "Bye!", "Take care!", "Later!", "Until next time!"] },
+          { patterns: ["cool", "nice", "great", "awesome", "perfect", "amazing"], responses: ["Thanks!", "Glad you like it!", "Awesome!", "Sweet!", "Rock on!"] },
+          { patterns: ["yes", "yep", "yeah", "sure", "definitely"], responses: ["Alright!", "Got it!", "On it!", "You got it!", "Absolutely!"] },
+          { patterns: ["no", "nope", "nah"], responses: ["Okay!", "No worries!", "Got it!", "Understood!"] },
+          { patterns: ["sorry", "apologies", "my bad"], responses: ["No worries!", "It's all good!", "Don't worry about it!", "No problem!"] },
+          { patterns: ["haha", "hahaha", "huhaha", "lol", "lmao", "rofl", "hahahaha", "hehe", "hehehe"], responses: ["Ha!", "What's so funny? 😄", "I see you're having fun!", "Glad I could make you laugh!", "😂", "You're killing me!", "That's hilarious!"] },
+          
+          // Spanish
+          { patterns: ["hola", "buenos dias", "buenas"], responses: ["¡Hola!", "¡Buenos días!", "¡Hola, qué tal!", "¡Qué tal!", "¡Hola babe!", "¡Hola señorita!", "¡Hola capitan!"] },
+          { patterns: ["gracias", "grac"], responses: ["¡De nada!", "¡Con gusto!", "¡No hay de qué!"] },
+          { patterns: ["adiós", "hasta luego", "chao"], responses: ["¡Hasta luego!", "¡Adiós!", "¡Nos vemos!", "¡Chao!"] },
+          
+          // Playful / Personality
+          { patterns: ["aye aye", "captain"], responses: ["Aye aye, captain!", "At your service, captain!", "Reporting for duty!", "Aye aye, ready to go!"] },
+          { patterns: ["yes my lord", "my lord"], responses: ["At your service, my lord!", "Yes, my lord!", "Your wish is my command!", "How may I assist you, my lord?"] },
+          { patterns: ["hola babe", "babe"], responses: ["Hola babe!", "Hey babe!", "What's up, babe!"] },
+          { patterns: ["senorita", "señorita"], responses: ["Hola señorita!", "¡Hola, señorita!", "At your service, señorita!"] },
+          
+          // French
+          { patterns: ["salut", "bonjour", "bonsoir"], responses: ["Salut!", "Bonjour!", "Bonsoir!", "Coucou!"] },
+          { patterns: ["merci", "merci beaucoup"], responses: ["De rien!", "Avec plaisir!", "Je vous en prie!"] },
+          { patterns: ["au revoir", "à bientôt"], responses: ["Au revoir!", "À bientôt!", "Salut!"] },
+          
+          // German
+          { patterns: ["hallo", "guten tag", "hi"], responses: ["Hallo!", "Guten Tag!", "Hi!"] },
+          { patterns: ["danke", "vielen dank"], responses: ["Bitte!", "Gern geschehen!", "Kein Problem!"] },
+          { patterns: ["tschüss", "auf wiedersehen"], responses: ["Tschüss!", "Bis bald!", "Auf Wiedersehen!"] },
+          
+          // Portuguese
+          { patterns: ["olá", "oi", "bom dia"], responses: ["Olá!", "Oi!", "Bom dia!", "Oi, tudo bem!"] },
+          { patterns: ["obrigado", "obrigada", "valeu"], responses: ["De nada!", "Por nada!", "Tamo junto!"] },
+          { patterns: ["tchau", "adeus"], responses: ["Tchau!", "Até logo!", "Até mais!"] },
+          
+          // Italian
+          { patterns: ["ciao", "salve", "buongiorno"], responses: ["Ciao!", "Salve!", "Buongiorno!", "Hey!"] },
+          { patterns: ["grazie", "grazie mille"], responses: ["Prego!", "Di niente!", "Non c'è di che!"] },
+          { patterns: ["arrivederci", "ciao"], responses: ["Arrivederci!", "A presto!", "Ciao!"] },
+          
+          // Japanese
+          { patterns: ["こんにちは", "konnichiwa", "ohayo"], responses: ["こんにちは!", "お元気ですか!", "やあ!"] },
+          { patterns: ["ありがとう", "arigatou", "thanks"], responses: ["どういたしまして!", "よろしく!"] },
+          { patterns: ["さようなら", "sayounara", "bye"], responses: ["さようなら!", "またね!", "バイバイ!"] },
+          
+          // Korean
+          { patterns: ["안녕하세요", "annyeonghaseyo", "annyeong"], responses: ["안녕하세요!", "반가워요!", "안녕!"] },
+          { patterns: ["감사합니다", "gamsahamnida", "고마워"], responses: ["천만에요!", "별말씀을요!", "감사!"] },
+          
+          // Hindi
+          { patterns: ["नमस्ते", "namaste", "namaskar"], responses: ["नमस्ते!", "नमस्कार!", "आप कैसे हैं!"] },
+          { patterns: ["धन्यवाद", "dhanyavad", "shukriya"], responses: ["स्वागत है!", "कोई बात नहीं!", "आपका स्वागत है!"] },
+          
+          // Arabic
+          { patterns: ["مرحبا", "marhaba", "ahlan", "salaam"], responses: ["مرحبا!", "أهلاً!", "السلام عليكم!"] },
+          { patterns: ["شكرا", "shukran"], responses: ["عفواً!", "الشكر لله!", "لا شكر على واجب!"] },
+          
+          // Russian
+          { patterns: ["привет", "privet", "здравствуйте"], responses: ["Привет!", "Здравствуйте!", "Приветствую!"] },
+          { patterns: ["спасибо", "spasibo"], responses: ["Пожалуйста!", "Не за что!", "На здоровье!"] },
+          
+          // Turkish
+          { patterns: ["merhaba", "selam"], responses: ["Merhaba!", "Selam!", "N'aber!"] },
+          { patterns: ["teşekkürler", "tesekkurler"], responses: ["Rica ederim!", "Ne demek!", "Bir şey değil!"] },
+        ]
+        
+        // Find matching greeting and pick a random response
+        for (const greeting of greetingResponses) {
+          if (greeting.patterns.includes(lowerText)) {
+            const quickReply = greeting.responses[Math.floor(Math.random() * greeting.responses.length)]
+            
+            // Create assistant message with quick reply
+            const assistantMessage: SessionV1.Assistant = yield* sessions.updateMessage({
+              id: MessageID.ascending(),
+              role: "assistant",
+              parentID: message.info.id,
+              sessionID: input.sessionID,
+              mode: "build",
+              agent: message.info.agent,
+              variant: message.info.model.variant,
+              path: { cwd: "", root: "" },
+              cost: 0,
+              tokens: { input: 0, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },
+              modelID: message.info.model.modelID,
+              providerID: message.info.model.providerID,
+              time: { created: Date.now() },
+            })
+            yield* sessions.updatePart({
+              id: PartID.ascending(),
+              messageID: assistantMessage.id,
+              sessionID: input.sessionID,
+              type: "text",
+              text: quickReply,
+            })
+            yield* status.set(input.sessionID, { type: "idle" })
+            const msgs = yield* sessions.messages({ sessionID: input.sessionID, limit: 1 }).pipe(Effect.orDie)
+            return msgs[0]
+          }
+        }
+      }
+
       return yield* loop({ sessionID: input.sessionID })
     })
 

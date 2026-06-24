@@ -43,7 +43,13 @@ export function DialogPrompt(props: DialogPromptProps) {
         run: confirm,
       },
     ],
-    bindings: tuiConfig.keybinds.gather("dialog.prompt", ["dialog.prompt.submit"]),
+    bindings: [
+      {
+        key: "return",
+        command: "dialog.prompt.submit",
+        preventDefault: true,
+      },
+    ],
   }))
 
   onMount(() => {

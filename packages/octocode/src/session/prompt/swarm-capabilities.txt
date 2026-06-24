@@ -22,6 +22,45 @@ Before executing complex tasks, a council of specialist agents votes on whether 
 - File access scoping restricts agents to allowed directories
 - Preflight review scans output for security and logic issues
 
+### System Awareness
+IMPORTANT: The Agent Swarm must respect system resources:
+
+#### RAM/VRAM Management
+- Check available RAM before spawning agents
+- Keep 1000MB (1GB) free for system operation
+- Maximum parallel agents: Based on available RAM (1 agent per 500MB)
+- If RAM < 1000MB free, reduce parallelism or defer non-critical agents
+
+GPU Detection by Vendor:
+- **NVIDIA**: `nvidia-smi` for dedicated GPUs
+- **AMD**: `rocm-smi` for dedicated GPUs
+- **Intel**: `intel_gpu_top` for Arc/discrete, integrated (UHD/Iris) uses shared memory
+- **Apple**: Metal-capable GPUs (M1/M2/M3/M4) via `system_profiler`
+
+For integrated graphics: Use CPU mode by default (shared VRAM with system RAM)
+For discrete GPUs: Check dedicated VRAM, keep 1000MB free
+
+#### Resource Monitoring
+Before starting complex tasks:
+1. Check available RAM: `free -m` (Linux) or equivalent
+2. Check available VRAM: `nvidia-smi` (if GPU available)
+3. Plan agent count based on available resources
+4. Adjust parallelism based on memory constraints
+
+#### Safe Limits
+- Maximum parallel agents: Based on available RAM (1 agent per 500MB)
+- Maximum file size: 50MB (stream larger files)
+- Maximum context: Based on model limits
+- Timeout: 5 minutes per tool call, 60 minutes per task
+- Retry limit: 3 attempts before escalating to user
+
+### Self-Healing
+The Agent Swarm includes self-healing capabilities:
+- If an agent fails, retry with alternative approach
+- If memory is low, reduce parallel agents
+- If timeout occurs, break task into smaller chunks
+- Automatic recovery from network failures
+
 ### Model Management
 - Automatic model failover on rate limits or errors
 - Context preservation when switching models mid-task

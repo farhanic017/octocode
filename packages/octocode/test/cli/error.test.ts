@@ -73,8 +73,8 @@ describe("cli.error", () => {
     const expected = [
       "Model not found: anthropic/claude-sonet-4",
       "Did you mean: claude-sonnet-4",
-      "Try: `octocode models` to list available models",
-      "Or check your config (octocode.json) provider/model names",
+      "Try: `octo models` to list available models",
+      "Or check your config (octo.json) provider/model names",
     ].join("\n")
 
     expect(FormatError({ name: "ProviderModelNotFoundError", data })).toBe(expected)

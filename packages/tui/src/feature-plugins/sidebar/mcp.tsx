@@ -19,6 +19,7 @@ function View(props: { api: TuiPluginApi }) {
 
   const dot = (status: string) => {
     if (status === "connected") return theme().success
+    if (status === "enabled") return theme().warning
     if (status === "failed") return theme().error
     if (status === "disabled") return theme().textMuted
     if (status === "needs_auth") return theme().warning
@@ -60,6 +61,7 @@ function View(props: { api: TuiPluginApi }) {
                   <span style={{ fg: theme().textMuted }}>
                     <Switch fallback={item.status}>
                       <Match when={item.status === "connected"}>Connected</Match>
+                      <Match when={item.status === "enabled"}>Ready</Match>
                       <Match when={item.status === "failed"}>
                         <i>{item.error}</i>
                       </Match>

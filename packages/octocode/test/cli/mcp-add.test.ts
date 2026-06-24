@@ -22,7 +22,7 @@ describe("octocode mcp add (non-interactive subprocess)", () => {
         octocode.expectExit(result, 0)
 
         const config = yield* Effect.promise(() =>
-          Bun.file(path.join(home, ".config", "octo", "octocode.json")).json(),
+          Bun.file(path.join(home, ".config", "octo", "octo.json")).json(),
         )
         expect(config.mcp.github).toEqual({
           type: "remote",
@@ -58,7 +58,7 @@ describe("octocode mcp add (non-interactive subprocess)", () => {
         octocode.expectExit(result, 0)
 
         const config = yield* Effect.promise(() =>
-          Bun.file(path.join(home, ".config", "octo", "octocode.json")).json(),
+          Bun.file(path.join(home, ".config", "octo", "octo.json")).json(),
         )
         expect(config.mcp.local).toEqual({
           type: "local",

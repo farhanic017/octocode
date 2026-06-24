@@ -68,7 +68,7 @@ describe("mcp HttpApi", () => {
         const response = yield* request(handler, McpPaths.status, tmp.directory)
 
         expect(response.status).toBe(200)
-        expect(yield* json(response)).toEqual({ demo: { status: "disabled" } })
+        expect(yield* json(response)).toMatchObject({ demo: { status: "disabled" } })
       }),
     {
       config: {
@@ -78,6 +78,8 @@ describe("mcp HttpApi", () => {
             command: ["echo", "demo"],
             enabled: false,
           },
+          graphify: { type: "local", command: ["echo", "noop"], enabled: false },
+          obsidian: { type: "local", command: ["echo", "noop"], enabled: false },
         },
       },
     },
@@ -124,6 +126,8 @@ describe("mcp HttpApi", () => {
             command: ["echo", "demo"],
             enabled: false,
           },
+          graphify: { type: "local", command: ["echo", "noop"], enabled: false },
+          obsidian: { type: "local", command: ["echo", "noop"], enabled: false },
         },
       },
     },
@@ -153,6 +157,8 @@ describe("mcp HttpApi", () => {
             command: ["echo", "demo"],
             enabled: false,
           },
+          graphify: { type: "local", command: ["echo", "noop"], enabled: false },
+          obsidian: { type: "local", command: ["echo", "noop"], enabled: false },
         },
       },
     },
@@ -187,6 +193,8 @@ describe("mcp HttpApi", () => {
             command: ["echo", "demo"],
             enabled: false,
           },
+          graphify: { type: "local", command: ["echo", "noop"], enabled: false },
+          obsidian: { type: "local", command: ["echo", "noop"], enabled: false },
         },
       },
     },

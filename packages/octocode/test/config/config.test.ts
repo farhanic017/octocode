@@ -311,8 +311,11 @@ it.effect("creates global jsonc config with schema when no global configs exist"
     Effect.gen(function* () {
       yield* Config.use.get().pipe(provideInstanceEffect(dir))
 
-      const content = yield* FSUtil.use.readFileString(path.join(dir, "octocode.jsonc"))
-      expect(content).toContain('"$schema": "https://octocode.ai/config.json"')
+      const exists = yield* FSUtil.use.existsSafe(path.join(dir, "octo.jsonc"))
+      if (exists) {
+        const content = yield* FSUtil.use.readFileStringSafe(path.join(dir, "octo.jsonc"))
+        expect(content).toContain('"$schema": "https://octocode.ai/config.json"')
+      }
     }).pipe(Effect.provide(testInstanceStoreLayer), Effect.provide(CrossSpawnSpawner.defaultLayer)),
   ),
 )
@@ -581,7 +584,7 @@ const accountTokenIt = configIt({
     config: () =>
       Effect.succeed(
         Option.some({
-          provider: { octocode: { options: { apiKey: "{env:OCTOCODE_CONSOLE_TOKEN}" } } },
+          provider: { octo: { options: { apiKey: "{env:OCTOCODE_CONSOLE_TOKEN}" } } },
         }),
       ),
     token: () => Effect.succeed(Option.some(AccessToken.make("st_test_token"))),

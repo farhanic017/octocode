@@ -77,6 +77,9 @@ type MCPClient = Client
 const StatusConnected = Schema.Struct({ status: Schema.Literal("connected") }).annotate({
   identifier: "MCPStatusConnected",
 })
+const StatusEnabled = Schema.Struct({ status: Schema.Literal("enabled") }).annotate({
+  identifier: "MCPStatusEnabled",
+})
 const StatusDisabled = Schema.Struct({ status: Schema.Literal("disabled") }).annotate({
   identifier: "MCPStatusDisabled",
 })
@@ -93,6 +96,7 @@ const StatusNeedsClientRegistration = Schema.Struct({
 
 export const Status = Schema.Union([
   StatusConnected,
+  StatusEnabled,
   StatusDisabled,
   StatusFailed,
   StatusNeedsAuth,
@@ -620,11 +624,11 @@ export const layer = Layer.effect(
 
       for (const [key, mcp] of Object.entries(config)) {
         if (!isMcpConfigured(mcp)) continue
-        result[key] = s.status[key] ?? { status: "disabled" }
+        result[key] = s.status[key] ?? (mcp.enabled === false ? { status: "disabled" } : { status: "enabled" })
       }
 
       for (const key of Object.keys(s.config)) {
-        result[key] = s.status[key] ?? { status: "disabled" }
+        result[key] = s.status[key] ?? { status: "enabled" }
       }
 
       return result

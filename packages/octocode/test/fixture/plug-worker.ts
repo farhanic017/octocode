@@ -56,7 +56,10 @@ function deps(msg: Msg): PlugDeps {
       await Filesystem.write(file, text)
     },
     exists: (file) => Filesystem.exists(file),
-    files: (dir, name) => [path.join(dir, `${name}.jsonc`), path.join(dir, `${name}.json`)],
+    files: (dir, name) => {
+      const names = name === "octo" ? ["octo", "octocode"] : [name]
+      return names.flatMap((item) => [path.join(dir, `${item}.jsonc`), path.join(dir, `${item}.json`)])
+    },
     global: msg.globalDir ?? path.join(msg.dir, ".global"),
   }
 }

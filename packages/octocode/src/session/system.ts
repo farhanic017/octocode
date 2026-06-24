@@ -15,6 +15,7 @@ import type { Provider } from "@/provider/provider"
 import type { Agent } from "@/agent/agent"
 import { Permission } from "@/permission"
 import { Skill } from "@/skill"
+import { readStylePreferences, injectMemoryContext } from "./memory"
 
 export function provider(model: Provider.Model) {
   if (model.api.id.includes("gpt-4") || model.api.id.includes("o1") || model.api.id.includes("o3"))
@@ -35,6 +36,7 @@ export function provider(model: Provider.Model) {
 export interface Interface {
   readonly environment: (model: Provider.Model) => Effect.Effect<string[]>
   readonly skills: (agent: Agent.Info) => Effect.Effect<string | undefined>
+  readonly styleContext: () => Effect.Effect<string>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@octocode/SystemPrompt") {}
@@ -47,7 +49,11 @@ export const layer = Layer.effect(
     return Service.of({
       environment: Effect.fn("SystemPrompt.environment")(function* (model: Provider.Model) {
         const ctx = yield* InstanceState.context
-        return [
+        const projectID = ctx.project.id ?? "default"
+        const stylePrefs = yield* Effect.promise(() => readStylePreferences(projectID))
+        const memoryCtx = yield* Effect.promise(() => injectMemoryContext(projectID))
+
+        const envLines = [
           [
             `You are powered by the model named ${model.api.id}. The exact model ID is ${model.providerID}/${model.api.id}`,
             `Here is some useful information about the environment you are running in:`,
@@ -60,6 +66,29 @@ export const layer = Layer.effect(
             `</env>`,
           ].join("\n"),
         ]
+
+        // Add style preferences context
+        if (Object.keys(stylePrefs).length > 0) {
+          const styleLines = ["<user_style>"]
+          if (stylePrefs.tone) styleLines.push(`  Tone: ${stylePrefs.tone}`)
+          if (stylePrefs.verbosity) styleLines.push(`  Verbosity: ${stylePrefs.verbosity}`)
+          if (stylePrefs.codeStyle) styleLines.push(`  Code style: ${stylePrefs.codeStyle}`)
+          if (stylePrefs.responseFormat) styleLines.push(`  Response format: ${stylePrefs.responseFormat}`)
+          if (stylePrefs.favoriteLanguages?.length) styleLines.push(`  Languages: ${stylePrefs.favoriteLanguages.join(", ")}`)
+          if (stylePrefs.customInstructions?.length) {
+            styleLines.push("  Custom instructions:")
+            stylePrefs.customInstructions.forEach((inst) => styleLines.push(`    - ${inst}`))
+          }
+          styleLines.push("</user_style>")
+          envLines.push(styleLines.join("\n"))
+        }
+
+        // Add memory context
+        if (memoryCtx) {
+          envLines.push(`<memory>\n${memoryCtx}\n</memory>`)
+        }
+
+        return envLines
       }),
 
       skills: Effect.fn("SystemPrompt.skills")(function* (agent: Agent.Info) {
@@ -72,6 +101,25 @@ export const layer = Layer.effect(
           "Use the skill tool to load a skill when a task matches its description.",
           Skill.fmt(list, { verbose: true }),
         ].join("\n")
+      }),
+
+      styleContext: Effect.fn("SystemPrompt.styleContext")(function* () {
+        const ctx = yield* InstanceState.context
+        const projectID = ctx.project.id ?? "default"
+        const prefs = yield* Effect.promise(() => readStylePreferences(projectID))
+        if (Object.keys(prefs).length === 0) return ""
+        
+        const lines = ["# User Style Preferences"]
+        if (prefs.tone) lines.push(`- Tone: ${prefs.tone}`)
+        if (prefs.verbosity) lines.push(`- Verbosity: ${prefs.verbosity}`)
+        if (prefs.codeStyle) lines.push(`- Code style: ${prefs.codeStyle}`)
+        if (prefs.responseFormat) lines.push(`- Response format: ${prefs.responseFormat}`)
+        if (prefs.favoriteLanguages?.length) lines.push(`- Languages: ${prefs.favoriteLanguages.join(", ")}`)
+        if (prefs.customInstructions?.length) {
+          lines.push("- Custom instructions:")
+          prefs.customInstructions.forEach((inst) => lines.push(`  - ${inst}`))
+        }
+        return lines.join("\n")
       }),
     })
   }),

@@ -2415,6 +2415,10 @@ export type McpStatusConnected = {
   status: "connected"
 }
 
+export type McpStatusEnabled = {
+  status: "enabled"
+}
+
 export type McpStatusDisabled = {
   status: "disabled"
 }
@@ -2435,6 +2439,7 @@ export type McpStatusNeedsClientRegistration = {
 
 export type McpStatus =
   | McpStatusConnected
+  | McpStatusEnabled
   | McpStatusDisabled
   | McpStatusFailed
   | McpStatusNeedsAuth

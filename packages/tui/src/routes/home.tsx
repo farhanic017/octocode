@@ -16,6 +16,8 @@ import { useDialog } from "../ui/dialog"
 import { DialogObsidianGraph } from "../component/dialog-obsidian-graph"
 import { DialogSessionList } from "../component/dialog-session-list"
 import { Locale } from "../util/locale"
+import { useKV } from "../context/kv"
+import { useSDK } from "../context/sdk"
 
 let once = false
 
@@ -54,13 +56,22 @@ const placeholder = {
 }
 
 const mascot = [
-  "     /-\\     ",
-  "    /   \\    ",
-  "   | ^ ^ |   ",
-  " --|  _  |-- ",
-  "  /|\\___/|\\  ",
-  " / | |_| | \\ ",
-  "   |  |  |   ",
+  "                               ███████████████",
+  "                             ███████████████████",
+  "                             ██ █████████████ ██",
+  "                             ██ █████████████ ██",
+  "                             ███████████████████",
+  "                    ███████  ███████████████████  ███████",
+  "                       ███████████████████████████████",
+  "                         ███████████████████████████",
+  "                      ███████ ████ ███ ███ ████ ███████",
+  "                    ███████   ████ ███  ██ ████   ███████",
+  "                            █████  ███  ██  █████",
+  "                         ██████   ███   ███   ██████",
+  "                                 ███     ███",
+  "                                 ███     ███",
+  "                                ██████  █████",
+  "                                  ██     ██",
 ]
 
 function relativeCwd() {
@@ -161,13 +172,15 @@ export function Home() {
   const local = useLocal()
   const editor = useEditorContext()
   const dialog = useDialog()
+  const kv = useKV()
+  const sdk = useSDK()
   const dimensions = useTerminalDimensions()
   const dashboardWidth = createMemo(() => Math.max(72, Math.min(88, dimensions().width - 26)))
 
-  const leftWidth = createMemo(() => Math.floor(dashboardWidth() * 0.44))
+  const leftWidth = createMemo(() => Math.floor(dashboardWidth() * 0.65))
   const rightWidth = createMemo(() => dashboardWidth() - leftWidth() - 2)
   const showNav = createMemo(() => dimensions().width >= 84)
-  const user = createMemo(() => process.env.USERNAME || process.env.USER || "Farhan")
+  const user = createMemo(() => sync.data.config.username || process.env.USERNAME || process.env.USER || "User")
   const cwd = createMemo(() => truncateMiddle(relativeCwd(), Math.max(18, leftWidth() - 4)))
   const recentSessions = createMemo(() => {
     return sync.data.session
@@ -177,11 +190,26 @@ export function Home() {
   })
   const [hoveredSession, setHoveredSession] = createSignal<string | null>(null)
   const [hoveredMore, setHoveredMore] = createSignal(false)
+  const [hoveredCommand, setHoveredCommand] = createSignal<string | null>(null)
   const [hoveredCmd, setHoveredCmd] = createSignal<string | null>(null)
   let sent = false
 
   onMount(() => {
     editor.clearSelection()
+    if (!kv.get("username_prompted")) {
+      const defaultName = sync.data.config.username || process.env.USERNAME || process.env.USER || ""
+      import("../ui/dialog-prompt").then(({ DialogPrompt }) => {
+        DialogPrompt.show(dialog, "What should we call you?", {
+          placeholder: "Your name",
+          value: defaultName,
+        }).then((name: string | null) => {
+          kv.set("username_prompted", true)
+          if (name && name.trim()) {
+            sdk.client.config.update({ config: { username: name.trim() } }).catch(() => {})
+          }
+        })
+      })
+    }
   })
 
   const bind = (r: PromptRef | undefined) => {
@@ -213,125 +241,117 @@ export function Home() {
     <HomeSessionDestinationProvider>
       <box flexGrow={1} backgroundColor={C.bg}>
         <box height={1} flexShrink={1} />
-        <box flexDirection="row" justifyContent="center" gap={2} width="100%" flexShrink={0}>
+        <box flexDirection="row" justifyContent="space-between" alignItems="flex-start" width="100%" flexShrink={0}>
+          <box paddingTop={1}>
+            <box alignItems="center" marginLeft={20}>
+              <text fg={C.pink} attributes={TextAttributes.BOLD}>
+                OCTOCODE V2
+              </text>
+              <text fg={C.muted}>{"Welcome back " + user() + "!"}</text>
+            </box>
+            <box marginTop={1}>
+              <For each={mascot}>{(line) => <text fg={C.purple}>{line}</text>}</For>
+            </box>
+          </box>
           <box
-            width={dashboardWidth()}
-            height={14}
             border={["top", "bottom", "left", "right"]}
             borderColor={C.border}
             customBorderChars={DOTTED}
             backgroundColor={C.bg}
-            flexDirection="row"
+            paddingLeft={1}
+            paddingRight={1}
+            marginRight={7}
           >
-            <box width={leftWidth()} border={["right"]} borderColor={C.border} customBorderChars={DOTTED}>
-              <box alignItems="center" height={3} paddingTop={1}>
-                <text fg={C.pink} attributes={TextAttributes.BOLD}>
-                  octo code v1
-                </text>
-                <text fg={C.muted}>{"Welcome back " + user() + "!"}</text>
-              </box>
-              <box height={1} />
-              <box alignItems="center">
-                <For each={mascot}>{(line) => <text fg={C.purple}>{line}</text>}</For>
-              </box>
-              <box flexGrow={1} />
-            </box>
-            <box width={rightWidth()} paddingLeft={1} paddingRight={1}>
-              <box height={6}>
-                <text fg={C.muted}>Recent activity</text>
-                <For each={recentSessions()}>
-                  {(session) => (
-                    <box
-                      flexDirection="row"
-                      gap={1}
-                      onMouseOver={() => setHoveredSession(session.id)}
-                      onMouseOut={() => setHoveredSession(null)}
-                      onMouseUp={() => route.navigate({ type: "session", sessionID: session.id })}
-                    >
-                      <text fg={hoveredSession() === session.id ? C.pink : C.muted}>
-                        {Locale.relativeTime(session.time.updated)}
-                      </text>
-                      <text fg={hoveredSession() === session.id ? C.text : C.muted}>
-                        {Locale.truncate(session.title, 24)}
-                      </text>
-                    </box>
-                  )}
-                </For>
+            <text fg={C.pink} attributes={TextAttributes.BOLD}>Recent activity</text>
+            <For each={recentSessions()}>
+              {(session) => (
                 <box
                   flexDirection="row"
                   gap={1}
-                  onMouseOver={() => setHoveredMore(true)}
-                  onMouseOut={() => setHoveredMore(false)}
-                  onMouseUp={() => dialog.replace(() => <DialogSessionList />)}
+                  onMouseOver={() => setHoveredSession(session.id)}
+                  onMouseOut={() => setHoveredSession(null)}
+                  onMouseUp={() => route.navigate({ type: "session", sessionID: session.id })}
                 >
-                  <text fg={hoveredMore() ? C.text : C.pink} attributes={TextAttributes.BOLD}>
-                    more sessions →
+                  <text fg={hoveredSession() === session.id ? C.pink : C.muted}>
+                    {Locale.relativeTime(session.time.updated)}
+                  </text>
+                  <text fg={hoveredSession() === session.id ? C.pink : C.muted}>
+                    {Locale.truncate(session.title, 24)}
                   </text>
                 </box>
-              </box>
-              <box height={1} border={["top"]} borderColor={C.border} customBorderChars={DOTTED} />
-              <box>
-                <text fg={C.pink} attributes={TextAttributes.BOLD}>
-                  What's new
-                </text>
-                <box
-                  flexDirection="row"
-                  gap={1}
-                  onMouseOver={() => setHoveredCmd("dream")}
-                  onMouseOut={() => setHoveredCmd(null)}
-                  onMouseUp={() => {
-                    ref()?.set({ input: "/dream", parts: [] })
-                    ref()?.submit()
-                  }}
-                >
-                  <text fg={hoveredCmd() === "dream" ? C.pink : C.muted}>/dream</text>
-                  <text fg={hoveredCmd() === "dream" ? C.text : C.dim}>consolidate memories</text>
-                </box>
-                <box
-                  flexDirection="row"
-                  gap={1}
-                  onMouseOver={() => setHoveredCmd("distill")}
-                  onMouseOut={() => setHoveredCmd(null)}
-                  onMouseUp={() => {
-                    ref()?.set({ input: "/distill", parts: [] })
-                    ref()?.submit()
-                  }}
-                >
-                  <text fg={hoveredCmd() === "distill" ? C.pink : C.muted}>/distill</text>
-                  <text fg={hoveredCmd() === "distill" ? C.text : C.dim}>create reusable skills</text>
-                </box>
-                <box
-                  flexDirection="row"
-                  gap={1}
-                  onMouseOver={() => setHoveredCmd("goal")}
-                  onMouseOut={() => setHoveredCmd(null)}
-                  onMouseUp={() => {
-                    ref()?.set({ input: "/goal", parts: [] })
-                    ref()?.submit()
-                  }}
-                >
-                  <text fg={hoveredCmd() === "goal" ? C.pink : C.muted}>/goal</text>
-                  <text fg={hoveredCmd() === "goal" ? C.text : C.dim}>set stopping conditions</text>
-                </box>
-                <box
-                  flexDirection="row"
-                  gap={1}
-                  onMouseOver={() => setHoveredCmd("help")}
-                  onMouseOut={() => setHoveredCmd(null)}
-                  onMouseUp={() => {
-                    ref()?.set({ input: "/help", parts: [] })
-                    ref()?.submit()
-                  }}
-                >
-                  <text fg={hoveredCmd() === "help" ? C.pink : C.muted}>/help</text>
-                  <text fg={hoveredCmd() === "help" ? C.text : C.dim}>for more</text>
-                </box>
-              </box>
+              )}
+            </For>
+            <box
+              flexDirection="row"
+              gap={1}
+              onMouseOver={() => setHoveredMore(true)}
+              onMouseOut={() => setHoveredMore(false)}
+              onMouseUp={() => dialog.replace(() => <DialogSessionList />)}
+            >
+              <text fg={hoveredMore() ? C.text : C.pink} attributes={TextAttributes.BOLD}>
+                more sessions →
+              </text>
             </box>
-          </box>
-          <box width={showNav() ? 18 : 0} visible={showNav()} paddingTop={1}>
-            <NavItem icon="@" label="Browser" command="docs.open" />
-            <MemoryButton />
+            <box height={1} border={["top"]} borderColor={C.border} customBorderChars={DOTTED} />
+            <text fg={C.pink} attributes={TextAttributes.BOLD}>
+              What's new
+            </text>
+            <box
+              flexDirection="row"
+              gap={1}
+              onMouseOver={() => setHoveredCommand("dream")}
+              onMouseOut={() => setHoveredCommand(null)}
+              onMouseUp={() => {
+                ref()?.set({ input: "/dream", parts: [] })
+                ref()?.submit()
+              }}
+            >
+              <text fg={hoveredCommand() === "dream" ? C.pink : C.muted}>/dream</text>
+              <text fg={C.dim}>consolidate memories</text>
+            </box>
+            <box
+              flexDirection="row"
+              gap={1}
+              onMouseOver={() => setHoveredCommand("distill")}
+              onMouseOut={() => setHoveredCommand(null)}
+              onMouseUp={() => {
+                ref()?.set({ input: "/distill", parts: [] })
+                ref()?.submit()
+              }}
+            >
+              <text fg={hoveredCommand() === "distill" ? C.pink : C.muted}>/distill</text>
+              <text fg={C.dim}>create reusable skills</text>
+            </box>
+            <box
+              flexDirection="row"
+              gap={1}
+              onMouseOver={() => setHoveredCommand("goal")}
+              onMouseOut={() => setHoveredCommand(null)}
+              onMouseUp={() => {
+                ref()?.set({ input: "/goal", parts: [] })
+                ref()?.submit()
+              }}
+            >
+              <text fg={hoveredCommand() === "goal" ? C.pink : C.muted}>/goal</text>
+              <text fg={C.dim}>set stopping conditions</text>
+            </box>
+            <box
+              flexDirection="row"
+              gap={1}
+              onMouseOver={() => setHoveredCommand("help")}
+              onMouseOut={() => setHoveredCommand(null)}
+              onMouseUp={() => {
+                ref()?.set({ input: "/help", parts: [] })
+                ref()?.submit()
+              }}
+            >
+              <text fg={hoveredCommand() === "help" ? C.pink : C.muted}>/help</text>
+              <text fg={C.dim}>for more</text>
+            </box>
+            <box flexDirection="row" gap={2} marginTop={1}>
+              <NavItem icon="@" label="Browser" command="docs.open" />
+              <MemoryButton />
+            </box>
           </box>
         </box>
         <box flexGrow={1} minHeight={2} />

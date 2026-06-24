@@ -558,16 +558,23 @@ ${brain.sessions.slice(-50).map((s) => {
 }
 
 // Auto-detect and sync on file changes
-export function watchForChanges(callback: (changes: string[]) => void): void {
+let brainWatcher: ReturnType<typeof fs.watch> | undefined
+
+export function watchForChanges(callback: (changes: string[]) => void): () => void {
   const brainPath = getBrainPath()
 
   try {
-    fs.watch(brainPath, { persistent: false }, (eventType, filename) => {
+    brainWatcher?.close()
+    brainWatcher = fs.watch(brainPath, { persistent: false }, (eventType, filename) => {
       if (filename) {
         callback([filename])
       }
     })
   } catch {}
+  return () => {
+    brainWatcher?.close()
+    brainWatcher = undefined
+  }
 }
 
 // Get brain stats for display

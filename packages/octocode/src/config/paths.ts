@@ -13,7 +13,7 @@ export const files = Effect.fn("ConfigPaths.projectFiles")(function* (
   worktree?: string,
 ) {
   const afs = yield* FSUtil.Service
-  const names = name === "octo" ? ["octo", "octo"] : [name]
+  const names = name === "octo" ? ["octo", "octocode"] : [name]
   return (yield* afs.up({
     targets: names.flatMap((item) => [`${item}.jsonc`, `${item}.json`]),
     start: directory,

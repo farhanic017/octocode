@@ -146,3 +146,62 @@ export async function injectMemoryContext(projectID: string): Promise<string> {
 
   return sections.join("\n\n---\n\n")
 }
+
+// User style preferences - persisted across sessions
+export interface StylePreferences {
+  tone?: "formal" | "casual" | "technical" | "friendly"
+  verbosity?: "minimal" | "moderate" | "detailed"
+  codeStyle?: "concise" | "readable" | "documented"
+  responseFormat?: "short" | "long" | "auto"
+  favoriteLanguages?: string[]
+  customInstructions?: string[]
+}
+
+const STYLE_FILE = "STYLE.json"
+
+function getStyleFile(projectID: string): string {
+  return path.join(getMemoryDir(projectID), STYLE_FILE)
+}
+
+export async function readStylePreferences(projectID: string): Promise<StylePreferences> {
+  try {
+    const content = await fs.readFile(getStyleFile(projectID), "utf-8")
+    return JSON.parse(content) as StylePreferences
+  } catch {
+    return {}
+  }
+}
+
+export async function writeStylePreferences(projectID: string, prefs: StylePreferences): Promise<void> {
+  const file = getStyleFile(projectID)
+  await ensureDir(path.dirname(file))
+  await fs.writeFile(file, JSON.stringify(prefs, null, 2), "utf-8")
+}
+
+export async function updateStylePreference(
+  projectID: string,
+  key: keyof StylePreferences,
+  value: unknown,
+): Promise<void> {
+  const prefs = await readStylePreferences(projectID)
+  ;(prefs as Record<string, unknown>)[key] = value
+  await writeStylePreferences(projectID, prefs)
+}
+
+export async function injectStyleContext(projectID: string): Promise<string> {
+  const prefs = await readStylePreferences(projectID)
+  if (Object.keys(prefs).length === 0) return ""
+
+  const lines: string[] = ["# User Style Preferences"]
+  if (prefs.tone) lines.push(`- Tone: ${prefs.tone}`)
+  if (prefs.verbosity) lines.push(`- Verbosity: ${prefs.verbosity}`)
+  if (prefs.codeStyle) lines.push(`- Code style: ${prefs.codeStyle}`)
+  if (prefs.responseFormat) lines.push(`- Response format: ${prefs.responseFormat}`)
+  if (prefs.favoriteLanguages?.length) lines.push(`- Languages: ${prefs.favoriteLanguages.join(", ")}`)
+  if (prefs.customInstructions?.length) {
+    lines.push("- Custom instructions:")
+    prefs.customInstructions.forEach((inst) => lines.push(`  - ${inst}`))
+  }
+
+  return lines.join("\n")
+}
