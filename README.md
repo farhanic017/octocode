@@ -17,13 +17,24 @@
   <a href="https://octocode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
   <a href="https://www.npmjs.com/package/octocode-ai"><img alt="npm" src="https://img.shields.io/npm/v/octocode-ai?style=flat-square" /></a>
   <a href="https://github.com/farhanic017/octocode/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue.svg?style=flat-square" /></a>
+  <img alt="Downloads" src="https://img.shields.io/npm/dm/octocode-ai?style=flat-square&label=downloads" />
 </p>
 
 [![OctoCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://octocode.ai)
 
 ---
 
-### Installation
+## Features
+
+- **Multi-provider AI** — Works with OpenAI, Anthropic, Google, and more
+- **Desktop app** — Native desktop application for macOS, Windows, and Linux
+- **Plugin system** — Extensible architecture with MCP protocol and custom tools
+- **Built-in agents** — Switch between `build` (full access) and `plan` (read-only) modes
+- **200k+ token sessions** — Handle massive context windows without crashes
+- **Smart compaction** — Automatic memory management for long conversations
+- **Real-time collaboration** — Multi-agent orchestration for complex tasks
+
+## Installation
 
 ```bash
 # npm (recommended)
@@ -33,46 +44,35 @@ npm i -g octocode-ai@latest
 curl -fsSL https://octocode.ai/install | bash
 ```
 
-### What's New
+### Quick Start
 
-- **New CLI command: `octo`** - Faster, cleaner command name
-- **Fixed 200k+ token sessions** - Sessions no longer crash at large context windows
-- **Improved compaction** - Better memory management for long conversations
-- **Desktop app support** - Native desktop application now available
-- **Multi-provider support** - Works with OpenAI, Anthropic, Google, and more
-- **Plugin system** - Extensible architecture with MCP and custom tools
+```bash
+cd your-project
+octo
+```
 
-### Agents
+## Agents
 
-OctoCode includes two built-in agents you can switch between.
+| Agent | Access | Use Case |
+|-------|--------|----------|
+| `build` | Full read/write | Default agent for development work |
+| `plan` | Read-only | Analysis, exploration, and planning |
 
-- **build** - Default, full-access agent for development work
-- **plan** - Read-only agent for analysis and code exploration
-  - Denies file edits by default
-  - Asks permission before running bash commands
-  - Ideal for exploring unfamiliar codebases or planning changes
+Switch agents with `/agent` or use `@general` for complex subtasks.
 
-Also included is a **general** subagent for complex searches and multistep tasks.
-This is used internally and can be invoked using `@general` in messages.
+## Documentation
 
-Learn more about [agents](https://octocode.ai/docs/agents).
+For configuration, plugins, and advanced usage, visit **[octocode.ai/docs](https://octocode.ai/docs)**.
 
-### Documentation
+## Community
 
-For more info on how to configure OctoCode, [**head over to our docs**](https://octocode.ai/docs).
+- [Discord](https://discord.gg/octocode) — Get help and connect with the community
+- [X.com](https://x.com/octocode) — Follow for updates
 
-### Contributing
+## Contributing
 
-If you're interested in contributing to OctoCode, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and guidelines.
 
-### Building on OctoCode
+## License
 
-If you are working on a project that's related to OctoCode and is using "octo" as part of its name, for example "octocode-dashboard" or "octocode-mobile", please add a note to your README to clarify that it is not built by the OctoCode team and is not affiliated with us in any way.
-
-### License
-
-OctoCode is licensed under the [GNU General Public License v3.0](./LICENSE).
-
----
-
-**Join our community** [Discord](https://discord.gg/octocode) | [X.com](https://x.com/octocode)
+[GNU General Public License v3.0](./LICENSE)
