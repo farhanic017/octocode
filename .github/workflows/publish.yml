@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,11 +29,6 @@ jobs:
           fetch-depth: 0
 
       - uses: oven-sh/setup-bun@v2
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-          registry-url: "https://registry.npmjs.org"
 
       - run: bun install
 
@@ -43,8 +38,31 @@ jobs:
           OCTOCODE_BUMP: ${{ inputs.bump }}
           OCTOCODE_VERSION: ${{ inputs.version }}
 
-      - name: Publish
-        run: bun run --cwd packages/octocode script/publish.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: packages/octocode/dist/octocode-*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: binaries
+          path: packages/octocode/dist
+
+      - run: ./script/publish.ts
         env:
+          OCTOCODE_VERSION: ${{ inputs.version }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
