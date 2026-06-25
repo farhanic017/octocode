@@ -34,6 +34,7 @@ UPCOMING_CHANGELOG.md
 logs/
 *.bun-build
 tsconfig.tsbuildinfo
+release/
 
 # Sensitive files
 config.json
