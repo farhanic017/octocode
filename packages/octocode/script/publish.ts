@@ -11,16 +11,27 @@ async function published(name: string, version: string) {
   return (await $`npm view ${name}@${version} version`.nothrow()).exitCode === 0
 }
 
-async function publish(dir: string, name: string, version: string) {
-  // GitHub artifact downloads can drop the executable bit, and Docker uses the
-  // unpacked dist binaries directly rather than the published tarball.
+async function publish(dir: string, name: string, version: string, retries = 3) {
   if (process.platform !== "win32") await $`chmod -R 755 .`.cwd(dir)
   if (await published(name, version)) {
     console.log(`already published ${name}@${version}`)
     return
   }
-  await $`bun pm pack`.cwd(dir)
-  await $`npm publish *.tgz --access public --tag ${Script.channel}`.cwd(dir)
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await $`bun pm pack`.cwd(dir)
+      await $`npm publish *.tgz --access public --tag ${Script.channel}`.cwd(dir)
+      return
+    } catch (err: any) {
+      const msg = err?.stderr || ""
+      if (msg.includes("E429") && attempt < retries) {
+        console.log(`Rate limited on ${name}, retrying in 60s (attempt ${attempt}/${retries})...`)
+        await new Promise((r) => setTimeout(r, 60000))
+        continue
+      }
+      throw err
+    }
+  }
 }
 
 const binaries: Record<string, string> = {}
