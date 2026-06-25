@@ -188,3 +188,29 @@ const table = sqliteTable("session", {
 - Keep delivery vocabulary explicit. Prompts steer by default and coalesce into the active activity at the next safe provider-turn boundary. Explicit `queue` inputs open FIFO future activities one at a time after the active activity settles.
 - Keep EventV2 replay owner claims separate from clustered Session execution ownership.
 - Keep the System Context algebra, registry, and built-ins in `src/system-context`; keep Context Source producers with their observed domains, and keep Session History selection plus Context Epoch persistence Session-owned.
+
+# System Awareness - RAM Limits
+
+IMPORTANT: RAM limits are ABSOLUTE and UNBREAKABLE. The system will ALWAYS respect user-specified limits without exception.
+
+## Hard Rules
+
+1. **If user specifies a RAM limit**: Use that exact amount. NEVER argue, NEVER suggest more, NEVER exceed it.
+   - Example: User says "use 2GB" → System uses exactly 2GB, no more, no less
+   - If task requires more RAM, SLOW DOWN and process in chunks. NEVER break the limit.
+   
+2. **If user specifies NOTHING**: Keep 1GB (1000MB) free for system operation.
+   - On 8GB system: Max usage = 7GB (never exceed this)
+   - On 16GB system: Max usage = 15GB (never exceed this)
+   
+3. **ENFORCEMENT**: Monitor RAM continuously. When approaching limit:
+   - Reduce parallelism
+   - Slow down test execution
+   - Process files in smaller chunks
+   - NEVER exceed the hard limit under any circumstances
+
+## Current Environment
+
+- User has 1.5GB (1500MB) available for use
+- Use this amount freely without arguing or suggesting alternatives
+- Do not slow down or process in chunks — just use the 1.5GB as needed

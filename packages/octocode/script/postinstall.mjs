@@ -7,9 +7,16 @@ import path from "path"
 import { createRequire } from "module"
 import { fileURLToPath } from "url"
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
-const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json"), "utf8"))
+
+// Find package.json - check current directory first, then parent
+let packageJsonPath = path.join(__dirname, "package.json")
+if (!fs.existsSync(packageJsonPath)) {
+  packageJsonPath = path.join(__dirname, "..", "package.json")
+}
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"))
 
 const platformMap = {
   darwin: "darwin",
@@ -26,7 +33,14 @@ const platform = platformMap[os.platform()] ?? os.platform()
 const arch = archMap[os.arch()] ?? os.arch()
 const base = `octocode-${platform}-${arch}`
 const sourceBinary = platform === "windows" ? "octo.exe" : "octo"
-const targetBinary = path.join(__dirname, "bin", platform === "windows" ? "octocode.exe" : "octocode")
+
+// Determine the correct target directory based on where package.json is
+let packageDir = __dirname
+if (!fs.existsSync(path.join(packageDir, "package.json"))) {
+  // If running from script directory, go up to package directory
+  packageDir = path.join(__dirname, "..")
+}
+const targetBinary = path.join(packageDir, "bin", platform === "windows" ? "octocode.exe" : "octocode")
 
 function supportsAvx2() {
   if (arch !== "x64") return false
@@ -187,8 +201,44 @@ function verifyBinary() {
   return result.status === 0
 }
 
+function resolveLocalBinary(name) {
+  // Check multiple possible locations for the binary
+  
+  // 1. Check if binary exists in a sibling dist directory (monorepo/dev environment)
+  // When running from script directory: ../../dist/name/bin/binary
+  const distDir1 = path.join(__dirname, "..", "dist", name, "bin", sourceBinary)
+  if (fs.existsSync(distDir1)) return distDir1
+  
+  // 2. Check if binary exists in dist relative to package root
+  // When running from package directory: ../dist/name/bin/binary
+  const distDir2 = path.join(__dirname, "..", name, "bin", sourceBinary)
+  if (fs.existsSync(distDir2)) return distDir2
+  
+  // 3. Check if binary exists in the same directory structure (npm installed)
+  // When installed via npm: ./node_modules/name/bin/binary
+  const npmDir = path.join(__dirname, "node_modules", name, "bin", sourceBinary)
+  if (fs.existsSync(npmDir)) return npmDir
+  
+  // 4. Check parent directory's node_modules
+  const parentNpmDir = path.join(__dirname, "..", "node_modules", name, "bin", sourceBinary)
+  if (fs.existsSync(parentNpmDir)) return parentNpmDir
+  
+  return null
+}
+
 function main() {
   const names = packageNames()
+  
+  // First try to find local binaries (monorepo/dev environment)
+  for (const name of names) {
+    const localPath = resolveLocalBinary(name)
+    if (localPath) {
+      copyBinary(localPath, targetBinary)
+      if (verifyBinary()) return
+    }
+  }
+  
+  // Then try to find installed packages
   for (const name of names) {
     try {
       copyBinary(resolveBinary(name), targetBinary)

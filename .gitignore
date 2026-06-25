@@ -4,6 +4,8 @@ node_modules
 .sst
 .env
 .env.local
+.env.*
+!.env.example
 .idea
 .vscode
 .codex
@@ -16,7 +18,7 @@ ts-dist
 **/.serena
 .serena/
 **/.omo
-.omo/
+omo/
 /result
 refs
 Session.vim
@@ -32,3 +34,25 @@ UPCOMING_CHANGELOG.md
 logs/
 *.bun-build
 tsconfig.tsbuildinfo
+
+# Sensitive files
+config.json
+*.key
+*.pem
+*.p12
+*.cert
+*.crt
+session*
+*session*
+*password*
+*secret*
+*token*
+*.env.local
+
+# OctoCode internal
+.understand-anything/
+.playwright-mcp/
+.octocode/
+octocode-dev/
+packages/octocode/bin/
+packages/octocode/config.json

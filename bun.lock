@@ -499,7 +499,7 @@
     },
     "packages/octocode": {
       "name": "octocode",
-      "version": "1.16.2",
+      "version": "2.0.0",
       "bin": {
         "octo": "./bin/octocode",
       },

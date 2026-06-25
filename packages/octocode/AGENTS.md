@@ -129,3 +129,23 @@ Use `Effect.cached` when multiple concurrent callers should share a single in-fl
 Use `EffectBridge` for native or external callbacks (`@parcel/watcher`, `node-pty`, native `fs.watch`, plugin callbacks, etc.) that need to re-enter Effect services with instance/workspace context.
 
 Plain async code should pass explicit context or stay inside an Effect fiber; do not add ambient instance context shims.
+
+# System Awareness - RAM Limits
+
+IMPORTANT: RAM limits are ABSOLUTE and UNBREAKABLE. The system will ALWAYS respect user-specified limits without exception.
+
+## Hard Rules
+
+1. **If user specifies a RAM limit**: Use that exact amount. NEVER argue, NEVER suggest more, NEVER exceed it.
+   - Example: User says "use 2GB" → System uses exactly 2GB, no more, no less
+   - If task requires more RAM, SLOW DOWN and process in chunks. NEVER break the limit.
+   
+2. **If user specifies NOTHING**: Keep 1GB (1000MB) free for system operation.
+   - On 8GB system: Max usage = 7GB (never exceed this)
+   - On 16GB system: Max usage = 15GB (never exceed this)
+   
+3. **ENFORCEMENT**: Monitor RAM continuously. When approaching limit:
+   - Reduce parallelism
+   - Slow down test execution
+   - Process files in smaller chunks
+   - NEVER exceed the hard limit under any circumstances
