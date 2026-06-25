@@ -77,6 +77,10 @@ octo
 
 For configuration, plugins, and advanced usage, visit **[octocode.ai/docs](https://octocode.ai/docs)**.
 
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
+
 ## Community
 
 - [Discord](https://discord.gg/octocode) — Get help and connect with the community

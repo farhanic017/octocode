@@ -2,13 +2,11 @@
 
 All notable changes to OctoCode are documented here.
 
-## [2.0] — Current
-
-The V2 rewrite introduces a durable session runtime with context epoch management, multi-agent orchestration, and a desktop application.
+## [2.0.0] — 2026-06-25
 
 ### New
 - **Session runtime (V2)** — Durable conversational history with context epoch management
-- **Desktop app** — noy avaiable yet 
+- **Desktop app** — Native desktop application for macOS, Windows, and Linux
 - **Plugin system** — MCP protocol support with custom tool definitions
 - **Built-in agents** — `build` (full access) and `plan` (read-only) modes
 - **Subagent orchestration** — `@general` subagent for complex multi-step tasks
@@ -18,14 +16,15 @@ The V2 rewrite introduces a durable session runtime with context epoch managemen
 - **Managed tool output** — Large outputs stored as files with bounded previews
 - **Multi-provider support** — OpenAI, Anthropic, Google, and custom providers
 - **CLI command: `octo`** — Faster, cleaner command name
-- **Obsidian integration** — Knowledge base integration for documentation
-- **Swarm state tracking** — Multi-agent coordination and state persistence
+- **Windows installer** — PowerShell install script (`install.ps1`)
+- **Auto-update** — Automatic patch updates on startup
 
 ### Architecture
 - System Context Registry with scoped contributions
 - Context Snapshot for state comparison and reconciliation
 - Safe Provider-Turn Boundary for atomic context admission
 - Model Request Options separated from Generation Controls
+- Simplified publish workflow (CLI-only, no Azure signing required)
 
 ## [1.5]
 
