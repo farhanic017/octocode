@@ -1,36 +1,12 @@
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
-import { RunCommand } from "./cli/cmd/run"
-import { GenerateCommand } from "./cli/cmd/generate"
 import * as Log from "@octocode-ai/core/util/log"
-import { ConsoleCommand } from "./cli/cmd/account"
-import { ProvidersCommand } from "./cli/cmd/providers"
-import { AgentCommand } from "./cli/cmd/agent"
-import { UpgradeCommand } from "./cli/cmd/upgrade"
-import { UninstallCommand } from "./cli/cmd/uninstall"
-import { ModelsCommand } from "./cli/cmd/models"
 import { UI } from "./cli/ui"
 import { Installation } from "./installation"
 import { InstallationVersion } from "@octocode-ai/core/installation/version"
 import { NamedError } from "@octocode-ai/core/util/error"
 import { FormatError } from "./cli/error"
-import { ServeCommand } from "./cli/cmd/serve"
-import { DebugCommand } from "./cli/cmd/debug"
-import { StatsCommand } from "./cli/cmd/stats"
-import { McpCommand } from "./cli/cmd/mcp"
-import { GithubCommand } from "./cli/cmd/github"
-import { ExportCommand } from "./cli/cmd/export"
-import { ImportCommand } from "./cli/cmd/import"
-import { AttachCommand } from "./cli/cmd/attach"
-import { TuiThreadCommand } from "./cli/cmd/tui"
-import { AcpCommand } from "./cli/cmd/acp"
 import { EOL } from "os"
-import { WebCommand } from "./cli/cmd/web"
-import { PrCommand } from "./cli/cmd/pr"
-import { SessionCommand } from "./cli/cmd/session"
-import { DbCommand } from "./cli/cmd/db"
-import { errorMessage } from "./util/error"
-import { PluginCommand } from "./cli/cmd/plug"
 import { Heap } from "./cli/heap"
 import { ensureProcessMetadata } from "@octocode-ai/core/util/octocode-process"
 import { isRecord } from "@/util/record"
@@ -39,13 +15,13 @@ const processMetadata = ensureProcessMetadata("main")
 
 process.on("unhandledRejection", (e) => {
   Log.Default.error("rejection", {
-    e: errorMessage(e),
+    e: e instanceof Error ? e.message : String(e),
   })
 })
 
 process.on("uncaughtException", (e) => {
   Log.Default.error("exception", {
-    e: errorMessage(e),
+    e: e instanceof Error ? e.message : String(e),
   })
 })
 
@@ -59,6 +35,12 @@ function show(out: string) {
     return
   }
   process.stderr.write(out)
+}
+
+// Lazy-load commands only when needed to reduce startup RAM
+async function loadCommand(path: string) {
+  const mod = await import(path)
+  return mod.default ?? mod[Object.keys(mod)[0]]
 }
 
 const cli = yargs(args)
@@ -111,43 +93,152 @@ const cli = yargs(args)
     })
   })
   .usage("")
-  .completion("completion", "generate shell completion script")
-  .command(AcpCommand)
-  .command(McpCommand)
-  .command(TuiThreadCommand)
-  .command(AttachCommand)
-  .command(RunCommand)
-  .command(GenerateCommand)
-  .command(DebugCommand)
-  .command(ConsoleCommand)
-  .command(ProvidersCommand)
-  .command(AgentCommand)
-  .command(UpgradeCommand)
-  .command(UninstallCommand)
-  .command(ServeCommand)
-  .command(WebCommand)
-  .command(ModelsCommand)
-  .command(StatsCommand)
-  .command(ExportCommand)
-  .command(ImportCommand)
-  .command(GithubCommand)
-  .command(PrCommand)
-  .command(SessionCommand)
-  .command(PluginCommand)
-  .command(DbCommand)
-  .fail((msg, err) => {
-    if (
-      msg?.startsWith("Unknown argument") ||
-      msg?.startsWith("Not enough non-option arguments") ||
-      msg?.startsWith("Invalid values:")
-    ) {
-      if (err) throw err
-      cli.showHelp(show)
-    }
+
+// Lazy-load commands — they're only loaded when the user invokes them
+cli.command("run", "run octocode with a message", (yargs) => {
+  return yargs.positional("message", { type: "string" })
+}, async (argv) => {
+  const { RunCommand } = await import("./cli/cmd/run")
+  await RunCommand.handler(argv)
+})
+
+cli.command("tui", "start octocode tui", () => {}, async () => {
+  const { TuiThreadCommand } = await import("./cli/cmd/tui")
+  await TuiThreadCommand.handler({})
+})
+
+cli.command("serve", "start a headless server", () => {}, async () => {
+  const { ServeCommand } = await import("./cli/cmd/serve")
+  await ServeCommand.handler({})
+})
+
+cli.command("web", "start server and open web interface", () => {}, async () => {
+  const { WebCommand } = await import("./cli/cmd/web")
+  await WebCommand.handler({})
+})
+
+cli.command("providers", "manage AI providers", (yargs) => {
+  return yargs.command("add", "add a provider").command("remove", "remove a provider").command("list", "list providers")
+}, async (argv) => {
+  const { ProvidersCommand } = await import("./cli/cmd/providers")
+  await ProvidersCommand.handler(argv)
+})
+
+cli.command("models [provider]", "list available models", () => {}, async (argv) => {
+  const { ModelsCommand } = await import("./cli/cmd/models")
+  await ModelsCommand.handler(argv)
+})
+
+cli.command("upgrade [target]", "upgrade octocode", () => {}, async (argv) => {
+  const { UpgradeCommand } = await import("./cli/cmd/upgrade")
+  await UpgradeCommand.handler(argv)
+})
+
+cli.command("uninstall", "uninstall octocode", () => {}, async () => {
+  const { UninstallCommand } = await import("./cli/cmd/uninstall")
+  await UninstallCommand.handler({})
+})
+
+cli.command("debug", "debugging tools", () => {}, async () => {
+  const { DebugCommand } = await import("./cli/cmd/debug")
+  await DebugCommand.handler({})
+})
+
+cli.command("stats", "show token usage", () => {}, async () => {
+  const { StatsCommand } = await import("./cli/cmd/stats")
+  await StatsCommand.handler({})
+})
+
+cli.command("mcp", "manage MCP servers", () => {}, async (argv) => {
+  const { McpCommand } = await import("./cli/cmd/mcp")
+  await McpCommand.handler(argv)
+})
+
+cli.command("github", "manage GitHub agent", () => {}, async (argv) => {
+  const { GithubCommand } = await import("./cli/cmd/github")
+  await GithubCommand.handler(argv)
+})
+
+cli.command("pr <number>", "fetch and checkout a PR", () => {}, async (argv) => {
+  const { PrCommand } = await import("./cli/cmd/pr")
+  await PrCommand.handler(argv)
+})
+
+cli.command("export [sessionID]", "export session data", () => {}, async (argv) => {
+  const { ExportCommand } = await import("./cli/cmd/export")
+  await ExportCommand.handler(argv)
+})
+
+cli.command("import <file>", "import session data", () => {}, async (argv) => {
+  const { ImportCommand } = await import("./cli/cmd/import")
+  await ImportCommand.handler(argv)
+})
+
+cli.command("session", "manage sessions", () => {}, async (argv) => {
+  const { SessionCommand } = await import("./cli/cmd/session")
+  await SessionCommand.handler(argv)
+})
+
+cli.command("agent", "manage agents", () => {}, async (argv) => {
+  const { AgentCommand } = await import("./cli/cmd/agent")
+  await AgentCommand.handler(argv)
+})
+
+cli.command("plug <module>", "install plugin", () => {}, async (argv) => {
+  const { PluginCommand } = await import("./cli/cmd/plug")
+  await PluginCommand.handler(argv)
+})
+
+cli.command("db", "database tools", () => {}, async (argv) => {
+  const { DbCommand } = await import("./cli/cmd/db")
+  await DbCommand.handler(argv)
+})
+
+cli.command("account", "account settings", () => {}, async (argv) => {
+  const { ConsoleCommand } = await import("./cli/cmd/account")
+  await ConsoleCommand.handler(argv)
+})
+
+cli.command("generate", "generate code", () => {}, async (argv) => {
+  const { GenerateCommand } = await import("./cli/cmd/generate")
+  await GenerateCommand.handler(argv)
+})
+
+cli.command("attach <url>", "attach to running server", () => {}, async (argv) => {
+  const { AttachCommand } = await import("./cli/cmd/attach")
+  await AttachCommand.handler(argv)
+})
+
+cli.command("acp", "start ACP server", () => {}, async () => {
+  const { AcpCommand } = await import("./cli/cmd/acp")
+  await AcpCommand.handler({})
+})
+
+cli.command("completion", "generate shell completion", () => {}, async () => {
+  // Already handled by yargs
+})
+
+// Default command: start TUI
+cli.middleware(async (argv) => {
+  // If no command matched, start the TUI
+  if (!argv._.length || argv._[0] === '') {
+    const { TuiThreadCommand } = await import("./cli/cmd/tui")
+    await TuiThreadCommand.handler({})
+  }
+})
+
+cli.fail((msg, err) => {
+  if (
+    msg?.startsWith("Unknown argument") ||
+    msg?.startsWith("Not enough non-option arguments") ||
+    msg?.startsWith("Invalid values:")
+  ) {
     if (err) throw err
-    process.exit(1)
-  })
-  .strict()
+    cli.showHelp(show)
+  }
+  if (err) throw err
+  process.exit(1)
+}).strict()
 
 try {
   if (args.includes("-h") || args.includes("--help")) {
@@ -180,29 +271,14 @@ try {
     }
   }
 
-  if (e instanceof ResolveMessage) {
-    Object.assign(data, {
-      name: e.name,
-      message: e.message,
-      code: e.code,
-      specifier: e.specifier,
-      referrer: e.referrer,
-      position: e.position,
-      importKind: e.importKind,
-    })
-  }
   Log.Default.error("fatal", data)
   const formatted = FormatError(e)
   if (formatted) UI.error(formatted)
   if (formatted === undefined) {
     UI.error("Unexpected error, check log file at " + Log.file() + " for more details" + EOL)
-    process.stderr.write(errorMessage(e) + EOL)
+    if (e instanceof Error) process.stderr.write(e.message + EOL)
   }
   process.exitCode = 1
 } finally {
-  // Some subprocesses don't react properly to SIGTERM and similar signals.
-  // Most notably, some docker-container-based MCP servers don't handle such signals unless
-  // run using `docker run --init`.
-  // Explicitly exit to avoid any hanging subprocesses.
   process.exit()
 }
