@@ -38,30 +38,9 @@ function show(out: string) {
 }
 
 // Lazy-load commands only when needed to reduce startup RAM
-const commandModules: Record<string, () => Promise<any>> = {
-  run: () => import("./cli/cmd/run"),
-  tui: () => import("./cli/cmd/tui"),
-  serve: () => import("./cli/cmd/serve"),
-  web: () => import("./cli/cmd/web"),
-  providers: () => import("./cli/cmd/providers"),
-  models: () => import("./cli/cmd/models"),
-  upgrade: () => import("./cli/cmd/upgrade"),
-  uninstall: () => import("./cli/cmd/uninstall"),
-  debug: () => import("./cli/cmd/debug"),
-  stats: () => import("./cli/cmd/stats"),
-  mcp: () => import("./cli/cmd/mcp"),
-  github: () => import("./cli/cmd/github"),
-  pr: () => import("./cli/cmd/pr"),
-  export: () => import("./cli/cmd/export"),
-  import: () => import("./cli/cmd/import"),
-  session: () => import("./cli/cmd/session"),
-  agent: () => import("./cli/cmd/agent"),
-  plug: () => import("./cli/cmd/plug"),
-  db: () => import("./cli/cmd/db"),
-  account: () => import("./cli/cmd/account"),
-  generate: () => import("./cli/cmd/generate"),
-  attach: () => import("./cli/cmd/attach"),
-  acp: () => import("./cli/cmd/acp"),
+async function loadCommand(path: string) {
+  const mod = await import(path)
+  return mod.default ?? mod[Object.keys(mod)[0]]
 }
 
 const cli = yargs(args)
@@ -115,122 +94,124 @@ const cli = yargs(args)
   })
   .usage("")
 
-// Register commands with lazy-loading — only loads the module when invoked
-cli.command("run [message]", "run octocode with a message", (yargs) => {
-  return yargs.positional("message", { describe: "message to send", type: "string" })
+// Lazy-load commands — they're only loaded when the user invokes them
+cli.command("run", "run octocode with a message", (yargs) => {
+  return yargs.positional("message", { type: "string" })
 }, async (argv) => {
-  const mod = await commandModules.run()
-  await (mod.RunCommand ?? mod.default).handler(argv)
+  const { RunCommand } = await import("./cli/cmd/run")
+  await RunCommand.handler(argv)
 })
 
 cli.command("tui", "start octocode tui", () => {}, async () => {
-  const mod = await commandModules.tui()
-  await (mod.TuiThreadCommand ?? mod.default).handler({})
+  const { TuiThreadCommand } = await import("./cli/cmd/tui")
+  await TuiThreadCommand.handler({})
 })
 
 cli.command("serve", "start a headless server", () => {}, async () => {
-  const mod = await commandModules.serve()
-  await (mod.ServeCommand ?? mod.default).handler({})
+  const { ServeCommand } = await import("./cli/cmd/serve")
+  await ServeCommand.handler({})
 })
 
 cli.command("web", "start server and open web interface", () => {}, async () => {
-  const mod = await commandModules.web()
-  await (mod.WebCommand ?? mod.default).handler({})
+  const { WebCommand } = await import("./cli/cmd/web")
+  await WebCommand.handler({})
 })
 
-cli.command("providers", "manage AI providers", () => {}, async (argv) => {
-  const mod = await commandModules.providers()
-  await (mod.ProvidersCommand ?? mod.default).handler(argv)
+cli.command("providers", "manage AI providers", (yargs) => {
+  return yargs.command("add", "add a provider").command("remove", "remove a provider").command("list", "list providers")
+}, async (argv) => {
+  const { ProvidersCommand } = await import("./cli/cmd/providers")
+  await ProvidersCommand.handler(argv)
 })
 
 cli.command("models [provider]", "list available models", () => {}, async (argv) => {
-  const mod = await commandModules.models()
-  await (mod.ModelsCommand ?? mod.default).handler(argv)
+  const { ModelsCommand } = await import("./cli/cmd/models")
+  await ModelsCommand.handler(argv)
 })
 
 cli.command("upgrade [target]", "upgrade octocode", () => {}, async (argv) => {
-  const mod = await commandModules.upgrade()
-  await (mod.UpgradeCommand ?? mod.default).handler(argv)
+  const { UpgradeCommand } = await import("./cli/cmd/upgrade")
+  await UpgradeCommand.handler(argv)
 })
 
 cli.command("uninstall", "uninstall octocode", () => {}, async () => {
-  const mod = await commandModules.uninstall()
-  await (mod.UninstallCommand ?? mod.default).handler({})
+  const { UninstallCommand } = await import("./cli/cmd/uninstall")
+  await UninstallCommand.handler({})
 })
 
 cli.command("debug", "debugging tools", () => {}, async () => {
-  const mod = await commandModules.debug()
-  await (mod.DebugCommand ?? mod.default).handler({})
+  const { DebugCommand } = await import("./cli/cmd/debug")
+  await DebugCommand.handler({})
 })
 
 cli.command("stats", "show token usage", () => {}, async () => {
-  const mod = await commandModules.stats()
-  await (mod.StatsCommand ?? mod.default).handler({})
+  const { StatsCommand } = await import("./cli/cmd/stats")
+  await StatsCommand.handler({})
 })
 
 cli.command("mcp", "manage MCP servers", () => {}, async (argv) => {
-  const mod = await commandModules.mcp()
-  await (mod.McpCommand ?? mod.default).handler(argv)
+  const { McpCommand } = await import("./cli/cmd/mcp")
+  await McpCommand.handler(argv)
 })
 
 cli.command("github", "manage GitHub agent", () => {}, async (argv) => {
-  const mod = await commandModules.github()
-  await (mod.GithubCommand ?? mod.default).handler(argv)
+  const { GithubCommand } = await import("./cli/cmd/github")
+  await GithubCommand.handler(argv)
 })
 
 cli.command("pr <number>", "fetch and checkout a PR", () => {}, async (argv) => {
-  const mod = await commandModules.pr()
-  await (mod.PrCommand ?? mod.default).handler(argv)
+  const { PrCommand } = await import("./cli/cmd/pr")
+  await PrCommand.handler(argv)
 })
 
 cli.command("export [sessionID]", "export session data", () => {}, async (argv) => {
-  const mod = await commandModules.export()
-  await (mod.ExportCommand ?? mod.default).handler(argv)
+  const { ExportCommand } = await import("./cli/cmd/export")
+  await ExportCommand.handler(argv)
 })
 
 cli.command("import <file>", "import session data", () => {}, async (argv) => {
-  const mod = await commandModules.import()
-  await (mod.ImportCommand ?? mod.default).handler(argv)
+  const { ImportCommand } = await import("./cli/cmd/import")
+  await ImportCommand.handler(argv)
 })
 
 cli.command("session", "manage sessions", () => {}, async (argv) => {
-  const mod = await commandModules.session()
-  await (mod.SessionCommand ?? mod.default).handler(argv)
+  const { SessionCommand } = await import("./cli/cmd/session")
+  await SessionCommand.handler(argv)
 })
 
 cli.command("agent", "manage agents", () => {}, async (argv) => {
-  const mod = await commandModules.agent()
-  await (mod.AgentCommand ?? mod.default).handler(argv)
+  const { AgentCommand } = await import("./cli/cmd/agent")
+  await AgentCommand.handler(argv)
 })
 
 cli.command("plug <module>", "install plugin", () => {}, async (argv) => {
-  const mod = await commandModules.plug()
-  await (mod.PluginCommand ?? mod.default).handler(argv)
+  const { PluginCommand } = await import("./cli/cmd/plug")
+  await PluginCommand.handler(argv)
 })
 
 cli.command("db", "database tools", () => {}, async (argv) => {
-  const mod = await commandModules.db()
-  await (mod.DbCommand ?? mod.default).handler(argv)
+  const { DbCommand } = await import("./cli/cmd/db")
+  await DbCommand.handler(argv)
 })
 
 cli.command("account", "account settings", () => {}, async (argv) => {
-  const mod = await commandModules.account()
-  await (mod.ConsoleCommand ?? mod.default).handler(argv)
+  const { ConsoleCommand } = await import("./cli/cmd/account")
+  await ConsoleCommand.handler(argv)
 })
 
 cli.command("generate", "generate code", () => {}, async (argv) => {
-  const mod = await commandModules.generate()
-  await (mod.GenerateCommand ?? mod.default).handler(argv)
+  const { GenerateCommand } = await import("./cli/cmd/generate")
+  await GenerateCommand.handler(argv)
 })
 
 cli.command("attach <url>", "attach to running server", () => {}, async (argv) => {
-  const mod = await commandModules.attach()
-  await (mod.AttachCommand ?? mod.default).handler(argv)
+  const { AttachCommand } = await import("./cli/cmd/attach")
+  await AttachCommand.handler(argv)
 })
 
 cli.command("acp", "start ACP server", () => {}, async () => {
-  const mod = await commandModules.acp()
-  await (mod.AcpCommand ?? mod.default).handler({})
+  const { AcpCommand } = await import("./cli/cmd/acp")
+  await AcpCommand.handler({})
 })
 
 cli.command("completion", "generate shell completion", () => {}, async () => {
@@ -241,8 +222,8 @@ cli.command("completion", "generate shell completion", () => {}, async () => {
 cli.middleware(async (argv) => {
   // If no command matched, start the TUI
   if (!argv._.length || argv._[0] === '') {
-    const mod = await commandModules.tui()
-    await (mod.TuiThreadCommand ?? mod.default).handler({})
+    const { TuiThreadCommand } = await import("./cli/cmd/tui")
+    await TuiThreadCommand.handler({})
   }
 })
 
