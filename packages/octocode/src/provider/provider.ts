@@ -1776,7 +1776,7 @@ export const layer = Layer.effect(
           const res = await fetchFn(input, {
             ...opts,
             // @ts-ignore see here: https://github.com/oven-sh/bun/issues/16682
-            timeout: false,
+            timeout: options["timeout"] !== undefined && options["timeout"] !== null && options["timeout"] !== false ? options["timeout"] : 120_000,
           }).finally(() => headerTimeoutCtl?.clear())
 
           if (!chunkAbortCtl) return res
