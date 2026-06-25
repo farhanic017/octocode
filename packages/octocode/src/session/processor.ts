@@ -991,7 +991,7 @@ export const layer = Layer.effect(
             yield* stream.pipe(
               Stream.tap((event) => handleEvent(event)),
               Stream.takeUntil(() => ctx.needsCompaction),
-              Stream.interruptWhen(Effect.sleep("10 minutes")),
+              Stream.interruptWhen(Effect.sleep("3 minutes")),
               Stream.runDrain,
             )
           }).pipe(

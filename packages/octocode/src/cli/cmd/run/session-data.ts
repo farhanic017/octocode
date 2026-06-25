@@ -574,6 +574,12 @@ function drop(data: SessionData, partID: string) {
   data.visible.delete(partID)
   data.msg.delete(partID)
   data.end.delete(partID)
+  data.ids.delete(partID)
+  // Also clean echo entries for this message
+  const msgID = data.msg.get(partID)
+  if (msgID) {
+    data.echo.delete(msgID)
+  }
 }
 
 // Called when we learn a message's role (from message.updated). Flushes any

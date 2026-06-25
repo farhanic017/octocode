@@ -585,6 +585,9 @@ async function runInteractiveRuntime(input: RunRuntimeInput, deps: RunRuntimeDep
           onSend: (prompt) => {
             state.shown = true
             state.history.push(prompt)
+            if (state.history.length > 200) {
+              state.history = state.history.slice(-200)
+            }
             if (prompt.mode !== "shell") {
               rememberLocal({
                 kind: "user",
