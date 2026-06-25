@@ -17,7 +17,7 @@
   <a href="https://octocode.ai/discord"><img alt="Discord" src="https://img.shields.io/badge/discord-0%20online-7289da?style=flat-square" /></a>
   <a href="https://www.npmjs.com/package/octocode-ai"><img alt="npm" src="https://img.shields.io/npm/v/octocode-ai?style=flat-square" /></a>
   <a href="https://github.com/farhanic017/octocode/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue.svg?style=flat-square" /></a>
-  <a href="https://www.npmjs.com/package/octocode-ai"><img alt="Downloads" src="https://img.shields.io/badge/downloads-0-blue?style=flat-square" /></a>
+  <a href="https://www.npmjs.com/package/octocode-ai"><img alt="Downloads" src="https://img.shields.io/npm/dm/octocode-ai?style=flat-square&label=downloads" /></a>
 </p>
 <p align="center"><sub>Created by Farhan Dhrubo</sub></p>
 
