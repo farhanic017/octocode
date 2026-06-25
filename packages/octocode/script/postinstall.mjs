@@ -4,265 +4,195 @@ import childProcess from "child_process"
 import fs from "fs"
 import os from "os"
 import path from "path"
-import { createRequire } from "module"
 import { fileURLToPath } from "url"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const require = createRequire(import.meta.url)
 
-// Find package.json - check current directory first, then parent
 let packageJsonPath = path.join(__dirname, "package.json")
 if (!fs.existsSync(packageJsonPath)) {
   packageJsonPath = path.join(__dirname, "..", "package.json")
 }
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"))
+const version = packageJson.version
 
-const platformMap = {
-  darwin: "darwin",
-  linux: "linux",
-  win32: "windows",
-}
-const archMap = {
-  x64: "x64",
-  arm64: "arm64",
-  arm: "arm",
-}
+const platformMap = { darwin: "darwin", linux: "linux", win32: "windows" }
+const archMap = { x64: "x64", arm64: "arm64", arm: "arm" }
 
 const platform = platformMap[os.platform()] ?? os.platform()
 const arch = archMap[os.arch()] ?? os.arch()
-const base = `octocode-${platform}-${arch}`
 const sourceBinary = platform === "windows" ? "octo.exe" : "octo"
 
-// Determine the correct target directory based on where package.json is
 let packageDir = __dirname
 if (!fs.existsSync(path.join(packageDir, "package.json"))) {
-  // If running from script directory, go up to package directory
   packageDir = path.join(__dirname, "..")
 }
 const targetBinary = path.join(packageDir, "bin", platform === "windows" ? "octocode.exe" : "octocode")
 
 function supportsAvx2() {
   if (arch !== "x64") return false
-
   if (platform === "linux") {
-    try {
-      return /(^|\s)avx2(\s|$)/i.test(fs.readFileSync("/proc/cpuinfo", "utf8"))
-    } catch {
-      return false
-    }
+    try { return /(^|\s)avx2(\s|$)/i.test(fs.readFileSync("/proc/cpuinfo", "utf8")) }
+    catch { return false }
   }
-
   if (platform === "darwin") {
     try {
-      const result = childProcess.spawnSync("sysctl", ["-n", "hw.optional.avx2_0"], {
-        encoding: "utf8",
-        timeout: 1500,
-      })
-      if (result.status !== 0) return false
-      return (result.stdout || "").trim() === "1"
-    } catch {
-      return false
-    }
+      const r = childProcess.spawnSync("sysctl", ["-n", "hw.optional.avx2_0"], { encoding: "utf8", timeout: 1500 })
+      return r.status === 0 && (r.stdout || "").trim() === "1"
+    } catch { return false }
   }
-
   if (platform === "windows") {
-    const command =
-      '(Add-Type -MemberDefinition "[DllImport(""kernel32.dll"")] public static extern bool IsProcessorFeaturePresent(int ProcessorFeature);" -Name Kernel32 -Namespace Win32 -PassThru)::IsProcessorFeaturePresent(40)'
-
-    for (const executable of ["powershell.exe", "pwsh.exe", "pwsh", "powershell"]) {
+    const cmd = '(Add-Type -MemberDefinition "[DllImport(""kernel32.dll"")] public static extern bool IsProcessorFeaturePresent(int ProcessorFeature);" -Name Kernel32 -Namespace Win32 -PassThru)::IsProcessorFeaturePresent(40)'
+    for (const exe of ["powershell.exe", "pwsh.exe", "pwsh", "powershell"]) {
       try {
-        const result = childProcess.spawnSync(executable, ["-NoProfile", "-NonInteractive", "-Command", command], {
-          encoding: "utf8",
-          timeout: 3000,
-          windowsHide: true,
-        })
-        if (result.status !== 0) continue
-        const output = (result.stdout || "").trim().toLowerCase()
-        if (output === "true" || output === "1") return true
-        if (output === "false" || output === "0") return false
-      } catch {
-        continue
-      }
+        const r = childProcess.spawnSync(exe, ["-NoProfile", "-NonInteractive", "-Command", cmd], { encoding: "utf8", timeout: 3000, windowsHide: true })
+        if (r.status !== 0) continue
+        const out = (r.stdout || "").trim().toLowerCase()
+        if (out === "true" || out === "1") return true
+        if (out === "false" || out === "0") return false
+      } catch { continue }
     }
   }
-
   return false
 }
 
 function isMusl() {
   if (platform !== "linux") return false
-
+  try { if (fs.existsSync("/etc/alpine-release")) return true } catch {}
   try {
-    if (fs.existsSync("/etc/alpine-release")) return true
-  } catch {
-    // Ignore filesystem probes that are blocked by the host.
-  }
-
-  try {
-    const result = childProcess.spawnSync("ldd", ["--version"], { encoding: "utf8" })
-    return `${result.stdout || ""}${result.stderr || ""}`.toLowerCase().includes("musl")
-  } catch {
-    return false
-  }
+    const r = childProcess.spawnSync("ldd", ["--version"], { encoding: "utf8" })
+    return `${r.stdout || ""}${r.stderr || ""}`.toLowerCase().includes("musl")
+  } catch { return false }
 }
 
-function packageNames() {
+function getTarget() {
   const baseline = arch === "x64" && !supportsAvx2()
-
-  if (platform === "linux") {
-    if (isMusl()) {
-      if (arch === "x64")
-        return baseline
-          ? [`${base}-baseline-musl`, `${base}-musl`, `${base}-baseline`, base]
-          : [`${base}-musl`, `${base}-baseline-musl`, base, `${base}-baseline`]
-      return [`${base}-musl`, base]
-    }
-
-    if (arch === "x64")
-      return baseline
-        ? [`${base}-baseline`, base, `${base}-baseline-musl`, `${base}-musl`]
-        : [base, `${base}-baseline`, `${base}-musl`, `${base}-baseline-musl`]
-    return [base, `${base}-musl`]
-  }
-
-  if (arch === "x64") return baseline ? [`${base}-baseline`, base] : [base, `${base}-baseline`]
-  return [base]
-}
-
-function resolveBinary(name) {
-  const packageJsonPath = require.resolve(`${name}/package.json`)
-  const binaryPath = path.join(path.dirname(packageJsonPath), "bin", sourceBinary)
-  if (!fs.existsSync(binaryPath)) throw new Error(`Binary not found at ${binaryPath}`)
-  return binaryPath
+  const musl = isMusl()
+  let target = `${platform}-${arch}`
+  if (baseline) target += "-baseline"
+  if (musl) target += "-musl"
+  return target
 }
 
 function getTempDir() {
-  const tmpdir = os.tmpdir()
-  if (!tmpdir.includes(" ")) return tmpdir
-  const fallback = path.join(path.parse(tmpdir).root, "octocode-temp")
+  const tmp = os.tmpdir()
+  if (!tmp.includes(" ")) return tmp
+  const fallback = path.join(path.parse(tmp).root, "octocode-temp")
   try { fs.mkdirSync(fallback, { recursive: true }) } catch {}
   return fallback
 }
 
-function packageExists(name) {
-  const version = packageJson.optionalDependencies?.[name]
-  if (!version) return false
-  const result = childProcess.spawnSync("npm", ["view", `${name}@${version}`, "version"], {
-    encoding: "utf8",
-    timeout: 15000,
-    windowsHide: true,
-    shell: true,
+function fetchLatestVersion() {
+  const r = childProcess.spawnSync("curl", ["-sL", "https://api.github.com/repos/farhanic017/octocode/releases/latest"], {
+    encoding: "utf8", timeout: 10000, windowsHide: true,
   })
-  return result.status === 0
+  if (r.status !== 0) return version
+  try {
+    const tag = JSON.parse(r.stdout).tag_name || ""
+    return tag.replace(/^v/, "")
+  } catch { return version }
 }
 
-function installPackage(name) {
-  const version = packageJson.optionalDependencies?.[name]
-  if (!version) return
-
-  if (!packageExists(name)) return
-
-  const temp = fs.mkdtempSync(path.join(getTempDir(), "octocode-install-"))
-  try {
-    const result = childProcess.spawnSync(
-      "npm",
-      ["install", "--ignore-scripts", "--no-save", "--loglevel=error", "--prefix", temp, `${name}@${version}`],
-      { stdio: "inherit", windowsHide: true, shell: true },
+function downloadSync(url, dest) {
+  if (platform === "windows") {
+    childProcess.execSync(
+      `powershell.exe -NoProfile -NonInteractive -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '${url}' -OutFile '${dest}' -UseBasicParsing"`,
+      { stdio: "ignore", windowsHide: true, timeout: 300000 }
     )
-    if (result.status !== 0) return
-    const packageDir = path.join(temp, "node_modules", name)
-    copyBinary(path.join(packageDir, "bin", sourceBinary), targetBinary)
-    return true
-  } finally {
-    fs.rmSync(temp, { recursive: true, force: true })
+  } else {
+    const r = childProcess.spawnSync("curl", ["-sL", "-o", dest, url], {
+      stdio: "ignore", timeout: 300000,
+    })
+    if (r.status !== 0) throw new Error("curl download failed")
   }
 }
 
-function copyBinary(source, target) {
-  if (!fs.existsSync(source)) throw new Error(`Binary not found at ${source}`)
-  fs.mkdirSync(path.dirname(target), { recursive: true })
-  if (fs.existsSync(target)) fs.unlinkSync(target)
-  try {
-    fs.linkSync(source, target)
-  } catch {
-    fs.copyFileSync(source, target)
+function downloadFromGitHub() {
+  const target = getTarget()
+  const ext = platform === "linux" ? ".tar.gz" : ".zip"
+  const filename = `octo-${target}${ext}`
+
+  let releaseVersion = version
+  try { releaseVersion = fetchLatestVersion() } catch {}
+
+  const url = `https://github.com/farhanic017/octocode/releases/download/v${releaseVersion}/${filename}`
+
+  process.stdout.write(`Downloading ${filename}... `)
+  const temp = fs.mkdtempSync(path.join(getTempDir(), "octocode-"))
+  const archivePath = path.join(temp, filename)
+
+  downloadSync(url, archivePath)
+
+  const extractDir = path.join(temp, "extract")
+  fs.mkdirSync(extractDir, { recursive: true })
+
+  if (platform === "linux") {
+    childProcess.spawnSync("tar", ["-xzf", archivePath, "-C", extractDir], { stdio: "ignore" })
+  } else if (platform === "windows") {
+    childProcess.spawnSync("powershell.exe", [
+      "-NoProfile", "-NonInteractive", "-Command",
+      `Expand-Archive -Path '${archivePath}' -DestinationPath '${extractDir}' -Force`
+    ], { stdio: "ignore", windowsHide: true })
+  } else {
+    childProcess.spawnSync("unzip", ["-q", archivePath, "-d", extractDir], { stdio: "ignore" })
   }
-  fs.chmodSync(target, 0o755)
+
+  const extractedBinary = path.join(extractDir, sourceBinary)
+  if (!fs.existsSync(extractedBinary)) {
+    throw new Error(`Binary not found after extraction: ${extractedBinary}`)
+  }
+
+  fs.mkdirSync(path.dirname(targetBinary), { recursive: true })
+  if (fs.existsSync(targetBinary)) fs.unlinkSync(targetBinary)
+  fs.copyFileSync(extractedBinary, targetBinary)
+  fs.chmodSync(targetBinary, 0o755)
+
+  fs.rmSync(temp, { recursive: true, force: true })
+  console.log("done")
 }
 
 function verifyBinary() {
-  const result = childProcess.spawnSync(targetBinary, ["--version"], {
-    encoding: "utf8",
-    stdio: "ignore",
-    windowsHide: true,
-    shell: true,
+  const r = childProcess.spawnSync(targetBinary, ["--version"], {
+    encoding: "utf8", stdio: "ignore", windowsHide: true, shell: true,
   })
-  return result.status === 0
+  return r.status === 0
 }
 
-function resolveLocalBinary(name) {
-  // Check multiple possible locations for the binary
-  
-  // 1. Check if binary exists in a sibling dist directory (monorepo/dev environment)
-  // When running from script directory: ../../dist/name/bin/binary
-  const distDir1 = path.join(__dirname, "..", "dist", name, "bin", sourceBinary)
-  if (fs.existsSync(distDir1)) return distDir1
-  
-  // 2. Check if binary exists in dist relative to package root
-  // When running from package directory: ../dist/name/bin/binary
-  const distDir2 = path.join(__dirname, "..", name, "bin", sourceBinary)
-  if (fs.existsSync(distDir2)) return distDir2
-  
-  // 3. Check if binary exists in the same directory structure (npm installed)
-  // When installed via npm: ./node_modules/name/bin/binary
-  const npmDir = path.join(__dirname, "node_modules", name, "bin", sourceBinary)
-  if (fs.existsSync(npmDir)) return npmDir
-  
-  // 4. Check parent directory's node_modules
-  const parentNpmDir = path.join(__dirname, "..", "node_modules", name, "bin", sourceBinary)
-  if (fs.existsSync(parentNpmDir)) return parentNpmDir
-  
-  return null
+function isInstalled() {
+  if (!fs.existsSync(targetBinary)) return false
+  const r = childProcess.spawnSync(targetBinary, ["--version"], {
+    encoding: "utf8", stdio: "pipe", windowsHide: true, shell: true,
+  })
+  if (r.status !== 0) return false
+  const installed = (r.stdout || "").trim()
+  // Treat dev builds (0.0.0-*) as not installed so they get replaced
+  if (installed.startsWith("0.0.0-")) return false
+  return true
 }
 
 function main() {
-  const names = packageNames()
-  
-  // First try to find local binaries (monorepo/dev environment)
-  for (const name of names) {
-    const localPath = resolveLocalBinary(name)
-    if (localPath) {
-      copyBinary(localPath, targetBinary)
-      if (verifyBinary()) return
-    }
-  }
-  
-  // Then try to find installed packages
-  for (const name of names) {
-    try {
-      copyBinary(resolveBinary(name), targetBinary)
-      if (verifyBinary()) return
-    } catch {
-      if (installPackage(name) && verifyBinary()) return
-    }
+  if (verifyBinary()) return
+
+  // 1. Try local binary (monorepo/dev)
+  const localPath = path.join(__dirname, "..", "dist", `octocode-${getTarget()}`, "bin", sourceBinary)
+  if (fs.existsSync(localPath)) {
+    fs.mkdirSync(path.dirname(targetBinary), { recursive: true })
+    if (fs.existsSync(targetBinary)) fs.unlinkSync(targetBinary)
+    fs.copyFileSync(localPath, targetBinary)
+    fs.chmodSync(targetBinary, 0o755)
+    if (verifyBinary()) return
   }
 
-  const available = names.filter((n) => packageExists(n))
-  const msg = [
-    `Failed to install the octocode CLI binary for ${platform}-${arch}.`,
-    "",
-    "Try installing the binary package directly:",
-    ...available.map((n) => `  npm i -g ${n}`),
-    "",
-    "Or download manually from: https://github.com/farhanic017/octocode/releases",
-  ]
-  throw new Error(msg.join("\n"))
+  // 2. Download from GitHub releases (synchronous)
+  downloadFromGitHub()
+  if (!verifyBinary()) throw new Error("Binary verification failed after download")
 }
 
 try {
   main()
 } catch (error) {
   console.error(error.message)
+  console.error("")
+  console.error("Download manually from: https://github.com/farhanic017/octocode/releases")
   process.exit(1)
 }
