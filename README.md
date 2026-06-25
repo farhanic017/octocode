@@ -17,8 +17,9 @@
   <a href="https://octocode.ai/discord"><img alt="Discord" src="https://img.shields.io/badge/discord-0%20online-7289da?style=flat-square" /></a>
   <a href="https://www.npmjs.com/package/octocode-ai"><img alt="npm" src="https://img.shields.io/npm/v/octocode-ai?style=flat-square" /></a>
   <a href="https://github.com/farhanic017/octocode/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue.svg?style=flat-square" /></a>
-  <a href="https://www.npmjs.com/package/octocode-ai"><img alt="Downloads" src="https://img.shields.io/npm/dm/octocode-ai?style=flat-square&label=downloads" /></a>
+  <a href="https://www.npmjs.com/package/octocode-ai"><img alt="Downloads" src="https://img.shields.io/badge/downloads-0-blue?style=flat-square" /></a>
 </p>
+<p align="center"><sub>Created by Farhan Dhrubo</sub></p>
 
 [![OctoCode V2 Desktop](designs/octocode%20home%20screen.png)](https://octocode.ai)
 
@@ -45,6 +46,8 @@ curl -fsSL https://octocode.ai/install | bash
 ```
 
 **Windows:** Install via npm, or download the `.exe` directly from [GitHub Releases](https://github.com/farhanic017/octocode/releases).
+
+> **Note:** Linux ARM64 npm packages (`octocode-linux-arm64`, `octocode-linux-arm64-musl`) are temporarily unavailable due to npm rate limits. Use the `curl` installer instead for Linux ARM64.
 
 ### Uninstall
 
