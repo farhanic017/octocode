@@ -18,6 +18,7 @@
   <a href="https://www.npmjs.com/package/octocode-ai"><img alt="npm" src="https://img.shields.io/npm/v/octocode-ai?style=flat-square" /></a>
   <a href="https://github.com/farhanic017/octocode/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue.svg?style=flat-square" /></a>
   <a href="https://www.npmjs.com/package/octocode-ai"><img alt="Downloads" src="https://img.shields.io/npm/dm/octocode-ai?style=flat-square&label=downloads" /></a>
+  <a href="https://github.com/sponsors/farhanic017"><img alt="Sponsor" src="https://img.shields.io/badge/sponsor-%E2%9D%A4-pink?style=flat-square" /></a>
 </p>
 <p align="center"><sub>Created by Farhan Dhrubo</sub></p>
 
@@ -79,6 +80,8 @@ octo
 ## Documentation
 
 For configuration, plugins, and advanced usage, visit **[octocode.ai/docs](https://octocode.ai/docs)**.
+
+> **Notice:** This project was previously hosted at `farhanic017/octo-code`. It has been renamed to `octocode` and restructured. Please update your bookmarks and remotes.
 
 ## Changelog
 
