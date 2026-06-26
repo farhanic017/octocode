@@ -31,8 +31,8 @@ function eventResponse(events: EventV2.Interface) {
     const workspaceID = yield* InstanceState.workspaceID
     // Listener registration is eager, so events published after this point cannot
     // be lost while the HTTP body fiber is starting or emitting server.connected.
-    const queue = yield* Queue.bounded<EventV2.Payload>(256)
-    const unsubscribe = yield* events.listen((event) => Effect.sync(() => Queue.offerUnsafe(queue, event)))
+    const queue = yield* Queue.bounded<EventV2.Payload>(500)
+    const unsubscribe = yield* events.listen((event) => Effect.sync(() => { if (queue.size < 500) Queue.offerUnsafe(queue, event) }))
     yield* Effect.addFinalizer(() => unsubscribe)
     const stream = Stream.fromQueue(queue).pipe(
       Stream.filter(

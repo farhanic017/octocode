@@ -9,6 +9,7 @@ import { Hash } from "@octocode-ai/core/util/hash"
 import { Config } from "@/config/config"
 import { Global } from "@octocode-ai/core/global"
 import * as Log from "@octocode-ai/core/util/log"
+import { RuntimeFlags } from "@/effect/runtime-flags"
 
 export const Patch = Schema.Struct({
   hash: Schema.String,
@@ -166,7 +167,9 @@ export const layer: Layer.Layer<Service, never, FSUtil.Service | AppProcess.Serv
 
         const enabled = Effect.fnUntraced(function* () {
           if (state.vcs !== "git") return false
-          return (yield* config.get()).snapshot !== false
+          if (process.env.OCTOCODE_PURE === "1") return false
+          const cfg = yield* config.get()
+          return cfg.snapshot !== false
         })
 
         const excludes = Effect.fnUntraced(function* () {

@@ -113,8 +113,10 @@ const allTargets: {
   },
 ]
 
+const skipArm64Linux = allTargets.filter((item) => !(item.os === "linux" && item.arch === "arm64"))
+
 const targets = singleFlag
-  ? allTargets.filter((item) => {
+  ? skipArm64Linux.filter((item) => {
       if (item.os !== process.platform || item.arch !== process.arch) {
         return false
       }
@@ -132,7 +134,7 @@ const targets = singleFlag
 
       return true
     })
-  : allTargets
+  : skipArm64Linux
 
 await $`rm -rf dist`
 

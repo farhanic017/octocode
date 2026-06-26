@@ -1422,7 +1422,21 @@ export const layer = Layer.effect(
         }
       }
 
-      return yield* loop({ sessionID: input.sessionID })
+      return yield* loop({ sessionID: input.sessionID }).pipe(
+        Effect.catchCause((cause) =>
+          Effect.gen(function* () {
+            const error = Cause.squash(cause)
+            const errorMsg = error instanceof Error ? error.message : String(error)
+            yield* elog.error("prompt loop failed", { sessionID: input.sessionID, error: errorMsg })
+            yield* events.publish(Session.Event.Error, {
+              sessionID: input.sessionID,
+              error: new NamedError.Unknown({ message: `Agent failed to respond: ${errorMsg}` }).toObject(),
+            })
+            yield* status.set(input.sessionID, { type: "idle" })
+            return yield* Effect.failCause(cause)
+          }),
+        ),
+      )
     })
 
     const lastAssistant = Effect.fnUntraced(function* (sessionID: SessionID) {
@@ -1975,7 +1989,20 @@ export const layer = Layer.effect(
     const loop: (input: LoopInput) => Effect.Effect<SessionV1.WithParts> = Effect.fn("SessionPrompt.loop")(function* (
       input: LoopInput,
     ) {
-      return yield* state.ensureRunning(input.sessionID, lastAssistant(input.sessionID), runLoop(input.sessionID))
+      return yield* state.ensureRunning(input.sessionID, lastAssistant(input.sessionID), runLoop(input.sessionID)).pipe(
+        Effect.timeout("10 minutes"),
+        Effect.catchTag("TimeoutException", () =>
+          Effect.gen(function* () {
+            yield* elog.error("loop timed out", { sessionID: input.sessionID })
+            yield* events.publish(Session.Event.Error, {
+              sessionID: input.sessionID,
+              error: new NamedError.Unknown({ message: "Agent response timed out after 10 minutes" }).toObject(),
+            })
+            yield* status.set(input.sessionID, { type: "idle" })
+            return yield* lastAssistant(input.sessionID)
+          }),
+        ),
+      )
     })
 
     const shell: (input: ShellInput) => Effect.Effect<SessionV1.WithParts, Session.BusyError> = Effect.fn(

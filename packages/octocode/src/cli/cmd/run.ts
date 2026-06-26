@@ -632,8 +632,21 @@ export const RunCommand = effectCmd({
         async function loop(client: OctocodeClient, events: Awaited<ReturnType<typeof sdk.event.subscribe>>) {
           const toggles = new Map<string, boolean>()
           let error: string | undefined
+          let llmStarted = false
 
           for await (const event of events.stream) {
+            if (event.type === "session.status" && event.properties.sessionID === sessionID && event.properties.status.type === "busy") {
+              llmStarted = true
+            }
+
+            if (
+              event.type === "message.updated" &&
+              event.properties.sessionID === sessionID &&
+              event.properties.info.role === "assistant"
+            ) {
+              llmStarted = true
+            }
+
             if (
               event.type === "message.updated" &&
               event.properties.sessionID === sessionID &&
@@ -723,7 +736,8 @@ export const RunCommand = effectCmd({
             if (
               event.type === "session.status" &&
               event.properties.sessionID === sessionID &&
-              event.properties.status.type === "idle"
+              event.properties.status.type === "idle" &&
+              llmStarted
             ) {
               break
             }
@@ -762,10 +776,14 @@ export const RunCommand = effectCmd({
 
         if (!args.interactive) {
           const events = await client.event.subscribe()
-          loop(client, events).catch((e) => {
-            console.error(e)
-            process.exit(1)
-          })
+          const safetyTimeout = setTimeout(() => process.exit(0), 120_000)
+          loop(client, events)
+            .then(() => { clearTimeout(safetyTimeout); if (globalThis.gc) globalThis.gc(); process.exit(0) })
+            .catch((e) => {
+              clearTimeout(safetyTimeout)
+              console.error(e)
+              process.exit(1)
+            })
 
           if (args.command) {
             const result = await client.session.command({

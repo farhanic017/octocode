@@ -988,10 +988,15 @@ export const layer = Layer.effect(
             yield* status.set(ctx.sessionID, { type: "busy" })
             const stream = llm.stream(streamInput)
 
+            let eventCount = 0
             yield* stream.pipe(
-              Stream.tap((event) => handleEvent(event)),
+              Stream.tap((event) => {
+                eventCount++
+                if (eventCount % 50 === 0 && globalThis.gc) globalThis.gc()
+                return handleEvent(event)
+              }),
               Stream.takeUntil(() => ctx.needsCompaction),
-              Stream.interruptWhen(Effect.sleep("3 minutes")),
+              Stream.interruptWhen(Effect.sleep("10 minutes")),
               Stream.runDrain,
             )
           }).pipe(
