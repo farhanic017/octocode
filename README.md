@@ -26,6 +26,24 @@
 
 ---
 
+
+## v2.0.9 (Latest)
+
+### Bug Fixes
+- Fixed Effect.catchAll crash that caused every octo run to fail
+- Process now exits cleanly after completion (was hanging indefinitely)
+
+### Performance
+- RAM peak reduced from **3GB to ~470MB** during LLM streaming via periodic GC
+- Snapshot system disabled in --pure mode to avoid scanning entire home directory
+- Event queue bounded at 500 to prevent unbounded memory growth
+
+### Install
+- **npm:** 
+pm i -g octocode-ai@latest
+- **curl:** curl -fsSL https://octocode.ai/install | bash
+- **GitHub:** https://github.com/farhanic017/octocode/releases/tag/v2.0.9
+
 ## Features
 
 - **Multi-provider AI** — Works with OpenAI, Anthropic, Google, and more
