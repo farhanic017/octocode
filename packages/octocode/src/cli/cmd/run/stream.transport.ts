@@ -1124,6 +1124,7 @@ function createLayer(input: StreamInput) {
           return true
         })
 
+        let eventCount = 0
         const watch = Effect.fn("RunStreamTransport.watch")(() =>
           Stream.fromAsyncIterable(events.stream, (error) =>
             error instanceof Error ? error : new Error(String(error)),
@@ -1165,6 +1166,8 @@ function createLayer(input: StreamInput) {
                 }
 
                 input.trace?.write("recv.event", event)
+                eventCount++
+                if (eventCount % 50 === 0 && globalThis.gc) globalThis.gc()
                 yield* applyEvent(event)
                 yield* drainBuffered()
               }),

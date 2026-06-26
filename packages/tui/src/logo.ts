@@ -7,7 +7,7 @@
 
 export const logo = {
   left: ["             ", "  octo       ", "             ", "             "],
-  right: ["       ", "code   ", " v1    ", "       "],
+  right: ["       ", "code   ", "       ", "       "],
 }
 
 export const go = {
