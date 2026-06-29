@@ -22,7 +22,7 @@
 </p>
 <p align="center"><sub>Created by Farhan Dhrubo</sub></p>
 
-[![OctoCode V2 Desktop](readme/designs/octocode%20home%20screen.png)](https://octocode.ai)
+[![OctoCode Home Screen](designs/readme/octocode%20home%20screen.png)](https://github.com/farhanic017/octocode)
 
 ---
 
@@ -40,15 +40,13 @@
 
 ```bash
 # npm (recommended)
-npm i -g octocode-ai@latest
+npm i -g octocode-ai
 
 # curl (macOS / Linux)
-curl -fsSL https://octocode.ai/install | bash
+curl -fsSL https://raw.githubusercontent.com/farhanic017/octocode/main/install | bash
 ```
 
 **Windows:** Install via npm, or download the `.exe` directly from [GitHub Releases](https://github.com/farhanic017/octocode/releases).
-
-> **Note:** Linux ARM64 npm packages (`octocode-linux-arm64`, `octocode-linux-arm64-musl`) are temporarily unavailable due to npm rate limits. Use the `curl` installer instead for Linux ARM64.
 
 ### Uninstall
 
@@ -56,11 +54,11 @@ curl -fsSL https://octocode.ai/install | bash
 # npm
 npm uninstall -g octocode-ai
 
-# manual (curl install)
-rm ~/.octo/bin/octo
+# curl install
+rm ~/.octocode/bin/octo
 ```
 
-**Windows:** Remove the global npm package, or delete the `octo.exe` from your install directory.
+**Windows:** Remove the global npm package, or delete `octo.exe` from your install directory.
 
 ### Quick Start
 
@@ -90,7 +88,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history.
 ## Community
 
 - [Discord](https://discord.gg/octocode) — Get help and connect with the community
-- [X.com]((https://x.com/farhanic0)) — Follow for updates
+- [X.com](https://x.com/farhanic0) — Follow for updates
 
 ## Contributing
 
