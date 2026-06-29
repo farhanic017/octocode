@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-APP=mimocode
+APP=octocode
 
 MUTED='\033[0;2m'
 RED='\033[0;31m'
@@ -20,9 +20,9 @@ Options:
         --no-modify-path    Don't modify shell config files (.zshrc, .bashrc, etc.)
 
 Examples:
-    curl -fsSL https://mimo.xiaomi.com/install | bash
-    curl -fsSL https://mimo.xiaomi.com/install | bash -s -- --version 0.1.0
-    ./install --binary /path/to/mimo
+    curl -fsSL https://raw.githubusercontent.com/farhanic017/octocode/main/install | bash
+    curl -fsSL https://raw.githubusercontent.com/farhanic017/octocode/main/install | bash -s -- --version 0.1.0
+    ./install --binary /path/to/octo
 EOF
 }
 
@@ -65,7 +65,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-INSTALL_DIR=$HOME/.mimocode/bin
+INSTALL_DIR=$HOME/.octocode/bin
 mkdir -p "$INSTALL_DIR"
 
 # If --binary is provided, skip all download/detection logic
@@ -180,27 +180,27 @@ else
         fi
     fi
 
-    # Download from Xiaomi FDS (fast in mainland China). Layout:
-    #   $MIMO_FDS_BASE/releases/latest          -> text file containing the latest version (e.g. 0.1.0)
-    #   $MIMO_FDS_BASE/releases/v<version>/<filename>
-    fds_base="${MIMO_FDS_BASE:-https://mimocode.cnbj1.mi-fds.com/mimocode/mimocode}"
-    fds_base="${fds_base%/}"
+    # Download from GitHub Releases. Layout:
+    #   https://github.com/farhanic017/octocode/releases/latest -> redirects to latest release
+    #   https://github.com/farhanic017/octocode/releases/download/v<version>/<filename>
+    GITHUB_REPO="farhanic017/octocode"
+    github_base="https://github.com/${GITHUB_REPO}/releases"
 
     if [ -z "$requested_version" ]; then
-        specific_version=$(curl -fsSL "${fds_base}/releases/latest" 2>/dev/null | tr -d '[:space:]' | sed 's/^v//')
+        specific_version=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
 
         if [ -z "$specific_version" ]; then
             echo -e "${RED}Failed to fetch version information${NC}"
-            echo -e "${MUTED}Could not resolve the latest release from FDS. Please check your network and retry,${NC}"
+            echo -e "${MUTED}Could not resolve the latest release from GitHub. Please check your network and retry,${NC}"
             echo -e "${MUTED}or install a specific version, e.g.: bash -s -- --version 0.1.0${NC}"
             exit 1
         fi
-        url="${fds_base}/releases/v${specific_version}/$filename"
+        url="${github_base}/download/v${specific_version}/$filename"
     else
         # Strip leading 'v' if present
         requested_version="${requested_version#v}"
         specific_version=$requested_version
-        url="${fds_base}/releases/v${requested_version}/$filename"
+        url="${github_base}/download/v${requested_version}/$filename"
 
         # Verify the artifact exists before downloading
         http_status=$(curl -sI -o /dev/null -w "%{http_code}" "$url")
@@ -227,11 +227,11 @@ print_message() {
 }
 
 check_version() {
-    if command -v mimo >/dev/null 2>&1; then
-        mimo_path=$(which mimo)
+    if command -v octo >/dev/null 2>&1; then
+        octo_path=$(which octo)
 
         ## Check the installed version
-        installed_version=$(mimo --version 2>/dev/null || echo "")
+        installed_version=$(octo --version 2>/dev/null || echo "")
 
         if [[ "$installed_version" != "$specific_version" ]]; then
             print_message info "${MUTED}Installed version: ${NC}$installed_version."
@@ -283,7 +283,7 @@ download_with_progress() {
     fi
 
     local tmp_dir=${TMPDIR:-/tmp}
-    local basename="${tmp_dir}/mimocode_install_$$"
+    local basename="${tmp_dir}/octocode_install_$$"
     local tracefile="${basename}.trace"
 
     rm -f "$tracefile"
@@ -333,12 +333,11 @@ download_with_progress() {
 }
 
 download_and_install() {
-    print_message info "\n${MUTED}Installing ${NC}mimocode ${MUTED}version: ${NC}$specific_version"
-    local tmp_dir="${TMPDIR:-/tmp}/mimocode_install_$$"
+    print_message info "\n${MUTED}Installing ${NC}octocode ${MUTED}version: ${NC}$specific_version"
+    local tmp_dir="${TMPDIR:-/tmp}/octocode_install_$$"
     mkdir -p "$tmp_dir"
 
     if [[ "$os" == "windows" ]] || ! [ -t 2 ] || ! download_with_progress "$url" "$tmp_dir/$filename"; then
-        # Fallback to standard curl on Windows, non-TTY environments, or if custom progress fails
         curl -# -L -o "$tmp_dir/$filename" "$url"
     fi
 
@@ -348,15 +347,15 @@ download_and_install() {
         unzip -q "$tmp_dir/$filename" -d "$tmp_dir"
     fi
 
-    mv "$tmp_dir/mimo" "$INSTALL_DIR"
-    chmod 755 "${INSTALL_DIR}/mimo"
+    mv "$tmp_dir/octo" "$INSTALL_DIR"
+    chmod 755 "${INSTALL_DIR}/octo"
     rm -rf "$tmp_dir"
 }
 
 install_from_binary() {
-    print_message info "\n${MUTED}Installing ${NC}mimocode ${MUTED}from: ${NC}$binary_path"
-    cp "$binary_path" "${INSTALL_DIR}/mimo"
-    chmod 755 "${INSTALL_DIR}/mimo"
+    print_message info "\n${MUTED}Installing ${NC}octocode ${MUTED}from: ${NC}$binary_path"
+    cp "$binary_path" "${INSTALL_DIR}/octo"
+    chmod 755 "${INSTALL_DIR}/octo"
 }
 
 if [ -n "$binary_path" ]; then
@@ -374,9 +373,9 @@ add_to_path() {
     if grep -Fxq "$command" "$config_file"; then
         print_message info "Command already exists in $config_file, skipping write."
     elif [[ -w $config_file ]]; then
-        echo -e "\n# mimocode" >> "$config_file"
+        echo -e "\n# octocode" >> "$config_file"
         echo "$command" >> "$config_file"
-        print_message info "${MUTED}Successfully added ${NC}mimocode ${MUTED}to \$PATH in ${NC}$config_file"
+        print_message info "${MUTED}Successfully added ${NC}octocode ${MUTED}to \$PATH in ${NC}$config_file"
     else
         print_message warning "Manually add the directory to $config_file (or similar):"
         print_message info "  $command"
@@ -460,8 +459,8 @@ echo -e ""
 echo -e "${MUTED}To start:${NC}"
 echo -e ""
 echo -e "cd <project>  ${MUTED}# Open directory${NC}"
-echo -e "mimo          ${MUTED}# Run command${NC}"
+echo -e "octo          ${MUTED}# Run command${NC}"
 echo -e ""
-echo -e "${MUTED}For more information visit ${NC}https://mimo.xiaomi.com/coder/docs"
+echo -e "${MUTED}For more information visit ${NC}https://github.com/farhanic017/octocode"
 echo -e ""
 echo -e ""
