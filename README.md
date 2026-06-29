@@ -73,6 +73,17 @@ octo
 |-------|--------|----------|
 | `build` | Full read/write | Default agent for development work |
 | `plan` | Read-only | Analysis, exploration, and planning |
+| `compose` | Multi-agent | Orchestrates parallel sub-agents for complex tasks |
+| `agent-swarm` | Distributed | Spawns autonomous agents for large-scale operations |
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/understand` | Analyze and remember codebases, files, plans, designs, packages |
+| `/dream` | Consolidate memories — distill session insights into persistent knowledge |
+| `/distill` | Create reusable skills from successful workflows |
+| `/md` | Generate session summaries and save to vault |
 
 
 ## Documentation
