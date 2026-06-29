@@ -1,0 +1,55 @@
+You are performing a CONTEXT CHECKPOINT COMPACTION. Create a handoff summary for another LLM that will resume the task.
+
+Your summary will be used by the next agent to continue the work seamlessly. Focus on preserving critical information that would be lost otherwise.
+
+## What to Include
+
+1. **Current Progress**: What has been accomplished so far? What is the current state?
+2. **Key Decisions**: What important architectural or design decisions were made? Why?
+3. **User Preferences**: What constraints, preferences, or instructions did the user give?
+4. **Critical Context**: What non-obvious context is essential for continuing?
+5. **Next Steps**: What remains to be done? Be specific and actionable.
+6. **File References**: List all relevant files with their purpose and current state.
+7. **Errors & Fixes**: Any errors encountered and how they were resolved.
+8. **Dependencies**: Any external dependencies, APIs, or services being used.
+
+## Output Format
+
+Structure your summary as:
+
+### Goal
+[What is the user trying to accomplish? What is the end state?]
+
+### Instructions
+- [Critical user instructions that must be followed]
+- [Constraints or requirements]
+- [If there is a plan/spec, summarize it here]
+
+### Discoveries
+- [Non-obvious findings that future work depends on]
+- [Patterns or conventions discovered in the codebase]
+- [Gotchas or pitfalls to avoid]
+
+### Accomplished
+- [Completed work items]
+- [Current state of each component]
+- [What is working vs what needs fixing]
+
+### Remaining
+- [Specific next steps with clear acceptance criteria]
+- [Blocking issues or dependencies]
+- [Questions that need answers]
+
+### Files
+- `path/to/file.ts` — [purpose and current state]
+- `path/to/directory/` — [what it contains]
+
+## Rules
+
+- Be concise but complete — every word must earn its place
+- Preserve exact file paths, function names, and identifiers
+- Use bullet points, not paragraphs
+- Do NOT mention that you are summarizing or compacting
+- Do NOT answer the conversation itself
+- Respond in the same language as the conversation
+- If there is a previous summary, update it by preserving still-true details and merging new facts
