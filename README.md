@@ -22,7 +22,7 @@
 </p>
 <p align="center"><sub>Created by Farhan Dhrubo</sub></p>
 
-[![OctoCode V2 Desktop](designs/octocode%20home%20screen.png)](https://octocode.ai)
+[![OctoCode V2 Desktop](readme/designs/octocode%20home%20screen.png)](https://octocode.ai)
 
 ---
 
