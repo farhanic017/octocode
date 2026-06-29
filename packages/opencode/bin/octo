@@ -50,8 +50,8 @@ let arch = archMap[os.arch()]
 if (!arch) {
   arch = os.arch()
 }
-const scope = "@octo-ai/"
-const base = scope + "octocode-" + platform + "-" + arch
+const scope = ""
+const base = scope + "octocode-ai-" + platform + "-" + arch
 const binary = platform === "windows" ? "octocode.exe" : "octocode"
 
 function supportsAvx2() {

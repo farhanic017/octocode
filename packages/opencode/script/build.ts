@@ -275,14 +275,14 @@ for (const item of targets) {
 
   await $`rm -rf ./dist/${name}/bin/tui`
   await Bun.file(`dist/${name}/README.md`).write(
-    `This is the ${item.os}-${item.arch} binary for [@octo-ai/cli](https://www.npmjs.com/package/@octo-ai/cli). Install that package directly.\n`,
+    `This is the ${item.os}-${item.arch} binary for [octocode-ai](https://www.npmjs.com/package/octocode-ai). Install that package directly.\n`,
   )
   await Bun.file(`dist/${name}/package.json`).write(
     JSON.stringify(
       {
-        name: `@octo-ai/${name}`,
+        name: `octocode-ai-${item.os === "win32" ? "windows" : item.os}-${item.arch}${item.abi ? `-${item.abi}` : ""}${item.avx2 === false ? "-baseline" : ""}`,
         version: Script.version,
-        description: "Platform-specific binary for @octo-ai/cli.",
+        description: "Platform-specific binary for octocode-ai.",
         license: "MIT",
         author: "Farhan Dhrubo",
         homepage: "https://github.com/farhanic017/octocode",
