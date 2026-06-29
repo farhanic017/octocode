@@ -280,7 +280,7 @@ for (const item of targets) {
   await Bun.file(`dist/${name}/package.json`).write(
     JSON.stringify(
       {
-        name: `octocode-ai-${item.os === "win32" ? "windows" : item.os}-${item.arch}${item.abi ? `-${item.abi}` : ""}${item.avx2 === false ? "-baseline" : ""}`,
+        name: `octocode-ai-${item.os === "win32" ? "windows" : item.os}-${item.arch}${item.avx2 === false ? "-baseline" : ""}${item.abi ? `-${item.abi}` : ""}`,
         version: Script.version,
         description: "Platform-specific binary for octocode-ai.",
         license: "MIT",
