@@ -1,7 +1,16 @@
 import { pinyin } from "pinyin-pro"
 
-const CJK = /[㐀-䶿一-鿿豈-﫿]/
+const CJK = /[㐀-䶿一-鿿豈-﫿]/
 const cache = new Map<string, string>()
+const CACHE_MAX = 500
+
+function cacheSet(key: string, value: string) {
+  if (cache.size >= CACHE_MAX) {
+    const firstKey = cache.keys().next().value
+    if (firstKey !== undefined) cache.delete(firstKey)
+  }
+  cache.set(key, value)
+}
 
 // Build a romanized, latin-keyboard-typable search string for CJK text so that
 // users don't have to switch their input method to find an item. For "切换会话"
@@ -15,6 +24,6 @@ export function pinyinSearch(text: string | undefined): string {
   const syllables = pinyin(text, { toneType: "none", type: "array" })
   const initials = pinyin(text, { pattern: "first", toneType: "none", type: "array" }).join("")
   const result = `${syllables.join("")} ${syllables.join(" ")} ${initials}`.toLowerCase()
-  cache.set(text, result)
+  cacheSet(text, result)
   return result
 }

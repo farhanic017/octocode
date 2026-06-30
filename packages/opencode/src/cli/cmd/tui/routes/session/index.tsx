@@ -2230,7 +2230,13 @@ function WorkflowPage(props: {
         }, 1000)
         onCleanup(() => {
           clearInterval(interval)
-          if (pageScroll) workflowScrollByRun.set(runID, pageScroll.scrollTop)
+          if (pageScroll) {
+            if (workflowScrollByRun.size >= 50) {
+              const firstKey = workflowScrollByRun.keys().next().value
+              if (firstKey !== undefined) workflowScrollByRun.delete(firstKey)
+            }
+            workflowScrollByRun.set(runID, pageScroll.scrollTop)
+          }
         })
       },
     ),

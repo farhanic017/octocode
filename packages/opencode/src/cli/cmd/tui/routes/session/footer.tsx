@@ -27,9 +27,10 @@ export function Footer() {
   onMount(() => {
     // Track all timeouts to ensure proper cleanup
     const timeouts: ReturnType<typeof setTimeout>[] = []
+    let disposed = false
 
     function tick() {
-      if (connected()) return
+      if (disposed || connected()) return
       if (!store.welcome) {
         setStore("welcome", true)
         timeouts.push(setTimeout(() => tick(), 5000))
@@ -45,6 +46,7 @@ export function Footer() {
     timeouts.push(setTimeout(() => tick(), 10_000))
 
     onCleanup(() => {
+      disposed = true
       timeouts.forEach(clearTimeout)
     })
   })
