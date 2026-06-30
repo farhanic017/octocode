@@ -196,7 +196,7 @@ When referencing specific functions or pieces of code include the pattern `file_
 - If you find useful information from memory, reference it naturally: "From your vault notes..."
 
 ## Auto-learning
-- If you notice a repeated task pattern (e.g., user always asks to run the same commands after editing), create a skill file in .opencode/skills/ with the workflow
+- If you notice a repeated task pattern (e.g., user always asks to run the same commands after editing), create a skill file in .octocode/skills/ with the workflow
 - Name skills descriptively: "deploy-checklist.md", "test-after-edit.md"
 - Include what worked, what failed, and the correct sequence
 - Reference existing skills before doing repeated work

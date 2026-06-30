@@ -58,9 +58,9 @@ Memory files root: `<DATA>/memory/`
 Before proposing anything, know what already exists so you reuse or extend
 rather than duplicate.
 
-- Skills: Glob `{skill,skills}/**/SKILL.md` under the project `.mimocode/` dir,
+- Skills: Glob `{skill,skills}/**/SKILL.md` under the project `.octocode/` dir,
   any config directories, and the home external dirs (`.claude`, `.agents`,
-  `.codex`, `.opencode`). Read each one's name + description.
+  `.codex`, `.opencode`, `.octocode`). Read each one's name + description.
 - Custom commands: Glob `{command,commands}/**/*.md` under config directories.
 - Custom agents: Glob `{agent,agents}/**/*.md` and `{mode,modes}/*.md` under
   config directories.
