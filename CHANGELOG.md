@@ -11,8 +11,6 @@ All notable changes to OctoCode are documented here.
 - **Smart math** — Solves arithmetic instantly without tools
 - **Pattern recognition** — Applies rename/numbering patterns to all similar cases automatically
 - **Dynamic vault/knowledge** — Vault and knowledge graph inject as compact references, read on demand when keywords mentioned
-- **Socials** — Facebook, Instagram, X, GitHub, LinkedIn, Website
-- **Dynamic age** — Calculates Farhan's age from birthday (September 2, 2005)
 - **Agent modes** — All 4 modes documented: `build`, `plan`, `compose`, `agent-swarm`
 - **Slash commands** — `/understand`, `/dream`, `/distill`, `/md`
 - **npm package** — `npm i -g octocode-ai` with auto-installing platform binaries
