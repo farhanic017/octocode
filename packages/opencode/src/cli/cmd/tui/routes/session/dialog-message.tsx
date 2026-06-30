@@ -28,6 +28,7 @@ export function DialogMessage(props: {
   return (
     <DialogSelect
       title="Message Actions"
+      skipFilter
       options={[
         {
           title: "Revert",
