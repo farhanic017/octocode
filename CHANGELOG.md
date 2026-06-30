@@ -11,9 +11,7 @@ All notable changes to OctoCode are documented here.
 - **Smart math** — Solves arithmetic instantly without tools
 - **Pattern recognition** — Applies rename/numbering patterns to all similar cases automatically
 - **Dynamic vault/knowledge** — Vault and knowledge graph inject as compact references, read on demand when keywords mentioned
-- **History & creator info** — Responds with creation date (June 15, 2026 v1 / June 27, 2026 v2), how it was built, and socials
-- **Project info** — Fetches Farhan's public GitHub repos and talks about them (but won't help replicate them)
-- **Socials** — Facebook, Instagram, X, GitHub, LinkedIn, Patreon, Website
+- **Socials** — Facebook, Instagram, X, GitHub, LinkedIn, Website
 - **Dynamic age** — Calculates Farhan's age from birthday (September 2, 2005)
 - **Agent modes** — All 4 modes documented: `build`, `plan`, `compose`, `agent-swarm`
 - **Slash commands** — `/understand`, `/dream`, `/distill`, `/md`
@@ -23,7 +21,6 @@ All notable changes to OctoCode are documented here.
 ### Fixed
 - **Brain dialog crash** — Fixed orphan text node error that crashed TUI on open
 - **Memory leaks** — Cleaned up 6 leaks: event listeners in session/index.tsx and prompt/index.tsx, voiceTimer interval, pinyin cache unbounded growth, workflow scroll map unbounded growth, footer timeout race condition
-- **Trust warning removed** — No longer shows warning when opening home directory
 - **Search removed from Message Actions** — Cleaner dialog without redundant search
 - **Sidebar hidden by default** — Session sidebar no longer shows automatically
 - **dialog-variant crash** — Removed invalid `compact` and `renderFilter` props
@@ -32,7 +29,7 @@ All notable changes to OctoCode are documented here.
 ### Improved
 - **Reduced prompt size** — Vault injects paths only (not full content), knowledge graph limited to 5 nodes
 - **Faster npm install** — Lightweight wrapper package (5KB) with platform binaries as optional dependencies
-- **README updated** — Correct image path, install/uninstall commands, all 4 agent modes, slash commands, Patreon link
+- **README updated** — Correct image path, install/uninstall commands, all 4 agent modes, slash commands
 
 ## [2.0.0] — 2026-06-25
 
