@@ -1,9 +1,8 @@
-import { createSignal, createMemo, onMount, For, Show } from "solid-js"
+import { createSignal, For, Show } from "solid-js"
 import { useDialog } from "@/cli/cmd/tui/ui/dialog"
 import { useTheme } from "@/cli/cmd/tui/context/theme"
 import { TextAttributes } from "@opentui/core"
 import { useKV } from "@/cli/cmd/tui/context/kv"
-import fs from "fs/promises"
 
 export function DialogBrain() {
   const dialog = useDialog()
@@ -13,12 +12,9 @@ export function DialogBrain() {
   const [files, setFiles] = createSignal<string[]>([])
   const [hoveredIdx, setHoveredIdx] = createSignal(-1)
 
-  onMount(() => {
-    if (savedPath) loadFiles(savedPath)
-  })
-
   async function loadFiles(p: string) {
     try {
+      const fs = await import("fs/promises")
       const exists = await fs.stat(p).then(() => true).catch(() => false)
       if (!exists) {
         setFiles([])
@@ -106,6 +102,10 @@ export function DialogBrain() {
         </box>
       )
     })
+  }
+
+  if (savedPath) {
+    loadFiles(savedPath)
   }
 
   return (
