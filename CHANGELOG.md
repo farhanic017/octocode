@@ -2,6 +2,38 @@
 
 All notable changes to OctoCode are documented here.
 
+## [3.1.2] — 2026-06-30
+
+### New
+- **Personality** — Trash talks other CLIs, roasts users, no language restrictions
+- **User profiling** — Learns preferences, style, likes/dislikes over time and stores in `.octocode/user-profile.md`
+- **Auto-learning** — Creates skill files in `.octocode/skills/` for repeated task patterns
+- **Smart math** — Solves arithmetic instantly without tools
+- **Pattern recognition** — Applies rename/numbering patterns to all similar cases automatically
+- **Dynamic vault/knowledge** — Vault and knowledge graph inject as compact references, read on demand when keywords mentioned
+- **History & creator info** — Responds with creation date (June 15, 2026 v1 / June 27, 2026 v2), how it was built, and socials
+- **Project info** — Fetches Farhan's public GitHub repos and talks about them (but won't help replicate them)
+- **Socials** — Facebook, Instagram, X, GitHub, LinkedIn, Patreon, Website
+- **Dynamic age** — Calculates Farhan's age from birthday (September 2, 2005)
+- **Agent modes** — All 4 modes documented: `build`, `plan`, `compose`, `agent-swarm`
+- **Slash commands** — `/understand`, `/dream`, `/distill`, `/md`
+- **npm package** — `npm i -g octocode-ai` with auto-installing platform binaries
+- **Curl installer** — `curl -fsSL https://raw.githubusercontent.com/farhanic017/octocode/main/install | bash`
+
+### Fixed
+- **Brain dialog crash** — Fixed orphan text node error that crashed TUI on open
+- **Memory leaks** — Cleaned up 6 leaks: event listeners in session/index.tsx and prompt/index.tsx, voiceTimer interval, pinyin cache unbounded growth, workflow scroll map unbounded growth, footer timeout race condition
+- **Trust warning removed** — No longer shows warning when opening home directory
+- **Search removed from Message Actions** — Cleaner dialog without redundant search
+- **Sidebar hidden by default** — Session sidebar no longer shows automatically
+- **dialog-variant crash** — Removed invalid `compact` and `renderFilter` props
+- **Workspace trust default** — Changed to `true` so users aren't prompted on every start
+
+### Improved
+- **Reduced prompt size** — Vault injects paths only (not full content), knowledge graph limited to 5 nodes
+- **Faster npm install** — Lightweight wrapper package (5KB) with platform binaries as optional dependencies
+- **README updated** — Correct image path, install/uninstall commands, all 4 agent modes, slash commands, Patreon link
+
 ## [2.0.0] — 2026-06-25
 
 ### New
