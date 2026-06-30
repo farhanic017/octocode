@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from "solid-js"
+import { createSignal, For } from "solid-js"
 import { useDialog } from "@/cli/cmd/tui/ui/dialog"
 import { useTheme } from "@/cli/cmd/tui/context/theme"
 import { TextAttributes } from "@opentui/core"
@@ -34,7 +34,6 @@ export function DialogBrain() {
       return (
         <box flexDirection="column" gap={1} paddingLeft={2} paddingRight={2} paddingTop={1}>
           <text fg={theme.text} attributes={TextAttributes.BOLD}>Obsidian Vault Path</text>
-          {savedPath && <text fg={theme.textMuted}>Current: {savedPath}</text>}
           <text fg={theme.textMuted}>Enter the full path to your Obsidian vault:</text>
           <textarea
             height={3}
@@ -83,7 +82,7 @@ export function DialogBrain() {
             </box>
           </box>
           {currentFiles.length === 0 && (
-            <text fg={theme.textMuted}>No memory files found in vault.</text>
+            <text fg={theme.textMuted}>No memory files found.</text>
           )}
           <For each={currentFiles}>
             {(file, i) => (
@@ -108,28 +107,15 @@ export function DialogBrain() {
     loadFiles(savedPath)
   }
 
+  if (savedPath) {
+    showFileList(savedPath)
+  } else {
+    showVaultSetter()
+  }
+
   return (
     <box flexDirection="column" gap={1} paddingLeft={1} paddingRight={1}>
-      <box flexDirection="row" justifyContent="space-between" alignItems="center">
-        <text fg={theme.text} attributes={TextAttributes.BOLD}>Brain</text>
-        <box
-          flexDirection="row"
-          alignItems="center"
-          paddingLeft={1}
-          paddingRight={1}
-          onMouseUp={() => showVaultSetter()}
-        >
-          <text fg={theme.success}>Vault</text>
-        </box>
-      </box>
-      {savedPath && (
-        <text fg={theme.textMuted}>Vault: {savedPath}</text>
-      )}
-      {!savedPath && (
-        <text fg={theme.textMuted}>
-          Click <span style={{ fg: theme.success }}>Vault</span> to set your Obsidian vault path.
-        </text>
-      )}
+      <text fg={theme.textMuted}>Loading...</text>
     </box>
   )
 }
