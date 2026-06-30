@@ -1,0 +1,33 @@
+{
+  "name": "octocode-ai",
+  "version": "3.0.2",
+  "description": "The open source AI coding agent.",
+  "author": "Farhan Dhrubo",
+  "license": "GPL-3.0-only",
+  "homepage": "https://github.com/farhanic017/octocode",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farhanic017/octocode.git"
+  },
+  "keywords": ["ai", "coding", "agent", "cli", "octocode"],
+  "bin": {
+    "octo": "./bin/octo"
+  },
+  "files": [
+    "bin/octo"
+  ],
+  "optionalDependencies": {
+    "octocode-ai-darwin-arm64": "0.0.0-main-202606291932",
+    "octocode-ai-darwin-x64": "0.0.0-main-202606291932",
+    "octocode-ai-darwin-x64-baseline": "0.0.0-main-202606291932",
+    "octocode-ai-linux-arm64": "0.0.0-main-202606291932",
+    "octocode-ai-linux-arm64-musl": "0.0.0-main-202606291932",
+    "octocode-ai-linux-x64": "0.0.0-main-202606291932",
+    "octocode-ai-linux-x64-baseline": "0.0.0-main-202606291932",
+    "octocode-ai-linux-x64-baseline-musl": "0.0.0-main-202606291932",
+    "octocode-ai-linux-x64-musl": "0.0.0-main-202606291932",
+    "octocode-ai-windows-arm64": "0.0.0-main-202606291932",
+    "octocode-ai-windows-x64": "0.0.0-main-202606291932",
+    "octocode-ai-windows-x64-baseline": "0.0.0-main-202606291932"
+  }
+}

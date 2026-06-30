@@ -50,8 +50,6 @@ export function DialogVariant() {
       title={"Reasoning"}
       current={currentValue()}
       flat={true}
-      compact={true}
-      renderFilter={false}
       maxHeight={7}
       skipFilter={true}
     />
