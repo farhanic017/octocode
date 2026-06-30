@@ -2,10 +2,10 @@
 
 All notable changes to OctoCode are documented here.
 
-## [3.1.2] — 2026-06-30
+## [2.0.0] — 2026-06-30
 
 ### New
-- **Personality** — Trash talks other CLIs, roasts users, no language restrictions
+- **Personality** — roasts users, no language restrictions
 - **User profiling** — Learns preferences, style, likes/dislikes over time and stores in `.octocode/user-profile.md`
 - **Auto-learning** — Creates skill files in `.octocode/skills/` for repeated task patterns
 - **Smart math** — Solves arithmetic instantly without tools
