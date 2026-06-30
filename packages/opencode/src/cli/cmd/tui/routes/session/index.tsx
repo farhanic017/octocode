@@ -235,7 +235,7 @@ export function Session() {
   })
 
   let lastSwitch: string | undefined = undefined
-  event.on("message.part.updated", (evt) => {
+  const unsubPart = event.on("message.part.updated", (evt) => {
     const part = evt.properties.part
     if (part.type !== "tool") return
     if (part.sessionID !== route.sessionID) return
@@ -250,6 +250,7 @@ export function Session() {
       lastSwitch = part.id
     }
   })
+  onCleanup(unsubPart)
 
   let seeded = false
   let scroll: ScrollBoxRenderable
@@ -265,7 +266,7 @@ export function Session() {
   const dialog = useDialog()
   const renderer = useRenderer()
 
-  event.on("session.status", (evt) => {
+  const unsubUpsell = event.on("session.status", (evt) => {
     if (evt.properties.sessionID !== route.sessionID) return
     if (evt.properties.status.type !== "retry") return
     if (evt.properties.status.message !== SessionRetry.GO_UPSELL_MESSAGE) return
@@ -281,6 +282,7 @@ export function Session() {
       kv.set(GO_UPSELL_LAST_SEEN_AT, Date.now())
     })
   })
+  onCleanup(unsubUpsell)
 
   // Allow exit when in child session (prompt is hidden)
   const exit = useExit()
@@ -370,7 +372,7 @@ export function Session() {
 
   // Free "mimo-auto" channel: on a rate-limit / queue ("too many requests"),
   // nudge the user toward a Token Plan — at most once per 24h.
-  event.on("session.status", (evt) => {
+  const unsubTokenPlan = event.on("session.status", (evt) => {
     if (evt.properties.sessionID !== route.sessionID) return
     if (evt.properties.status.type !== "retry") return
     if (!SessionRetry.isRateLimitMessage(evt.properties.status.message)) return
@@ -387,6 +389,7 @@ export function Session() {
       kv.set(QUEUE_TOKEN_PLAN_LAST_SEEN_AT, Date.now())
     })
   })
+  onCleanup(unsubTokenPlan)
 
   function moveFirstChild() {
     const list = actors().filter((a) => a.mode === "subagent")
