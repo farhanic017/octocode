@@ -54,12 +54,12 @@ async function readBrainVault(): Promise<{ vaultPath: string; files: string[]; s
     const entries = await import("fs/promises").then((fs) => fs.readdir(vaultPath))
     const mdFiles = entries.filter((f: string) => f.endsWith(".md")).sort()
 
-    // Only read first 3 files to keep prompt compact
+    // Only read first 1 file to keep prompt compact
     const summaryParts: string[] = []
-    for (const file of mdFiles.slice(0, 3)) {
+    for (const file of mdFiles.slice(0, 1)) {
       try {
         const content = await Filesystem.readText(path.join(vaultPath, file))
-        const preview = content.slice(0, 500) + (content.length > 500 ? "..." : "")
+        const preview = content.slice(0, 300) + (content.length > 300 ? "..." : "")
         summaryParts.push(`### ${file}\n${preview}`)
       } catch {}
     }
@@ -85,10 +85,10 @@ async function readKnowledgeGraph(workspacePath: string): Promise<string | null>
     if (graph.project?.languages?.length) lines.push(`Languages: ${graph.project.languages.join(", ")}`)
     lines.push(`Components tracked: ${graph.nodes?.length || 0}`)
 
-    // Only include first 10 nodes to keep prompt compact
+    // Only include first 5 nodes to keep prompt compact
     if (graph.nodes?.length) {
       lines.push("Key components:")
-      for (const node of graph.nodes.slice(0, 10)) {
+      for (const node of graph.nodes.slice(0, 5)) {
         lines.push(`- ${node.name} (${node.type}): ${node.summary}`)
       }
     }
