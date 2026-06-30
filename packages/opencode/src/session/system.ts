@@ -41,7 +41,7 @@ export function provider(model: Provider.Model) {
   return [PROMPT_DEFAULT]
 }
 
-async function readBrainVault(): Promise<{ vaultPath: string; files: string[]; summary: string } | null> {
+async function readBrainVault(): Promise<{ vaultPath: string; files: string[] } | null> {
   try {
     const kvPath = path.join(Global.Path.state, "kv.json")
     const kv = await Filesystem.readJson<Record<string, any>>(kvPath).catch(() => ({} as Record<string, any>))
@@ -54,23 +54,13 @@ async function readBrainVault(): Promise<{ vaultPath: string; files: string[]; s
     const entries = await import("fs/promises").then((fs) => fs.readdir(vaultPath))
     const mdFiles = entries.filter((f: string) => f.endsWith(".md")).sort()
 
-    // Only read first 1 file to keep prompt compact
-    const summaryParts: string[] = []
-    for (const file of mdFiles.slice(0, 1)) {
-      try {
-        const content = await Filesystem.readText(path.join(vaultPath, file))
-        const preview = content.slice(0, 300) + (content.length > 300 ? "..." : "")
-        summaryParts.push(`### ${file}\n${preview}`)
-      } catch {}
-    }
-
-    return { vaultPath, files: mdFiles, summary: summaryParts.join("\n") }
+    return { vaultPath, files: mdFiles }
   } catch {
     return null
   }
 }
 
-async function readKnowledgeGraph(workspacePath: string): Promise<string | null> {
+async function readKnowledgeGraph(workspacePath: string): Promise<{ name: string; description: string; components: string[] } | null> {
   try {
     const graphPath = path.join(workspacePath, ".understand-anything", "knowledge-graph.json")
     const exists = await Filesystem.exists(graphPath)
@@ -79,21 +69,13 @@ async function readKnowledgeGraph(workspacePath: string): Promise<string | null>
     const content = await Filesystem.readText(graphPath)
     const graph = JSON.parse(content)
 
-    const lines: string[] = []
-    lines.push(`## Knowledge Graph: ${graph.project?.name || "Unknown"}`)
-    if (graph.project?.description) lines.push(`Description: ${graph.project.description}`)
-    if (graph.project?.languages?.length) lines.push(`Languages: ${graph.project.languages.join(", ")}`)
-    lines.push(`Components tracked: ${graph.nodes?.length || 0}`)
+    const components = (graph.nodes || []).slice(0, 8).map((n: any) => `${n.name} (${n.type})`)
 
-    // Only include first 5 nodes to keep prompt compact
-    if (graph.nodes?.length) {
-      lines.push("Key components:")
-      for (const node of graph.nodes.slice(0, 5)) {
-        lines.push(`- ${node.name} (${node.type}): ${node.summary}`)
-      }
+    return {
+      name: graph.project?.name || "Unknown",
+      description: graph.project?.description || "",
+      components,
     }
-
-    return lines.join("\n")
   } catch {
     return null
   }
@@ -132,21 +114,31 @@ export const layer = Layer.effect(
 
         const parts = [envBlock.join("\n"), `IMPORTANT: Your response must ALWAYS strictly follow the same major language as the user.`]
 
-        // Only inject brain vault if it exists (keep compact)
+        // Only inject brain vault reference if it exists (just paths, read content when needed)
         if (brain) {
           parts.push(
             [
               `<brain>`,
-              `Vault: ${brain.vaultPath} (${brain.files.length} .md files)`,
-              brain.summary,
+              `Vault: ${brain.vaultPath}`,
+              `Files: ${brain.files.join(", ")}`,
+              `Read files from vault when user mentions memory, vault, brain, or notes.`,
               `</brain>`,
             ].join("\n"),
           )
         }
 
-        // Only inject knowledge graph if it exists (keep compact)
+        // Only inject knowledge graph reference if it exists (just names, read when needed)
         if (knowledgeGraph) {
-          parts.push(`<knowledge>${knowledgeGraph}</knowledge>`)
+          parts.push(
+            [
+              `<knowledge>`,
+              `Project: ${knowledgeGraph.name}`,
+              knowledgeGraph.description ? `Description: ${knowledgeGraph.description}` : "",
+              `Components: ${knowledgeGraph.components.join(", ")}`,
+              `Read .understand-anything/knowledge-graph.json for details when user mentions architecture, components, or project structure.`,
+              `</knowledge>`,
+            ].filter(Boolean).join("\n"),
+          )
         }
 
         return parts
