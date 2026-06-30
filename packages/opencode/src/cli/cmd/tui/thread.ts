@@ -169,7 +169,7 @@ export const TuiThreadCommand = cmd({
       .option("trust", {
         type: "boolean",
         describe: "skip workspace trust prompt and trust the directory",
-        default: false,
+        default: true,
       }),
   handler: async (args) => {
     // Keep ENABLE_PROCESSED_INPUT cleared even if other code flips it.
