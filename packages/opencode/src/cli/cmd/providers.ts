@@ -547,7 +547,8 @@ export const ProvidersLoginCommand = cmd({
           const choice = await prompts.select({
             message: t("cli.providers.select"),
             options: [
-              { label: "MiMo", value: "xiaomi", hint: t("cli.providers.mimo.recommended_hint") },
+              { label: "MiMo (Recommended)", value: "xiaomi", hint: t("cli.providers.mimo.recommended_hint") },
+              { label: "MiMo (API Key)", value: "xiaomi-api", hint: "Paste an API key directly" },
               ...(loginExt?.menu
                 ? [{ label: loginExt.menu.label, value: loginExt.id, hint: loginExt.menu.hint }]
                 : []),
@@ -556,7 +557,9 @@ export const ProvidersLoginCommand = cmd({
           })
           if (prompts.isCancel(choice)) throw new UI.CancelledError()
 
-          if (loginExt && choice === loginExt.id) {
+          if (choice === "xiaomi-api") {
+            provider = "xiaomi"
+          } else if (loginExt && choice === loginExt.id) {
             await loginExt.run()
             return
           }
@@ -613,6 +616,10 @@ export const ProvidersLoginCommand = cmd({
 
         if (provider === "opencode") {
           prompts.log.info("Create an api key at https://opencode.ai/auth")
+        }
+
+        if (provider === "xiaomi") {
+          prompts.log.info("Get your API key at https://platform.xiaomimimo.com")
         }
 
         if (provider === "xiaomi") {

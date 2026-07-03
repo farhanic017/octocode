@@ -31,6 +31,26 @@ export function DialogMimoLogin() {
         value: "xiaomi",
         description: t("tui.dialog.login.xiaomi.desc"),
         category: "Recommended",
+        onSelect: async () => {
+          const result = await sdk.client.provider.oauth.authorize({
+            providerID: "xiaomi",
+            method: 0,
+          })
+          if (result.error) {
+            toast.show({ message: t("tui.dialog.login.start_failed"), variant: "error" })
+            dialog.clear()
+            return
+          }
+          dialog.replace(() => (
+            <MimoOAuthFlow url={result.data!.url} instructions={result.data!.instructions} />
+          ))
+        },
+      },
+      {
+        title: "Xiaomi (API Key)",
+        value: "xiaomi-api",
+        description: "Paste an API key directly",
+        category: "Recommended",
         onSelect: () => {
           dialog.replace(() => <XiaomiApiKeyDialog />)
         },
