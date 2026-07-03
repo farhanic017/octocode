@@ -18,6 +18,7 @@ import PROMPT_TITLE from "./prompt/title.txt"
 import { Permission } from "@/permission"
 import { mergeDeep, pipe, sortBy, values } from "remeda"
 import { Global } from "@/global"
+import { SWARM_AGENTS, buildFromSpec } from "@/swarm/catalog"
 import path from "path"
 import { Plugin } from "@/plugin"
 import { Skill } from "../skill"
@@ -434,6 +435,12 @@ export const layer = Layer.effect(
           item.toolAllowlist = value.tool_allowlist ?? item.toolAllowlist
           item.options = mergeDeep(item.options, value.options ?? {})
           item.permission = Permission.merge(item.permission, Permission.fromConfig(value.permission ?? {}))
+        }
+
+        for (const spec of SWARM_AGENTS) {
+          if (!agents[spec.name]) {
+            agents[spec.name] = buildFromSpec(spec) as any
+          }
         }
 
         // Ensure Truncate.GLOB is allowed unless explicitly configured
