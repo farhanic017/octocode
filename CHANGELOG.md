@@ -2,7 +2,7 @@
 
 All notable changes to OctoCode are documented here.
 
-## [3.2.0] — 2026-07-03
+## [2.0.0] — 2026-07-03
 
 ### New — Smart Skill Matching Engine
 - **Relevance-sorted skills** — System prompt now ranks skills by relevance to the user's query instead of alphabetical order. The LLM sees the most useful skill first.
