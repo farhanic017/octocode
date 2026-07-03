@@ -2,3 +2,6 @@ export { SWARM_AGENTS, SWARM_PILLARS, buildFromSpec, type SwarmAgentSpec, type P
 export { runCouncilVote, type CouncilOpinion, type CouncilDecision } from "./council"
 export { LoopDetector } from "./loop-detector"
 export { LessonLearner, type Lesson } from "./learning"
+export { Consciousness, type ConsciousnessEvent, type ConsciousnessEventType } from "./consciousness"
+export { SharedMemory, type MemoryEntry, type MemoryType } from "./memory"
+export { SwarmMessaging, type SwarmMessage, type SwarmThread } from "./messaging"
