@@ -5,8 +5,9 @@ import * as Sound from "@/cli/cmd/tui/util/sound"
 import { go, logo } from "@/cli/logo"
 
 export type LogoShape = {
-  left: string[]
-  right: string[]
+  left?: string[]
+  right?: string[]
+  lines?: string[]
 }
 
 type ShimmerConfig = {
@@ -305,8 +306,14 @@ type LogoContext = {
 }
 
 function build(shape: LogoShape): LogoContext {
-  const LEFT = shape.left[0]?.length ?? 0
-  const FULL = shape.left.map((line, i) => line + " ".repeat(GAP) + shape.right[i])
+  if (shape.lines) {
+    const FULL = shape.lines
+    const LEFT = 0
+    const SPAN = Math.hypot(FULL[0]?.length ?? 0, FULL.length * 2) * 0.94
+    return { LEFT, FULL, SPAN, MAP: mapGlyphs(FULL), shape }
+  }
+  const LEFT = shape.left![0]?.length ?? 0
+  const FULL = shape.left!.map((line, i) => line + " ".repeat(GAP) + shape.right![i])
   const SPAN = Math.hypot(FULL[0]?.length ?? 0, FULL.length * 2) * 0.94
   return { LEFT, FULL, SPAN, MAP: mapGlyphs(FULL), shape }
 }
@@ -918,33 +925,12 @@ export function Logo(props: { shape?: LogoShape; ink?: RGBA; idle?: boolean; swe
         zIndex={1}
         onMouse={mouse}
       />
-      <For each={ctx.shape.left}>
+      <For each={ctx.FULL}>
         {(line, index) => {
-          const labelRow = index() === 0
-          if (labelRow) {
-            return (
-              <box flexDirection="row" gap={1}>
-                <text fg={MIMO_GRAY} selectable={false}>{line}</text>
-                <text fg={MIMO_GRAY} selectable={false}>{ctx.shape.right[index()]}</text>
-              </box>
-            )
-          }
           return (
             <box flexDirection="row" gap={1}>
               <box flexDirection="row">
                 {renderLine(line, index(), props.ink ?? MIMO_ORANGE, true, 0, frame(), dusk(), idleState())}
-              </box>
-              <box flexDirection="row">
-                {renderLine(
-                  ctx.shape.right[index()],
-                  index(),
-                  props.ink ?? MIMO_GRAY,
-                  true,
-                  ctx.LEFT + GAP,
-                  frame(),
-                  dusk(),
-                  idleState(),
-                )}
               </box>
             </box>
           )
