@@ -234,7 +234,7 @@ export function Home() {
           <box paddingTop={1}>
             <box alignItems="center" marginLeft={20}>
               <text fg={C.pink} attributes={TextAttributes.BOLD}>
-                OCTOCODE V2
+                OCTOCODE V2.5
               </text>
               <text fg={C.muted}>{greeting() + user() + "!"}</text>
             </box>
