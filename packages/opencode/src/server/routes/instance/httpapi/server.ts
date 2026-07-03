@@ -73,7 +73,7 @@ const auth = Layer.succeed(
       Effect.gen(function* () {
         if (!Flag.MIMOCODE_SERVER_PASSWORD) return yield* effect
 
-        const user = Flag.MIMOCODE_SERVER_USERNAME ?? "mimocode"
+        const user = Flag.MIMOCODE_SERVER_USERNAME ?? "octocode"
         if (credential.username !== user) {
           return yield* new Unauthorized({ message: "Unauthorized" })
         }
