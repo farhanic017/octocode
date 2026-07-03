@@ -24,6 +24,9 @@ target
 .scripts
 .direnv/
 
+# Understand-anything generated files
+.understand-anything/
+
 # Local dev files
 opencode-dev
 UPCOMING_CHANGELOG.md

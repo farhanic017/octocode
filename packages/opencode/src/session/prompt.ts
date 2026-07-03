@@ -3111,8 +3111,10 @@ NOTE: At any point in time through this workflow you should feel free to ask the
               return "continue" as const
             }
 
+            const userQueryParts = msgs.findLast((m) => m.info.role === "user" && m.info.id === lastUser.id)?.parts ?? []
+            const userQuery = userQueryText(userQueryParts)
             const [skills, env, instructions] = yield* Effect.all([
-              sys.skills(agent),
+              sys.skills(agent, userQuery || undefined),
               Effect.promise(() => sys.environment(model, session.time.created)),
               instruction.system().pipe(Effect.orDie),
             ])

@@ -30,6 +30,8 @@ export const SkillTool = Tool.define(
             throw new Error(`Skill "${params.name}" not found. Available skills: ${available || "none"}`)
           }
 
+          yield* skill.activate(params.name)
+
           yield* ctx.ask({
             permission: "skill",
             patterns: [params.name],
@@ -47,6 +49,8 @@ export const SkillTool = Tool.define(
             Stream.runCollect,
             Effect.map((chunk) => [...chunk].map((file) => `<file>${file}</file>`).join("\n")),
           )
+
+          yield* skill.recordUsage(params.name)
 
           return {
             title: `Loaded skill: ${info.name}`,

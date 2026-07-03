@@ -26,16 +26,19 @@ export function DialogSkill(props: DialogSkillProps) {
       list = list.filter((s) => !s.name.startsWith("compose:"))
     }
     const maxWidth = Math.max(0, ...list.map((s) => s.name.length))
-    return list.map((skill) => ({
-      title: skill.name.padEnd(maxWidth),
-      description: skill.description?.replace(/\s+/g, " ").trim(),
-      value: skill.name,
-      category: "Skills",
-      onSelect: () => {
-        props.onSelect(skill.name)
-        dialog.clear()
-      },
-    }))
+    return list.map((skill: any) => {
+      const activeTag = skill.active ? " [active]" : ""
+      return {
+        title: `${skill.name.padEnd(maxWidth)}${activeTag}`,
+        description: skill.description?.replace(/\s+/g, " ").trim(),
+        value: skill.name,
+        category: "Skills",
+        onSelect: () => {
+          props.onSelect(skill.name)
+          dialog.clear()
+        },
+      }
+    })
   })
 
   return <DialogSelect title="Skills" placeholder="Search skills..." options={options()} />

@@ -18,6 +18,8 @@ import { Log } from "../util"
 import { Discovery } from "./discovery"
 import { extractComposeBundle } from "./compose/extract"
 import { extractBuiltinBundle } from "./builtin/extract"
+import { matchSkills, type SkillMatch } from "./match"
+import { parsePlainMarkdown } from "./markdown-fallback"
 
 const log = Log.create({ service: "skill" })
 const EXTERNAL_DIRS = [".claude", ".agents", ".codex", ".opencode", ".octocode"]
@@ -52,9 +54,16 @@ export const NameMismatchError = NamedError.create(
   }),
 )
 
+export type ActiveMeta = {
+  loadedAt: number
+  callCount: number
+  lastUsedAt: number
+}
+
 type State = {
   skills: Record<string, Info>
   dirs: Set<string>
+  active: Map<string, ActiveMeta>
 }
 
 type DiscoveryState = {
@@ -72,7 +81,12 @@ export interface Interface {
   readonly all: () => Effect.Effect<Info[]>
   readonly dirs: () => Effect.Effect<string[]>
   readonly available: (agent?: Agent.Info) => Effect.Effect<Info[]>
+  readonly match: (query: string) => Effect.Effect<SkillMatch[]>
   readonly reload: () => Effect.Effect<void>
+  readonly activate: (name: string) => Effect.Effect<void>
+  readonly deactivate: (name: string) => Effect.Effect<void>
+  readonly activeSkills: () => Effect.Effect<Map<string, ActiveMeta>>
+  readonly recordUsage: (name: string) => Effect.Effect<void>
 }
 
 const add = Effect.fnUntraced(function* (state: State, match: string, bus: Bus.Interface) {
@@ -95,8 +109,12 @@ const add = Effect.fnUntraced(function* (state: State, match: string, bus: Bus.I
 
   if (!md) return
 
-  const parsed = Info.pick({ name: true, description: true, hidden: true }).safeParse(md.data)
-  if (!parsed.success) return
+  let parsed = Info.pick({ name: true, description: true, hidden: true }).safeParse(md.data)
+  if (!parsed.success) {
+    const fallback = parsePlainMarkdown(md.content)
+    if (!fallback) return
+    parsed = { success: true, data: { name: fallback.name, description: fallback.description, hidden: undefined } }
+  }
 
   if (state.skills[parsed.data.name]) {
     log.warn("duplicate skill name", {
@@ -254,7 +272,7 @@ export const layer = Layer.effect(
     )
     const state = yield* InstanceState.make(
       Effect.fn("Skill.state")(function* (ctx) {
-        const s: State = { skills: {}, dirs: new Set() }
+        const s: State = { skills: {}, dirs: new Set(), active: new Map() }
         yield* loadSkills(s, yield* InstanceState.get(discovered), bus)
         return s
       }),
@@ -284,12 +302,43 @@ export const layer = Layer.effect(
       return list.filter((skill) => Permission.evaluate("skill", skill.name, agent.permission).action !== "deny")
     })
 
+    const match = Effect.fn("Skill.match")(function* (query: string) {
+      const s = yield* InstanceState.get(state)
+      return matchSkills(Object.values(s.skills), query)
+    })
+
     const reload = Effect.fn("Skill.reload")(function* () {
       yield* InstanceState.invalidate(discovered)
       yield* InstanceState.invalidate(state)
     })
 
-    return Service.of({ get, all, dirs, available, reload })
+    const activate = Effect.fn("Skill.activate")(function* (name: string) {
+      const s = yield* InstanceState.get(state)
+      if (!s.active.has(name)) {
+        s.active.set(name, { loadedAt: Date.now(), callCount: 0, lastUsedAt: Date.now() })
+      }
+    })
+
+    const deactivate = Effect.fn("Skill.deactivate")(function* (name: string) {
+      const s = yield* InstanceState.get(state)
+      s.active.delete(name)
+    })
+
+    const activeSkills = Effect.fn("Skill.activeSkills")(function* () {
+      const s = yield* InstanceState.get(state)
+      return s.active
+    })
+
+    const recordUsage = Effect.fn("Skill.recordUsage")(function* (name: string) {
+      const s = yield* InstanceState.get(state)
+      const meta = s.active.get(name)
+      if (meta) {
+        meta.callCount++
+        meta.lastUsedAt = Date.now()
+      }
+    })
+
+    return Service.of({ get, all, dirs, available, match, reload, activate, deactivate, activeSkills, recordUsage })
   }),
 )
 
@@ -300,30 +349,41 @@ export const defaultLayer = layer.pipe(
   Layer.provide(AppFileSystem.defaultLayer),
 )
 
-export function fmt(list: Info[], opts: { verbose: boolean }) {
+export function fmt(
+  list: Info[],
+  opts: { verbose: boolean; query?: string; active?: Map<string, ActiveMeta> },
+) {
   if (list.length === 0) return "No skills are currently available."
+
+  const sorted = opts.query
+    ? matchSkills(list, opts.query, opts.active).map((m) => m.skill)
+    : list.toSorted((a, b) => a.name.localeCompare(b.name))
+
   if (opts.verbose) {
     return [
       "<available_skills>",
-      ...list
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .flatMap((skill) => [
+      ...sorted.flatMap((skill) => {
+        const isActive = opts.active?.has(skill.name) ?? false
+        const meta = isActive ? opts.active!.get(skill.name)! : undefined
+        const activeTag = isActive ? ` [ACTIVE: ${meta!.callCount} calls]` : ""
+        return [
           "  <skill>",
-          `    <name>${skill.name}</name>`,
+          `    <name>${skill.name}${activeTag}</name>`,
           `    <description>${skill.description}</description>`,
           `    <location>${pathToFileURL(skill.location).href}</location>`,
           "  </skill>",
-        ]),
+        ]
+      }),
       "</available_skills>",
     ].join("\n")
   }
 
   return [
     "## Available Skills",
-    ...list
-      .toSorted((a, b) => a.name.localeCompare(b.name))
-      .map((skill) => `- **${skill.name}**: ${skill.description}`),
+    ...sorted.map((skill) => `- **${skill.name}**: ${skill.description}`),
   ].join("\n")
 }
 
+export type { SkillMatch } from "./match"
+export { matchSkills } from "./match"
 export * as Skill from "."

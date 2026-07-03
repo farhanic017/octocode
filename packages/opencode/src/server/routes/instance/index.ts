@@ -249,7 +249,13 @@ export const InstanceRoutes = (upgrade: UpgradeWebSocket): Hono => {
       async (c) =>
         jsonRequest("InstanceRoutes.skill.list", c, function* () {
           const skill = yield* Skill.Service
-          return yield* skill.all()
+          const all = yield* skill.all()
+          const active = yield* skill.activeSkills()
+          return all.map((s) => ({
+            ...s,
+            active: active.has(s.name),
+            callCount: active.get(s.name)?.callCount ?? 0,
+          }))
         }),
     )
     .get(

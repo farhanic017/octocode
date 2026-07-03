@@ -281,7 +281,7 @@
     },
     "packages/opencode": {
       "name": "octocode-ai",
-      "version": "3.0.0",
+      "version": "3.2.0",
       "bin": {
         "octo": "./bin/octo",
       },
