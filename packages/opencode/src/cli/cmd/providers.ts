@@ -547,8 +547,8 @@ export const ProvidersLoginCommand = cmd({
           const choice = await prompts.select({
             message: t("cli.providers.select"),
             options: [
-              { label: "MiMo (Recommended)", value: "xiaomi", hint: t("cli.providers.mimo.recommended_hint") },
-              { label: "MiMo (API Key)", value: "xiaomi-api", hint: "Paste an API key directly" },
+              { label: "Xiaomi (Recommended)", value: "xiaomi", hint: t("cli.providers.mimo.recommended_hint") },
+              { label: "Xiaomi (API Key)", value: "xiaomi-api", hint: "Paste an API key directly" },
               ...(loginExt?.menu
                 ? [{ label: loginExt.menu.label, value: loginExt.id, hint: loginExt.menu.hint }]
                 : []),
