@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "name": "octocode-ai",
   "author": "Farhan Dhrubo",
   "type": "module",
