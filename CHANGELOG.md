@@ -2,6 +2,47 @@
 
 All notable changes to OctoCode are documented here.
 
+## [3.2.0] — 2026-07-03
+
+### New — Smart Skill Matching Engine
+- **Relevance-sorted skills** — System prompt now ranks skills by relevance to the user's query instead of alphabetical order. The LLM sees the most useful skill first.
+- **Weighted token scoring** — Name matches score 3x, description matches score 1x. Exact word matches (1.0) beat substring matches (0.8) beat prefix matches (0.7).
+- **24-category synonym expansion** — "database" automatically expands to "db", "sql", "postgres", "supabase", "storage", "query", "data", "table", "migration". Reverse expansion too: "postgres" → "database". Two-hop transitive: "motion" → "animation" → "gsap".
+- **Compound token splitting** — "skill-dispatcher" splits into "skill" + "dispatcher" for better matching.
+- **Coverage bonus** — If 80%+ of query tokens match a skill, score gets 1.3x multiplier. 100% match gets additional 1.15x.
+- **Session query extraction** — The user's current message is extracted and passed to the matching engine, so the system prompt adapts per-turn.
+
+### New — Skill Lifecycle Tracking
+- **Active skill tracking** — Skills are marked active when loaded via the `skill` tool. Tracks load time, call count, and last used timestamp.
+- **Score boost for active skills** — Already-loaded skills get 1.5x multiplier in matching. Frequently used skills get up to +2.0 bonus points.
+- **System prompt indicators** — Active skills show `[ACTIVE: N calls]` badge in the `<available_skills>` XML block.
+- **TUI active badge** — Skill dialog shows `[active]` next to loaded skills.
+- **API active status** — Skill list endpoint returns `active` boolean and `callCount` per skill.
+
+### New — Plain Markdown Skill Fallback
+- **No-frontmatter support** — SKILL.md files without YAML frontmatter now load by extracting name from `# heading` and description from `> blockquote`.
+- **Gemini-style compatibility** — Skills written in Gemini format (`# name\n> description`) are recognized automatically.
+- **Zero config** — Works with existing skill discovery. Only activates when frontmatter is missing.
+
+### New — Curl Installer
+- **Cross-platform install script** — `curl -fsSL https://raw.githubusercontent.com/farhanic017/octocode/main/install.sh | bash` detects OS and architecture, downloads correct binary.
+
+### Build
+- **12 platform binaries** — linux (arm64, x64, x64-baseline, arm64-musl, x64-musl, x64-baseline-musl) + darwin (arm64, x64, x64-baseline) + windows (arm64, x64, x64-baseline)
+- **All 13 packages published to npm** — `octocode-ai@3.2.0` with 12 optional platform binaries
+- **40 tests passing** — 23 matching engine + 6 lifecycle + 11 markdown fallback
+
+### Files Changed
+- `packages/opencode/src/skill/match.ts` — Matching engine (normalize, tokenize, expandSynonyms, matchToken, computeSmartScore, computeRelevance, matchSkills)
+- `packages/opencode/src/skill/markdown-fallback.ts` — Plain markdown parser (heading + blockquote extraction)
+- `packages/opencode/src/skill/index.ts` — ActiveMeta type, activate/deactivate/activeSkills/recordUsage methods, fmt() with relevance sorting and active badges
+- `packages/opencode/src/tool/skill.ts` — activate() and recordUsage() hooks on skill load
+- `packages/opencode/src/session/system.ts` — Passes active skills map and query to skill formatting
+- `packages/opencode/src/session/prompt.ts` — Extracts user query text for relevance sorting
+- `packages/opencode/src/server/routes/instance/index.ts` — API returns active status and call count
+- `packages/opencode/src/cli/cmd/tui/component/dialog-skill.tsx` — Shows [active] badge in TUI
+- `install.sh` — Cross-platform curl installer
+
 ## [2.0.0] — 2026-06-30
 
 ### New
