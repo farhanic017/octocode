@@ -8,6 +8,7 @@ import { useLanguage } from "../context/language"
 import { createDialogProviderOptions } from "./dialog-provider"
 import { DialogSelect } from "@/cli/cmd/tui/ui/dialog-select"
 import { DialogPrompt } from "../ui/dialog-prompt"
+import { DialogModel } from "./dialog-model"
 import { useToast } from "../ui/toast"
 import * as Clipboard from "@/cli/cmd/tui/util/clipboard"
 import { useRenderer } from "@opentui/solid"
@@ -30,19 +31,8 @@ export function DialogMimoLogin() {
         value: "xiaomi",
         description: t("tui.dialog.login.xiaomi.desc"),
         category: "Recommended",
-        onSelect: async () => {
-          const result = await sdk.client.provider.oauth.authorize({
-            providerID: "xiaomi",
-            method: 0,
-          })
-          if (result.error) {
-            toast.show({ message: t("tui.dialog.login.start_failed"), variant: "error" })
-            dialog.clear()
-            return
-          }
-          dialog.replace(() => (
-            <MimoOAuthFlow url={result.data!.url} instructions={result.data!.instructions} />
-          ))
+        onSelect: () => {
+          dialog.replace(() => <XiaomiApiKeyDialog />)
         },
       },
       {
@@ -139,6 +129,41 @@ export function DialogMimoLogin() {
     <DialogSelect
       title={t("tui.dialog.login.title")}
       options={options()}
+    />
+  )
+}
+
+function XiaomiApiKeyDialog() {
+  const dialog = useDialog()
+  const sdk = useSDK()
+  const sync = useSync()
+  const { theme } = useTheme()
+  const toast = useToast()
+
+  return (
+    <DialogPrompt
+      title="Xiaomi API Key"
+      placeholder="API key"
+      description={
+        <box gap={1}>
+          <text fg={theme.textMuted}>
+            Get your API key from the Xiaomi MiMo platform.
+          </text>
+          <text fg={theme.text}>
+            Go to <span style={{ fg: theme.primary }}>https://platform.xiaomimimo.com</span>
+          </text>
+        </box>
+      }
+      onConfirm={async (value) => {
+        if (!value) return
+        await sdk.client.auth.set({
+          providerID: "xiaomi",
+          auth: { type: "api", key: value },
+        })
+        await sdk.client.instance.dispose()
+        await sync.bootstrap()
+        dialog.replace(() => <DialogModel providerID="xiaomi" />)
+      }}
     />
   )
 }

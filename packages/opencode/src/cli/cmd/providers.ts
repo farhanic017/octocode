@@ -530,10 +530,7 @@ export const ProvidersLoginCommand = cmd({
         const loginExt = await loadLoginExtension()
         const loginExtIds = loginExt ? [loginExt.id, ...(loginExt.aliases ?? [])] : []
         let provider: string
-        if (args.provider === "xiaomi") {
-          await mimoLogin()
-          return
-        } else if (loginExt && args.provider && loginExtIds.includes(args.provider)) {
+        if (loginExt && args.provider && loginExtIds.includes(args.provider)) {
           await loginExt.run()
           return
         } else if (args.provider) {
@@ -558,11 +555,6 @@ export const ProvidersLoginCommand = cmd({
             ],
           })
           if (prompts.isCancel(choice)) throw new UI.CancelledError()
-
-          if (choice === "xiaomi") {
-            await mimoLogin()
-            return
-          }
 
           if (loginExt && choice === loginExt.id) {
             await loginExt.run()
@@ -621,6 +613,10 @@ export const ProvidersLoginCommand = cmd({
 
         if (provider === "opencode") {
           prompts.log.info("Create an api key at https://opencode.ai/auth")
+        }
+
+        if (provider === "xiaomi") {
+          prompts.log.info("Get your API key at https://platform.xiaomimimo.com")
         }
 
         if (provider === "vercel") {
