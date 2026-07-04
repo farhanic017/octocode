@@ -1,10 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "3.7.6",
+  "version": "3.8.0",
   "name": "octocode-ai",
   "type": "module",
   "license": "GPL-3.0-only",
-  "description": "AI-powered development tool for the terminal with desktop & browser automation",
+  "description": "AI-powered development tool for the terminal",
   "scripts": {
     "postinstall": "node script/postinstall.mjs"
   },
@@ -20,9 +20,6 @@
     "coding",
     "cli",
     "terminal",
-    "automation",
-    "desktop",
-    "browser",
     "openai",
     "anthropic",
     "claude"
