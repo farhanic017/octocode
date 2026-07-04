@@ -2,6 +2,21 @@
 
 All notable changes to OctoCode are documented here.
 
+## [3.9.6] — 2026-07-05
+
+### Platform Changes
+- **Dropped: `darwin-x64`** — No longer built or supported. Apple Silicon is the standard.
+- **Dropped: `linux-x64-musl`** — No longer built or supported.
+- **Dropped: `linux-arm64-musl`** — No longer built or supported.
+- Remaining platforms: `darwin-arm64`, `linux-arm64`, `linux-x64`, `windows-arm64`, `windows-x64`
+
+### Previously Dropped (v3.9.5)
+- `darwin-x64-baseline`, `linux-x64-baseline`, `linux-x64-baseline-musl`, `windows-x64-baseline`
+
+### Build
+- **5 platform binaries** — Down from 12. Cleaner, faster releases.
+- Binary-only package, zero npm dependencies.
+
 ## [3.5.0] — 2026-07-05
 
 ### Desktop Automation
