@@ -1,10 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "name": "octocode-ai",
   "type": "module",
   "license": "GPL-3.0-only",
   "scripts": {
+    "postinstall": "node script/postinstall.mjs",
     "typecheck": "tsgo --noEmit",
     "test": "bun test --timeout 30000",
     "test:ci": "mkdir -p .artifacts/unit && bun test --timeout 30000 --reporter=junit --reporter-outfile=.artifacts/unit/junit.xml",
