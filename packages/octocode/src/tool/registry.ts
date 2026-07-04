@@ -13,26 +13,6 @@ import { WebFetchTool } from "./webfetch"
 import { WriteTool } from "./write"
 import { InvalidTool } from "./invalid"
 import { SkillTool } from "./skill"
-import { DesktopControlTool } from "./desktop_control"
-import { ScreenshotTool } from "./screenshot"
-import { OpenAppTool } from "./open_app"
-import { OpenTerminalTool } from "./open_terminal"
-import { BrowserNavigateTool } from "./browser_navigate"
-import { BrowserClickTool } from "./browser_click"
-import { BrowserTypeTool } from "./browser_type"
-import { BrowserScreenshotTool } from "./browser_screenshot"
-import { BrowserEvaluateTool } from "./browser_evaluate"
-import { BrowserWaitTool } from "./browser_wait"
-import { DesktopWorkflowTool } from "./desktop_workflow"
-import { VisualQATool } from "./visual_qa"
-import { DesktopClipboardTool } from "./desktop_clipboard"
-import { DesktopWindowTool } from "./desktop_window"
-import { DesktopRecordTool } from "./desktop_record"
-import { DesktopReplayTool } from "./desktop_replay"
-import { BrowserHoverTool } from "./browser_hover"
-import { BrowserSelectTool } from "./browser_select"
-import { BrowserDragTool } from "./browser_drag"
-import { DesktopScreenRecordTool } from "./desktop_screen_record"
 import * as Tool from "./tool"
 import { Config } from "@/config/config"
 import { type ToolContext as PluginToolContext, type ToolDefinition } from "@octocode-ai/plugin"
@@ -151,26 +131,6 @@ export const layer: Layer.Layer<
     const greptool = yield* GrepTool
     const patchtool = yield* ApplyPatchTool
     const skilltool = yield* SkillTool
-    const desktopcontrol = yield* DesktopControlTool
-    const screenshottool = yield* ScreenshotTool
-    const openapptool = yield* OpenAppTool
-    const terminaltool = yield* OpenTerminalTool
-    const browsernavigate = yield* BrowserNavigateTool
-    const browserclick = yield* BrowserClickTool
-    const browsertype = yield* BrowserTypeTool
-    const browserscreenshot = yield* BrowserScreenshotTool
-    const browserevaluate = yield* BrowserEvaluateTool
-    const browserwait = yield* BrowserWaitTool
-    const desktopworkflow = yield* DesktopWorkflowTool
-    const visualqa = yield* VisualQATool
-    const desktopclipboard = yield* DesktopClipboardTool
-    const desktopwindow = yield* DesktopWindowTool
-    const desktoprecord = yield* DesktopRecordTool
-    const desktopreplay = yield* DesktopReplayTool
-    const browserhover = yield* BrowserHoverTool
-    const browserselect = yield* BrowserSelectTool
-    const browserdrag = yield* BrowserDragTool
-    const desktopscreenrecord = yield* DesktopScreenRecordTool
     const agent = yield* Agent.Service
 
     const state = yield* InstanceState.make<State>(
@@ -278,26 +238,6 @@ export const layer: Layer.Layer<
           question: Tool.init(question),
           lsp: Tool.init(lsptool),
           plan: Tool.init(plan),
-          desktop_control: Tool.init(desktopcontrol),
-          screenshot: Tool.init(screenshottool),
-          open_app: Tool.init(openapptool),
-          open_terminal: Tool.init(terminaltool),
-          browser_navigate: Tool.init(browsernavigate),
-          browser_click: Tool.init(browserclick),
-          browser_type: Tool.init(browsertype),
-          browser_screenshot: Tool.init(browserscreenshot),
-          browser_evaluate: Tool.init(browserevaluate),
-          browser_wait: Tool.init(browserwait),
-          desktop_workflow: Tool.init(desktopworkflow),
-          visual_qa: Tool.init(visualqa),
-          desktop_clipboard: Tool.init(desktopclipboard),
-          desktop_window: Tool.init(desktopwindow),
-          desktop_record: Tool.init(desktoprecord),
-          desktop_replay: Tool.init(desktopreplay),
-          browser_hover: Tool.init(browserhover),
-          browser_select: Tool.init(browserselect),
-          browser_drag: Tool.init(browserdrag),
-          desktop_screen_record: Tool.init(desktopscreenrecord),
         })
 
         return {
@@ -317,26 +257,6 @@ export const layer: Layer.Layer<
             tool.search,
             tool.skill,
             tool.patch,
-            tool.desktop_control,
-            tool.screenshot,
-            tool.open_app,
-            tool.open_terminal,
-            tool.browser_navigate,
-            tool.browser_click,
-            tool.browser_type,
-            tool.browser_screenshot,
-            tool.browser_evaluate,
-            tool.browser_wait,
-            tool.desktop_workflow,
-            tool.visual_qa,
-            tool.desktop_clipboard,
-            tool.desktop_window,
-            tool.desktop_record,
-            tool.desktop_replay,
-            tool.browser_hover,
-            tool.browser_select,
-            tool.browser_drag,
-            tool.desktop_screen_record,
             ...(flags.experimentalLspTool ? [tool.lsp] : []),
             ...(flags.experimentalPlanMode && flags.client === "cli" ? [tool.plan] : []),
           ],

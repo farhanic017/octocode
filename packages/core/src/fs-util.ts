@@ -243,12 +243,6 @@ export namespace FSUtil {
   }
 
   export function contains(parent: string, child: string) {
-    // Cross-drive paths on Windows can never be contained
-    if (process.platform === "win32") {
-      const parentDrive = parent.match(/^([A-Za-z]):/)?.[1]?.toUpperCase()
-      const childDrive = child.match(/^([A-Za-z]):/)?.[1]?.toUpperCase()
-      if (parentDrive && childDrive && parentDrive !== childDrive) return false
-    }
     const result = relative(parent, child)
     return result === "" || (!isAbsolute(result) && result !== ".." && !result.startsWith(`..${sep}`))
   }

@@ -370,15 +370,6 @@ export const ShellTool = Tool.define(
           const file = yield* cygpath(shell, text)
           if (file) return file
         }
-        // Handle drive-relative paths like C:../outside.txt
-        const driveRelative = text.match(/^([A-Za-z]):(.+)$/)
-        if (driveRelative) {
-          const drive = driveRelative[1].toUpperCase()
-          const rest = driveRelative[2]
-          // Resolve relative to the drive's current directory
-          const driveRoot = `${drive}:\\`
-          return FSUtil.normalizePath(path.resolve(driveRoot, rest))
-        }
         return FSUtil.normalizePath(path.resolve(root, FSUtil.windowsPath(text)))
       }
       return path.resolve(root, text)

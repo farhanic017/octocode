@@ -1,11 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "3.7.5",
-  "name": "octocode-ai",
+  "version": "2.0.2",
+  "name": "octocode",
   "type": "module",
   "license": "GPL-3.0-only",
+  "private": true,
   "scripts": {
-    "postinstall": "node script/postinstall.mjs",
     "typecheck": "tsgo --noEmit",
     "test": "bun test --timeout 30000",
     "test:ci": "mkdir -p .artifacts/unit && bun test --timeout 30000 --reporter=junit --reporter-outfile=.artifacts/unit/junit.xml",
@@ -17,7 +17,7 @@
     "dev:temporary": "bun run --conditions=browser ./src/temporary.ts"
   },
   "bin": {
-    "octo": "./bin/octocode.exe"
+    "octo": "./bin/octocode"
   },
   "exports": {
     "./*": "./src/*.ts"
@@ -80,7 +80,6 @@
     "@effect/opentelemetry": "catalog:",
     "@effect/platform-node": "catalog:",
     "@modelcontextprotocol/sdk": "1.29.0",
-    "@nut-tree-fork/nut-js": "^4.2.6",
     "@octocode-ai/llm": "workspace:*",
     "@octocode-ai/plugin": "workspace:*",
     "@octocode-ai/script": "workspace:*",

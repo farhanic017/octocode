@@ -453,13 +453,7 @@ describe("tool.shell permissions", () => {
                 ).toMatchObject({ message: err.message })
                 expect(requests[0]?.permission).toBe("external_directory")
                 if (requests[0]?.permission !== "external_directory") return
-                // For drive-relative paths like C:../outside.txt, the resolved path is on C:\
-                // so the patterns should contain C:\* (or the specific resolved directory)
-                const patterns = requests[0].patterns
-                const hasMatchingPattern = patterns.some(
-                  (p) => p.includes("C:\\") || p.includes(path.dirname(tmp)),
-                )
-                expect(hasMatchingPattern).toBe(true)
+                expect(requests[0].patterns).toContain(glob(path.join(path.dirname(tmp), "*")))
               }),
             )
           }),
@@ -924,17 +918,13 @@ describe("tool.shell permissions", () => {
           const extDirReq = requests.find((r) => r.permission === "external_directory")
           const expected = glob(path.join(outerTmp, "*"))
           expect(extDirReq).toBeDefined()
-          // On cross-drive setups with spaces in paths, tree-sitter may resolve to drive root
-          const patterns = extDirReq!.patterns
-          const always = extDirReq!.always
-          const hasExpected = patterns.includes(expected) || patterns.some((p) => outerTmp.startsWith(p.replace("\\*", "").replace("/*", "")))
-          expect(hasExpected).toBe(true)
-          const hasExpectedAlways = always.includes(expected) || always.some((p) => outerTmp.startsWith(p.replace("\\*", "").replace("/*", "")))
-          expect(hasExpectedAlways).toBe(true)
-          // Metadata may have resolved directory (drive root on cross-drive with spaces)
+          expect(extDirReq!.patterns).toContain(expected)
+          expect(extDirReq!.always).toContain(expected)
           expect(extDirReq!.metadata).toMatchObject({
             command: `cat ${filepath}`,
             description: "Read external file",
+            directories: [outerTmp],
+            patterns: [expected],
           })
         }),
       )
@@ -957,15 +947,7 @@ describe("tool.shell permissions", () => {
             capture(requests),
           )
           const extDirReq = requests.find((r) => r.permission === "external_directory")
-          // On cross-drive setups (temp on D:, project on C:), the path is outside the project
-          // so permission IS asked. Only on same-drive setups should it be undefined.
-          const tmpDrive = tmp.match(/^([A-Za-z]):/)?.[1]?.toUpperCase()
-          const projectDrive = process.cwd().match(/^([A-Za-z]):/)?.[1]?.toUpperCase()
-          if (tmpDrive === projectDrive) {
-            expect(extDirReq).toBeUndefined()
-          } else {
-            expect(extDirReq).toBeDefined()
-          }
+          expect(extDirReq).toBeUndefined()
         }),
       )
     }),

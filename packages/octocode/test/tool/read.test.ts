@@ -205,11 +205,6 @@ describe("tool.read external_directory permission", () => {
           .replaceAll("\\", "/")
           .toLowerCase()
 
-        // Skip on cross-drive setups: alt path without drive letter resolves to project drive
-        const dirDrive = dir.match(/^([A-Za-z]):/)?.[1]?.toUpperCase()
-        const cwdDrive = process.cwd().match(/^([A-Za-z]):/)?.[1]?.toUpperCase()
-        if (dirDrive !== cwdDrive) return
-
         yield* exec(dir, { filePath: alt }, next)
         const read = items.find((item) => item.permission === "read")
         expect(read).toBeDefined()

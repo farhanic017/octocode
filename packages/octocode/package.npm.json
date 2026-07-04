@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "3.7.2",
+  "version": "3.7.6",
   "name": "octocode-ai",
   "type": "module",
   "license": "GPL-3.0-only",
@@ -9,7 +9,7 @@
     "postinstall": "node script/postinstall.mjs"
   },
   "bin": {
-    "octo": "./bin/octocode"
+    "octo": "./bin/octocode.exe"
   },
   "repository": {
     "type": "git",

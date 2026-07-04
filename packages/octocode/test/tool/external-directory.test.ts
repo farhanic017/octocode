@@ -125,20 +125,8 @@ describe("tool.assertExternalDirectory", () => {
           const req = requests.find((r) => r.permission === "external_directory")
           const expected = glob(path.join(outerTmp, "*"))
           expect(req).toBeDefined()
-          // Debug: log the actual patterns
-          console.log("outerTmp:", outerTmp)
-          console.log("expected:", expected)
-          console.log("patterns:", req!.patterns)
-          // Accept any pattern that covers the outerTmp directory
-          // On cross-drive setups, alt path without drive letter resolves to C:\ instead of D:\
-          const patterns = req!.patterns
-          const hasValidPattern = patterns.some(
-            (p) =>
-              p === expected ||
-              outerTmp.startsWith(p.replace(/[/\\]\*$/, "")) ||
-              p.includes(path.basename(outerTmp)),
-          )
-          expect(hasValidPattern).toBe(true)
+          expect(req!.patterns).toEqual([expected])
+          expect(req!.always).toEqual([expected])
         }),
       { git: true },
     )
