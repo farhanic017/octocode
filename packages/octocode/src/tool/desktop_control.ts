@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
+import { requireDep } from "./lazy-dep"
 
 const ControlActionSchema = Schema.Union([
   Schema.Struct({
@@ -46,7 +47,8 @@ export const Parameters = Schema.Struct({
 })
 
 async function executeAction(params: { action: any; screenshot_after?: boolean }) {
-  const { mouse, keyboard, Point, Button } = await import("@nut-tree-fork/nut-js")
+  const nutjs = await requireDep("@nut-tree-fork/nut-js")
+  const { mouse, keyboard, Point, Button } = nutjs
 
   switch (params.action.action) {
     case "click": {
@@ -108,8 +110,8 @@ async function executeAction(params: { action: any; screenshot_after?: boolean }
 
   let screenshot: string | undefined
   if (params.screenshot_after) {
-    const { screen } = await import("@nut-tree-fork/nut-js")
-    const img = await screen.capture()
+    const nutjs = await requireDep("@nut-tree-fork/nut-js")
+    const img = await nutjs.screen.capture()
     screenshot = img.toBase64()
   }
 

@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
+import { requireDep } from "./lazy-dep"
 
 const ClipboardActionSchema = Schema.Union([
   Schema.Struct({
@@ -37,7 +38,8 @@ export const DesktopClipboardTool = Tool.define(
           })
 
           try {
-            const { clipboard } = yield* Effect.promise(() => import("@nut-tree-fork/nut-js"))
+            const nutjs = yield* Effect.promise(() => requireDep("@nut-tree-fork/nut-js"))
+            const { clipboard } = nutjs
 
             let output: string
 

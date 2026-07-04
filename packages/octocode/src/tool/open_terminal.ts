@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
+import { requireDep } from "./lazy-dep"
 
 export const Parameters = Schema.Struct({
   command: Schema.optional(Schema.String),
@@ -26,7 +27,8 @@ async function openNewTerminal(params: { command?: string; cwd?: string; shell?:
 
   if (params.command) {
     await new Promise((r) => setTimeout(r, 500))
-    const { keyboard } = await import("@nut-tree-fork/nut-js")
+    const nutjs = await requireDep("@nut-tree-fork/nut-js")
+    const { keyboard } = nutjs
     await keyboard.type(params.command)
     await keyboard.pressKey("Enter")
   }

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "version": "3.7.2",
+  "name": "octocode-ai",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "description": "AI-powered development tool for the terminal with desktop & browser automation",
+  "scripts": {
+    "postinstall": "node script/postinstall.mjs"
+  },
+  "bin": {
+    "octo": "./bin/octocode"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/farhanic017/octocode"
+  },
+  "keywords": [
+    "ai",
+    "coding",
+    "cli",
+    "terminal",
+    "automation",
+    "desktop",
+    "browser",
+    "openai",
+    "anthropic",
+    "claude"
+  ],
+  "author": "Farhan Dhrubo",
+  "engines": {
+    "node": ">=18"
+  }
+}

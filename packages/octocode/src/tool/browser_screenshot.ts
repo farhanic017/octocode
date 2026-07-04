@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
+import { requireDep } from "./lazy-dep"
 
 export const Parameters = Schema.Struct({
   url: Schema.optional(Schema.String),
@@ -23,7 +24,8 @@ export const BrowserScreenshotTool = Tool.define(
           })
 
           try {
-            const { chromium } = yield* Effect.promise(() => import("playwright"))
+            const pw = yield* Effect.promise(() => requireDep("playwright"))
+            const { chromium } = pw
 
             const browser = yield* Effect.promise(() => chromium.launch({ headless: false }))
             const page = yield* Effect.promise(() => browser.newPage())

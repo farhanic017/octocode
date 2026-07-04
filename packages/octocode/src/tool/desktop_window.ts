@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
+import { requireDep } from "./lazy-dep"
 
 const WindowActionSchema = Schema.Union([
   Schema.Struct({
@@ -40,17 +41,20 @@ export const Parameters = Schema.Struct({
 })
 
 async function findWindow(title: string) {
-  const { window: win } = await import("@nut-tree-fork/nut-js")
+  const nutjs = await requireDep("@nut-tree-fork/nut-js")
+  const { window: win } = nutjs
   const windows = await win.getAllWindows()
   return windows.find((w) => w.title?.toLowerCase().includes(title.toLowerCase()))
 }
 
 async function handleWindowAction(params: { action: string; title?: string; width?: number; height?: number; x?: number; y?: number }) {
-  const { Size, Point } = await import("@nut-tree-fork/nut-js")
+  const nutjs = await requireDep("@nut-tree-fork/nut-js")
+  const { Size, Point } = nutjs
 
   switch (params.action) {
     case "list": {
-      const { window: win } = await import("@nut-tree-fork/nut-js")
+      const nutjs2 = await requireDep("@nut-tree-fork/nut-js")
+      const { window: win } = nutjs2
       const windows = await win.getAllWindows()
       const titles = windows.map((w) => w.title).filter(Boolean)
       return `Open windows:\n${titles.join("\n")}`

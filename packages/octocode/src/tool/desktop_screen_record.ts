@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
+import { requireDep } from "./lazy-dep"
 
 const ScreenRecordActionSchema = Schema.Union([
   Schema.Struct({
@@ -30,7 +31,8 @@ let recordingInterval: ReturnType<typeof setInterval> | null = null
 let currentFps = 10
 
 async function captureFrame(): Promise<string> {
-  const { screen } = await import("@nut-tree-fork/nut-js")
+  const nutjs = await requireDep("@nut-tree-fork/nut-js")
+  const { screen } = nutjs
   const img = await screen.capture()
   return img.toBase64("png")
 }

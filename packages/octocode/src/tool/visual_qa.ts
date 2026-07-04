@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
+import { requireDep } from "./lazy-dep"
 
 const QAActionSchema = Schema.Union([
   Schema.Struct({
@@ -36,7 +37,8 @@ export const VisualQATool = Tool.define(
           })
 
           try {
-            const { screen } = yield* Effect.promise(() => import("@nut-tree-fork/nut-js"))
+            const nutjs = yield* Effect.promise(() => requireDep("@nut-tree-fork/nut-js"))
+            const { screen } = nutjs
 
             let output: string
 

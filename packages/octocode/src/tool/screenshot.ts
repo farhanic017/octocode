@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect"
 import * as Tool from "./tool"
+import { requireDep } from "./lazy-dep"
 
 export const Parameters = Schema.Struct({
   region: Schema.optional(
@@ -14,7 +15,8 @@ export const Parameters = Schema.Struct({
 })
 
 async function captureScreenshot(params: { region?: any; format?: string }) {
-  const { screen, Region } = await import("@nut-tree-fork/nut-js")
+  const nutjs = await requireDep("@nut-tree-fork/nut-js")
+  const { screen, Region } = nutjs
 
   let img
   if (params.region) {
