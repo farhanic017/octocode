@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "3.8.0",
+  "version": "3.8.1",
   "name": "octocode-ai",
   "type": "module",
   "license": "GPL-3.0-only",
