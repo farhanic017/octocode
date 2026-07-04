@@ -1,0 +1,45 @@
+{
+  "name": "@octocode-ai/enterprise",
+  "version": "1.16.2",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "typecheck": "tsgo --noEmit",
+    "dev": "vite dev",
+    "build": "vite build",
+    "build:cloudflare": "OCTOCODE_DEPLOYMENT_TARGET=cloudflare vite build",
+    "start": "vite start",
+    "shell-prod": "sst shell --target Teams --stage production"
+  },
+  "dependencies": {
+    "@octocode-ai/core": "workspace:*",
+    "@octocode-ai/ui": "workspace:*",
+    "aws4fetch": "^1.0.20",
+    "@pierre/diffs": "catalog:",
+    "@solidjs/router": "catalog:",
+    "@solidjs/start": "catalog:",
+    "@solidjs/meta": "catalog:",
+    "@hono/standard-validator": "catalog:",
+    "hono": "catalog:",
+    "hono-openapi": "catalog:",
+    "js-base64": "3.7.7",
+    "luxon": "catalog:",
+    "nitro": "3.0.1-alpha.1",
+    "solid-js": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/luxon": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,13 @@
+/*
+ * OctoCode - Original UI/UX Design
+ * Copyright (C) 2025 Farhan Dhrubo
+ * Licensed under the GNU General Public License v3.0
+ * https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import type { CliRenderer } from "@opentui/core"
+
+export function destroyRenderer(renderer: Pick<CliRenderer, "isDestroyed" | "setTerminalTitle" | "destroy">) {
+  renderer.setTerminalTitle("")
+  if (!renderer.isDestroyed) renderer.destroy()
+}

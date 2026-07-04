@@ -4,7 +4,6 @@
   "name": "octocode",
   "type": "module",
   "license": "GPL-3.0-only",
-  "private": true,
   "scripts": {
     "typecheck": "tsgo --noEmit",
     "test": "bun test --timeout 30000",

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@octocode-ai/plugin",
+  "version": "1.16.2",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "typecheck": "tsgo --noEmit",
+    "build": "tsc"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./tool": "./src/tool.ts",
+    "./tui": "./src/tui.ts",
+    "./auth/gitlab": "./src/auth/gitlab.ts",
+    "./auth/poe": "./src/auth/poe.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@octocode-ai/sdk": "workspace:*",
+    "effect": "catalog:",
+    "open": "^10.0.0",
+    "poe-oauth": "*",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.3.0",
+    "@opentui/keymap": ">=0.3.0",
+    "@opentui/solid": ">=0.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@opentui/core": {
+      "optional": true
+    },
+    "@opentui/keymap": {
+      "optional": true
+    },
+    "@opentui/solid": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@opentui/core": "catalog:",
+    "@opentui/keymap": "catalog:",
+    "@opentui/solid": "catalog:",
+    "@tsconfig/node22": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "@typescript/native-preview": "catalog:"
+  }
+}
