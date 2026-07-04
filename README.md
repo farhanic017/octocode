@@ -38,11 +38,6 @@
 - Snapshot system disabled in --pure mode to avoid scanning entire home directory
 - Event queue bounded at 500 to prevent unbounded memory growth
 
-### Install
-- **npm:** 
-pm i -g octocode-ai@latest
-- **curl:** curl -fsSL https://octocode.ai/install | bash
-- **GitHub:** https://github.com/farhanic017/octocode/releases/tag/v2.0.9
 
 ## Features
 
