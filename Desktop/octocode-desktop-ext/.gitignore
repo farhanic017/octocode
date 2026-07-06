@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Private / test files
+.private/
+browser/test-*.cjs
+browser/blog-*.md
+
+# Exclude everything that is NOT the extension
+.antigravity/
+.cursor/
+cursor-extension/
+bin/
+script/
+script/
+Pictures/
+Application Data/
+Cookies/
+Local Settings/
+My Documents/
+NetHood/
+PrintHood/
+Recent/
+SendTo/
+Start Menu/
+Templates/
+Desktop/
+octo code/
+octocode-3.9.5/
+octocode-main/
+AUDIT.md
+browse-demo.cjs
+demo-devices.cjs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated
+*.blend
+*.png
+*.jpg
+*.exe
+
+# Editor
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+build/
