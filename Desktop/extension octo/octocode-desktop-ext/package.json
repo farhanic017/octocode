@@ -1,0 +1,48 @@
+{
+  "name": "octocode-desktop-ext",
+  "version": "2.0.0",
+  "description": "Desktop & browser automation extension for OctoCode",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "main": "src/octocode-desktop/browser.ts",
+  "bin": {
+    "octo-desktop": "./bin/octo-desktop"
+  },
+  "scripts": {
+    "postinstall": "node script/postinstall.mjs"
+  },
+  "exports": {
+    "./*": "./src/octocode-desktop/*.ts",
+    "./tools/*": "./tools/*.ts"
+  },
+  "dependencies": {
+    "@nut-tree-fork/nut-js": "^4.2.6",
+    "clipboardy": "^4.0.0",
+    "effect": "^3.21.4",
+    "ewvjs": "^1.0.25",
+    "playwright": "^1.61.1",
+    "win_webview2": "^1.1.25",
+    "zod": "^3.24.0"
+  },
+  "peerDependencies": {
+    "octocode-ai": ">=3.4.0"
+  },
+  "keywords": [
+    "octocode",
+    "desktop",
+    "automation",
+    "browser",
+    "mouse",
+    "keyboard",
+    "screenshot",
+    "playwright"
+  ],
+  "author": "Farhan Dhrubo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/farhanic017/octocode"
+  },
+  "devDependencies": {
+    "electron": "^43.0.0"
+  }
+}

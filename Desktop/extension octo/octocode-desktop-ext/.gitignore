@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Private / test files (jailbreak tests, blog posts)
+.private/
+browser/test-*.cjs
+browser/blog-*.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated
+*.blend
+*.png
+*.jpg
+*.exe
+
+# Editor
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+build/
