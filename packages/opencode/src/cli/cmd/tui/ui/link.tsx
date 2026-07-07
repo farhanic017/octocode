@@ -8,17 +8,23 @@ export interface LinkProps {
   fg?: RGBA
 }
 
-/**
- * Link component that renders clickable hyperlinks.
- * Clicking anywhere on the link text opens the URL in the default browser.
- */
+let externalNavigate: ((url: string) => Promise<void>) | null = null
+
+export function setLinkNavigator(fn: (url: string) => Promise<void>) {
+  externalNavigate = fn
+}
+
 export function Link(props: LinkProps) {
   const displayText = props.children ?? props.href
 
   return (
     <text
       fg={props.fg}
-      onMouseUp={() => {
+      onMouseUp={async () => {
+        if (externalNavigate) {
+          await externalNavigate(props.href).catch(() => {})
+          return
+        }
         open(props.href).catch(() => {})
       }}
     >
@@ -26,5 +32,3 @@ export function Link(props: LinkProps) {
     </text>
   )
 }
-
-

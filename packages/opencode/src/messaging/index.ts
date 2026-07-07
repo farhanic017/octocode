@@ -1,0 +1,7 @@
+export { MessagingGateway, layer, defaultLayer } from "./gateway"
+export type { GatewayInterface } from "./gateway"
+export type { PlatformAdapter, Message, Attachment, GatewayConfig } from "./types"
+export { TelegramAdapter } from "./telegram"
+export { DiscordAdapter } from "./discord"
+export { EmailAdapter } from "./email"
+export { WebhookAdapter } from "./webhook"

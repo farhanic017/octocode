@@ -1,6 +1,6 @@
 import { BoxRenderable, RGBA, TextAttributes } from "@opentui/core"
 import { useKeyboard } from "@opentui/solid"
-import open from "open"
+import open from "@/cli/cmd/tui/util/open-url"
 import { createSignal, onCleanup, onMount } from "solid-js"
 import { selectedForeground, useTheme } from "@/cli/cmd/tui/context/theme"
 import { useDialog, type DialogContext } from "@/cli/cmd/tui/ui/dialog"

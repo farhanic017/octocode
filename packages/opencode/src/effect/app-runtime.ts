@@ -57,6 +57,13 @@ import { TaskRegistry } from "@/task/registry"
 import { WorkflowRuntime } from "@/workflow/runtime"
 import { History } from "@/history"
 import { Memory } from "@/memory"
+import { EpisodicMemory } from "@/memory/episodic"
+import { ProceduralMemory } from "@/memory/procedural"
+import { PersonalityService } from "@/personality/traits"
+import { MoodService } from "@/personality/mood"
+import { VoiceService } from "@/personality/voice"
+import { GrowthService } from "@/personality/growth"
+import { MessagingGateway } from "@/messaging"
 import * as BashInteractive from "@/tool/bash-interactive"
 import { memoMap } from "./memo-map"
 
@@ -118,6 +125,13 @@ export const AppLayer = Layer.suspend(() =>
     TaskRegistry.defaultLayer,
     WorkflowRuntime.defaultLayer,
     Memory.defaultLayer,
+    EpisodicMemory.defaultLayer,
+    ProceduralMemory.defaultLayer,
+    PersonalityService.defaultLayer,
+    MoodService.defaultLayer,
+    VoiceService.defaultLayer,
+    GrowthService.defaultLayer,
+    MessagingGateway.defaultLayer,
     History.defaultLayer,
   ).pipe(Layer.provideMerge(Observability.layer), Layer.provideMerge(BashInteractive.defaultLayer)),
 )

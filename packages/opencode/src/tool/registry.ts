@@ -25,6 +25,11 @@ import { Provider } from "../provider"
 import { ProviderID, type ModelID } from "../provider/schema"
 import { WebSearchTool } from "./websearch"
 import { CodeSearchTool } from "./codesearch"
+import { EpisodicMemoryTool } from "./episodic-memory"
+import { ProceduralMemoryTool } from "./procedural-memory"
+import { LearningLoopTool } from "./learning-loop"
+import { CheckpointTool } from "./checkpoint"
+import { CronTool } from "./cron"
 import { Flag } from "@/flag/flag"
 import { Log } from "@/util"
 import { LspTool } from "./lsp"
@@ -140,6 +145,11 @@ export const layer = Layer.effect(
     const changedirtool = yield* ChangeDirectoryTool
     const skilltool = yield* SkillTool
     const historytool = yield* HistoryTool
+    const episodictool = yield* EpisodicMemoryTool
+    const proceduraltool = yield* ProceduralMemoryTool
+    const learningtool = yield* LearningLoopTool
+    const checkpointtool = yield* CheckpointTool
+    const crontool = yield* CronTool
     const memorytool = yield* MemoryTool
     const tasktool = yield* TaskTool
     const workflowtool = yield* WorkflowTool
@@ -227,6 +237,11 @@ export const layer = Layer.effect(
           planexit: Tool.init(planexit),
           planenter: Tool.init(planenter),
           memory: Tool.init(memorytool),
+          episodic: Tool.init(episodictool),
+          procedural: Tool.init(proceduraltool),
+          learning: Tool.init(learningtool),
+          checkpoint: Tool.init(checkpointtool),
+          cron: Tool.init(crontool),
           history: Tool.init(historytool),
           task: Tool.init(tasktool),
           workflow: Tool.init(workflowtool),
@@ -255,6 +270,11 @@ export const layer = Layer.effect(
             tool.planexit,
             tool.planenter,
             tool.memory,
+            tool.episodic,
+            tool.procedural,
+            tool.learning,
+            tool.checkpoint,
+            tool.cron,
             tool.history,
             tool.task,
             ...(Flag.MIMOCODE_EXPERIMENTAL_WORKFLOW_TOOL ? [tool.workflow] : []),

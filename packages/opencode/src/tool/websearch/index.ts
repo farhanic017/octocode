@@ -93,6 +93,19 @@ export const WebSearchTool = Tool.define(
                   timeout ?? "25 seconds",
                 )
 
+          if (!result) {
+            try {
+              const { searchWeb } = yield* Effect.promise(() => import("../webreach"))
+              const browserResults = yield* Effect.promise(() => searchWeb(params.query))
+              if (browserResults.length > 0) {
+                const output = browserResults
+                  .map((r, i) => `[${i + 1}] ${r.title}\n${r.url}\n${r.snippet}`)
+                  .join("\n\n")
+                return { output, title: `Web search (browser): ${params.query}`, metadata: { source: "browser" } }
+              }
+            } catch {}
+          }
+
           return {
             output: result ?? WEBFETCH_FALLBACK,
             title: `Web search: ${params.query}`,

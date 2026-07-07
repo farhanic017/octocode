@@ -334,7 +334,7 @@ export function Home() {
               <text fg={C.dim}>for more</text>
             </box>
             <box flexDirection="row" gap={2} marginTop={1}>
-              <NavItem icon="@" label="Browser" command="docs.open" />
+              <NavItem icon="@" label="Extension" command="docs.open" />
               <MemoryButton />
             </box>
           </box>

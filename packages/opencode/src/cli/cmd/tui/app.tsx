@@ -61,7 +61,7 @@ import { LOCALES } from "./i18n/locales"
 import { DialogSelect } from "@/cli/cmd/tui/ui/dialog-select"
 import { Provider } from "@/provider"
 import { ArgsProvider, useArgs, type Args } from "@/cli/cmd/tui/context/args"
-import open from "open"
+import open from "@/cli/cmd/tui/util/open-url"
 import { Process } from "@/util"
 import { PromptRefProvider, usePromptRef } from "@/cli/cmd/tui/context/prompt"
 import { TuiConfigProvider, useTuiConfig } from "@/cli/cmd/tui/context/tui-config"
@@ -72,6 +72,8 @@ import { isPlainTerminal } from "@/cli/cmd/tui/util/terminal"
 
 import type { EventSource } from "@/cli/cmd/tui/context/sdk"
 import { DialogVariant } from "@/cli/cmd/tui/component/dialog-variant"
+import { DialogExtension } from "@/cli/cmd/tui/component/dialog-extension"
+import { BrowserProvider } from "@/cli/cmd/tui/context/browser"
 
 function rendererConfig(_config: TuiConfig.Info, plainTerminal: boolean): CliRendererConfig {
   const mouseEnabled = !plainTerminal && !Flag.MIMOCODE_DISABLE_MOUSE && (_config.mouse ?? true)
@@ -164,56 +166,58 @@ export function tui(input: {
           <ArgsProvider {...input.args}>
             <ExitProvider onBeforeExit={onBeforeExit} onExit={onExit}>
               <KVProvider>
-                <LanguageProvider>
-                  <UiI18nBridge>
-                <ToastProvider>
-                  <RouteProvider
-                    initialRoute={
-                      input.args.continue
-                        ? {
-                            type: "session",
-                            sessionID: "dummy",
+                <BrowserProvider>
+                  <LanguageProvider>
+                    <UiI18nBridge>
+                      <ToastProvider>
+                        <RouteProvider
+                          initialRoute={
+                            input.args.continue
+                              ? {
+                                  type: "session",
+                                  sessionID: "dummy",
+                                }
+                              : undefined
                           }
-                        : undefined
-                    }
-                  >
-                    <TuiConfigProvider config={input.config}>
-                      <SDKProvider
-                        url={input.url}
-                        directory={input.directory}
-                        fetch={input.fetch}
-                        headers={input.headers}
-                        events={input.events}
-                      >
-                        <ProjectProvider>
-                          <SyncProvider>
-                            <ThemeProvider mode={mode} plain={plainTerminal}>
-                              <LocalProvider>
-                                <KeybindProvider>
-                                  <PromptStashProvider>
-                                    <DialogProvider>
-                                      <CommandProvider>
-                                        <FrecencyProvider>
-                                          <PromptHistoryProvider>
-                                            <PromptRefProvider>
-                                              <App onSnapshot={input.onSnapshot} />
-                                            </PromptRefProvider>
-                                          </PromptHistoryProvider>
-                                        </FrecencyProvider>
-                                      </CommandProvider>
-                                    </DialogProvider>
-                                  </PromptStashProvider>
-                                </KeybindProvider>
-                              </LocalProvider>
-                            </ThemeProvider>
-                          </SyncProvider>
-                        </ProjectProvider>
-                      </SDKProvider>
-                    </TuiConfigProvider>
-                  </RouteProvider>
-                </ToastProvider>
-                  </UiI18nBridge>
-                </LanguageProvider>
+                        >
+                          <TuiConfigProvider config={input.config}>
+                            <SDKProvider
+                              url={input.url}
+                              directory={input.directory}
+                              fetch={input.fetch}
+                              headers={input.headers}
+                              events={input.events}
+                            >
+                              <ProjectProvider>
+                                <SyncProvider>
+                                  <ThemeProvider mode={mode} plain={plainTerminal}>
+                                    <LocalProvider>
+                                      <KeybindProvider>
+                                        <PromptStashProvider>
+                                          <DialogProvider>
+                                            <CommandProvider>
+                                              <FrecencyProvider>
+                                                <PromptHistoryProvider>
+                                                  <PromptRefProvider>
+                                                    <App onSnapshot={input.onSnapshot} />
+                                                  </PromptRefProvider>
+                                                </PromptHistoryProvider>
+                                              </FrecencyProvider>
+                                            </CommandProvider>
+                                          </DialogProvider>
+                                        </PromptStashProvider>
+                                      </KeybindProvider>
+                                    </LocalProvider>
+                                  </ThemeProvider>
+                                </SyncProvider>
+                              </ProjectProvider>
+                            </SDKProvider>
+                          </TuiConfigProvider>
+                        </RouteProvider>
+                      </ToastProvider>
+                    </UiI18nBridge>
+                  </LanguageProvider>
+                </BrowserProvider>
               </KVProvider>
             </ExitProvider>
           </ArgsProvider>
@@ -244,6 +248,12 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
   const promptRef = usePromptRef()
   const lang = useLanguage()
   const t = lang.t
+
+  onMount(() => {
+    import("@/messaging/gateway").then(({ autoConnect }) => {
+      autoConnect().catch(() => {})
+    }).catch(() => {})
+  })
   const routes: RouteMap = new Map()
   const [routeRev, setRouteRev] = createSignal(0)
   const routeView = (name: string) => {
@@ -349,31 +359,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
 
     if (route.data.type === "plugin") {
       renderer.setTerminalTitle(`OC | ${route.data.id}`)
-    }
-  })
-
-  const args = useArgs()
-  onMount(() => {
-    batch(() => {
-      if (args.agent) local.agent.set(args.agent)
-      if (args.model) {
-        const { providerID, modelID } = Provider.parseModel(args.model)
-        if (!providerID || !modelID)
-          return toast.show({
-            variant: "warning",
-            message: `Invalid model format: ${args.model}`,
-            duration: 3000,
-          })
-        local.model.set({ providerID, modelID }, { recent: true })
-      }
-      if (args.sessionID && !args.fork) {
-        route.navigate({
-          type: "session",
-          sessionID: args.sessionID,
-        })
       }
     })
-  })
 
   let continued = false
   createEffect(() => {
@@ -773,8 +760,8 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
         aliases: ["docs"],
       },
       onSelect: () => {
-        open("https://mimo.xiaomi.com/coder/docs").catch(() => {})
-        dialog.clear()
+        dialog.replace(() => <DialogExtension />)
+        dialog.setSize("medium")
       },
       category: "system",
     },
@@ -905,6 +892,153 @@ function App(props: { onSnapshot?: () => Promise<string[]> }) {
             }))}
           />
         ))
+      },
+    },
+    {
+      title: "Connect Telegram Bot",
+      value: "messaging.telegram",
+      slash: {
+        name: "telegram",
+      },
+      category: "system",
+      onSelect: () => {
+        const token = kv.get("telegram_bot_token") as string
+        if (token) {
+          toast.show({ message: "Telegram bot already configured. Use /messaging to manage.", duration: 3000 })
+        } else {
+          toast.show({ message: "Set TELEGRAM_BOT_TOKEN env var, then restart OctoCode to connect.", duration: 5000 })
+        }
+      },
+    },
+    {
+      title: "Connect Discord Bot",
+      value: "messaging.discord",
+      slash: {
+        name: "discord",
+      },
+      category: "system",
+      onSelect: () => {
+        const token = kv.get("discord_bot_token") as string
+        if (token) {
+          toast.show({ message: "Discord bot already configured. Use /messaging to manage.", duration: 3000 })
+        } else {
+          toast.show({ message: "Set DISCORD_BOT_TOKEN env var, then restart OctoCode to connect.", duration: 5000 })
+        }
+      },
+    },
+    {
+      title: "Configure Email Notifications",
+      value: "messaging.email",
+      slash: {
+        name: "email",
+      },
+      category: "system",
+      onSelect: () => {
+        const smtpHost = kv.get("email_smtp_host") as string
+        if (smtpHost) {
+          toast.show({ message: "Email configured. Use /messaging to manage.", duration: 3000 })
+        } else {
+          toast.show({ message: "Set EMAIL_SMTP_HOST, EMAIL_SMTP_USER, EMAIL_SMTP_PASS env vars.", duration: 5000 })
+        }
+      },
+    },
+    {
+      title: "Start Webhook Server",
+      value: "messaging.webhook",
+      slash: {
+        name: "webhook",
+      },
+      category: "system",
+      onSelect: () => {
+        toast.show({ message: "Webhook server starts on port 4096 by default. POST messages to http://localhost:4096/webhook", duration: 5000 })
+      },
+    },
+    {
+      title: "Messaging Status",
+      value: "messaging.status",
+      slash: {
+        name: "messaging",
+        aliases: ["msg", "connect"],
+      },
+      category: "system",
+      onSelect: () => {
+        const platforms = ["telegram", "discord", "email", "webhook"]
+        const configured = platforms.filter((p) => kv.get(`${p}_configured`) || kv.get(`${p}_bot_token`) || kv.get(`${p}_smtp_host`))
+        if (configured.length === 0) {
+          toast.show({ message: "No messaging platforms connected. Use /telegram, /discord, /email, /webhook to configure.", duration: 5000 })
+        } else {
+          toast.show({ message: `Connected: ${configured.join(", ")}. Task completions will be sent there.`, duration: 5000 })
+        }
+      },
+    },
+    {
+      title: "Allow User (Messaging)",
+      value: "messaging.allow",
+      slash: {
+        name: "allow",
+        aliases: ["adduser"],
+      },
+      category: "system",
+      onSelect: () => {
+        dialog.replace(() => {
+          dialog.setSize("medium")
+          return (
+            <box flexDirection="column" gap={1} paddingLeft={2} paddingRight={2} paddingTop={1}>
+              <text>Allow a user to interact via messaging platform.</text>
+              <text>Type: /allow telegram 12345678 full</text>
+              <text>Permissions: full, read-only, blocked</text>
+              <text>Example: /allow discord 9876543210 read-only</text>
+            </box>
+          )
+        })
+      },
+    },
+    {
+      title: "Deny User (Messaging)",
+      value: "messaging.deny",
+      slash: {
+        name: "deny",
+        aliases: ["removeuser", "block"],
+      },
+      category: "system",
+      onSelect: () => {
+        dialog.replace(() => {
+          dialog.setSize("medium")
+          return (
+            <box flexDirection="column" gap={1} paddingLeft={2} paddingRight={2} paddingTop={1}>
+              <text>Block a user from interacting via messaging.</text>
+              <text>Type: /deny telegram 12345678</text>
+              <text>The user will be ignored completely.</text>
+            </box>
+          )
+        })
+      },
+    },
+    {
+      title: "Messaging Users & Permissions",
+      value: "messaging.users",
+      slash: {
+        name: "users",
+        aliases: ["permissions", "perms"],
+      },
+      category: "system",
+      onSelect: () => {
+        dialog.replace(() => {
+          dialog.setSize("medium")
+          return (
+            <box flexDirection="column" gap={1} paddingLeft={2} paddingRight={2} paddingTop={1}>
+              <text>Manage messaging users and permissions.</text>
+              <text>Commands:</text>
+              <text>  /allow telegram 12345678 full</text>
+              <text>  /deny discord 9876543210</text>
+              <text>  /users — list all users</text>
+              <text>Permission levels:</text>
+              <text>  full — can execute commands, edit files, run code</text>
+              <text>  read-only — can chat and ask questions only</text>
+              <text>  blocked — completely ignored</text>
+            </box>
+          )
+        })
       },
     },
   ])

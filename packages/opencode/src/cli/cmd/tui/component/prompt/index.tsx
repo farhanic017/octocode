@@ -1841,7 +1841,7 @@ export function Prompt(props: PromptProps) {
                       )}
                     </Show>
                     <Show when={!props.homeDock}>
-                      <NavItem icon="@" label="Browser" command="docs.open" />
+                       <NavItem icon="@" label="Extension" command="docs.open" />
                       <MemoryButton />
                     </Show>
                   </box>

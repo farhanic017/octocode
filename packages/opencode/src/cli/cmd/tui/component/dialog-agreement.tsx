@@ -1,7 +1,7 @@
 import { TextAttributes } from "@opentui/core"
 import { createStore } from "solid-js/store"
 import { Show } from "solid-js"
-import open from "open"
+import open from "@/cli/cmd/tui/util/open-url"
 import { useKeyboard } from "@opentui/solid"
 import { useTheme } from "@/cli/cmd/tui/context/theme"
 import { useLanguage } from "@/cli/cmd/tui/context/language"
