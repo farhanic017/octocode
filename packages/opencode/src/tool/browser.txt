@@ -1,0 +1,44 @@
+- Control web browsers and manage live servers via the OctoCode Desktop Extension
+
+## Actions
+
+### navigate
+Navigate to a URL in the browser.
+- **url**: The URL to navigate to
+
+### screenshot
+Take a screenshot of the current browser state.
+
+### click
+Click an element by CSS selector.
+- **selector**: CSS selector of the element to click
+
+### type
+Type text into an element.
+- **selector**: CSS selector of the input element
+- **text**: Text to type
+
+### evaluate
+Execute JavaScript in the browser context.
+- **script**: JavaScript code to execute
+
+### start-server
+Start a live development server that persists.
+- **command**: The server command (e.g., "npm run dev")
+- **sessionId**: Session ID to associate with the server
+
+### stop-server
+Stop a running server.
+- **serverId**: ID of the server to stop
+
+### status
+Show status of running servers.
+- **sessionId**: (Optional) Filter by session ID
+
+## Requirements
+This tool requires the OctoCode Desktop Extension to be installed:
+```
+npm install -g octocode-desktop-ext
+```
+
+When the extension is not installed, the tool will provide guidance on installation.
