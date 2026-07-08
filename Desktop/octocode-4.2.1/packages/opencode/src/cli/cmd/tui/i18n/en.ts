@@ -353,6 +353,8 @@ export const dict: Record<string, string> = {
   "tui.command.session.parent.title": "Go to parent session",
   "tui.command.session.child_next.title": "Next child session",
   "tui.command.session.child_previous.title": "Previous child session",
+  "tui.command.session.learn.title": "Learn from session",
+  "tui.command.session.stats.title": "Show statistics",
 
   // Prompt commands
   "tui.command.prompt.clear.title": "Clear prompt",

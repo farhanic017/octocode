@@ -81,6 +81,7 @@ import { Filesystem } from "@/util"
 import { Global } from "@/global"
 import { PermissionPrompt } from "./permission"
 import { QuestionPrompt } from "./question"
+import { BrowserButton } from "../../component/browser-button"
 import { DialogExportOptions } from "../../ui/dialog-export-options"
 import * as Model from "../../util/model"
 import { formatTranscript } from "../../util/transcript"
@@ -1057,6 +1058,65 @@ export function Session() {
       hidden: true,
       onSelect: (dialog) => {
         moveChild(-1)
+        dialog.clear()
+      },
+    },
+    {
+      title: t("tui.command.session.learn.title"),
+      value: "session.learn",
+      category: "session",
+      slash: {
+        name: "learn",
+      },
+      onSelect: async (dialog) => {
+        try {
+          const { LearningLoop } = await import("@/session/learning-loop")
+          const result = await LearningLoop.learnFromSession(route.sessionID, sdk)
+          if (result) {
+            toast.show({
+              message: `Lesson logged! Context: ${result.context.slice(0, 80)}...`,
+              variant: "success",
+            })
+          } else {
+            toast.show({
+              message: "No learnable content found in this session.",
+              variant: "info",
+            })
+          }
+        } catch (e) {
+          toast.show({
+            message: `Learning failed: ${e instanceof Error ? e.message : "Unknown error"}`,
+            variant: "error",
+          })
+        }
+        dialog.clear()
+      },
+    },
+    {
+      title: t("tui.command.session.stats.title"),
+      value: "session.stats",
+      category: "session",
+      slash: {
+        name: "stats",
+      },
+      onSelect: async (dialog) => {
+        try {
+          const { LearningLoop } = await import("@/session/learning-loop")
+          const stats = await LearningLoop.getStats()
+          const successPercent = Math.round(stats.successRate * 100)
+          const agentStats = Object.entries(stats.byAgent)
+            .map(([agent, count]) => `${agent}: ${count}`)
+            .join(", ")
+          toast.show({
+            message: `Lessons: ${stats.total} | Success: ${successPercent}% | ${agentStats || "No data yet"}`,
+            variant: "success",
+          })
+        } catch (e) {
+          toast.show({
+            message: `Stats failed: ${e instanceof Error ? e.message : "Unknown error"}`,
+            variant: "error",
+          })
+        }
         dialog.clear()
       },
     },

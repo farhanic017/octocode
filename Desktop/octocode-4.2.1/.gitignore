@@ -56,4 +56,8 @@ experiment/last-outcome.json
 dev-err.txt
 dev-stdout.txt
 test-compiled.*
- designs/
+designs/
+
+# Desktop files - do not track
+../agent-swarm-main/
+../octocode-4.2.1-desktop/

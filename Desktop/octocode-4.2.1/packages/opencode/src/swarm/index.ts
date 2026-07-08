@@ -6,3 +6,5 @@ export { Consciousness, type ConsciousnessEvent, type ConsciousnessEventType } f
 export { SharedMemory, type MemoryEntry, type MemoryType } from "./memory"
 export { SwarmMessaging, type SwarmMessage, type SwarmThread } from "./messaging"
 export { TokenBudget, type TokenBudgetConfig, type BudgetCheckResult, type BudgetCalculation } from "./token-budget"
+export { LearningLoop } from "../session/learning-loop"
+export type { Interface as LearningLoopInterface } from "../session/learning-loop"

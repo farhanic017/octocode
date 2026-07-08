@@ -192,6 +192,17 @@ const cli = yargs(args)
         Log.Default.warn("claude-import failed", { e: errorMessage(e) })
       }
     }
+
+    // Initialize learning loop eagerly (non-blocking, best-effort)
+    if (!process.env.MIMOCODE_PURE && !process.env.MIMOCODE_DISABLE_LEARNING) {
+      try {
+        const { LearningLoop } = await import("./session/learning-loop")
+        LearningLoop.getStats() // triggers initialization
+        Log.Default.info("learning-loop-initialized")
+      } catch (e) {
+        Log.Default.warn("learning-loop-init failed", { e: errorMessage(e) })
+      }
+    }
   })
   .usage("")
   .completion("completion", "generate shell completion script")
