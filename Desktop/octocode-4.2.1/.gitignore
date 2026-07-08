@@ -20,9 +20,11 @@ refs
 Session.vim
 /opencode.json
 a.out
-target
+.target
 .scripts
 .direnv/
+.bun/
+.cache/
 
 # Understand-anything generated files
 .understand-anything/
