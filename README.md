@@ -40,7 +40,7 @@
 
 ```bash
 # npm (recommended)
-npm i -g octocode-ai
+npm i -g octocode-ai@4.8.6
 
 # curl (macOS / Linux)
 curl -fsSL https://raw.githubusercontent.com/farhanic017/octocode/main/install | bash
